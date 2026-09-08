@@ -2,12 +2,13 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { formatPhone } from "@/lib/phone";
 import { RSVP_LABELS } from "@/lib/event-types";
+import { csvSafe } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
 function cell(v: string | number | null | undefined) {
-  const s = v == null ? "" : String(v);
-  return /[";\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  const s = csvSafe(v == null ? "" : String(v));
+  return /[";\n']/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
 /** Exporta a lista de convidados em CSV (separador ;, abre diretamente no Excel em PT). */

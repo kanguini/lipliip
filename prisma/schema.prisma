@@ -48,6 +48,7 @@ model Event {
   coverImageUrl        String?
   accentColor          String? // sobrepõe a cor principal do template
   country              String   @default("PT") // país por omissão para normalizar telefones
+  timezone             String   @default("Europe/Lisbon") // fuso horário do evento
   currency             String   @default("EUR")
   rsvpDeadline         DateTime?
   allowChildren        Boolean  @default(true)

@@ -3,6 +3,7 @@ import { requireOwnedEvent } from "@/lib/auth";
 import { formatMoney } from "@/lib/format";
 import { addGiftAction, deleteGiftAction } from "@/app/dashboard/actions";
 import { FlashFromSearch } from "@/components/ui";
+import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 
 export default async function GiftsPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { id } = await params;
@@ -63,7 +64,7 @@ export default async function GiftsPage({ params, searchParams }: { params: Prom
                         </p>
                       )}
                     </div>
-                    <form action={deleteGiftAction.bind(null, g.id)}><button className="btn-danger btn-sm">Remover</button></form>
+                    <form action={deleteGiftAction.bind(null, g.id)}><ConfirmButton message={g.reservations.length > 0 ? `"${g.name}" já tem reservas. Remover mesmo assim?` : `Remover "${g.name}"?`}>Remover</ConfirmButton></form>
                   </li>
                 );
               })}

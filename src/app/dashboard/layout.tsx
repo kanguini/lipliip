@@ -10,7 +10,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <Link href="/dashboard" className="font-display text-2xl font-semibold text-brand-700">Lipliip</Link>
           <div className="flex items-center gap-3 text-sm">
-            <span className="hidden text-stone-500 sm:inline">{user.name}</span>
+            <Link href="/dashboard/account" className="text-stone-600 hover:text-stone-900">{user.name}</Link>
             <form action={logoutAction}>
               <button className="btn-ghost btn-sm">Sair</button>
             </form>

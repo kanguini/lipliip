@@ -43,12 +43,15 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
     );
   }
 
-  // Regista a abertura do convite (para o organizador ver quem já abriu).
-  await db.guest.update({
-    where: { id: guest.id },
-    data: { openCount: { increment: 1 }, firstOpenedAt: guest.firstOpenedAt ?? new Date() },
-  });
-  await logAccess(guest.id, "VIEW");
+  // Regista a abertura do convite (para o organizador ver quem já abriu), no máximo uma vez por 30 minutos.
+  const lastView = await db.accessLog.findFirst({ where: { guestId: guest.id, outcome: "VIEW" }, orderBy: { createdAt: "desc" }, select: { createdAt: true } });
+  if (!lastView || Date.now() - lastView.createdAt.getTime() > 30 * 60_000) {
+    await db.guest.update({
+      where: { id: guest.id },
+      data: { openCount: { increment: 1 }, firstOpenedAt: guest.firstOpenedAt ?? new Date() },
+    });
+    await logAccess(guest.id, "VIEW");
+  }
 
   const epcPayload = event.contributionIban ? buildEpcPayload({ iban: event.contributionIban, name: event.hostNames, remittance: `Presente ${event.title}`.slice(0, 140) }) : null;
   const [gifts, guestbook, qrDataUrl, epcQr] = await Promise.all([
@@ -97,7 +100,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
         allowChildren={event.allowChildren}
         current={guest}
         deadlinePassed={deadlinePassed}
-        deadlineLabel={event.rsvpDeadline ? formatEventDate(event.rsvpDeadline, false) : undefined}
+        deadlineLabel={event.rsvpDeadline ? formatEventDate(event.rsvpDeadline, false, event.timezone) : undefined}
         songRequests={event.songRequestsEnabled}
       />
       {event.giftsEnabled && (giftViews.length > 0 || event.contributionIban || event.contributionMbway) && (

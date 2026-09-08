@@ -8,8 +8,11 @@ export function MusicPlayer({ src, autoplay = false }: { src: string; autoplay?:
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
-    if (!autoplay || !ref.current) return;
-    ref.current.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    if (!autoplay) return;
+    // Os browsers só permitem áudio depois de um gesto do utilizador: o toque no envelope serve de gatilho.
+    const start = () => ref.current?.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    window.addEventListener("lipliip:open", start);
+    return () => window.removeEventListener("lipliip:open", start);
   }, [autoplay]);
 
   function toggle() {

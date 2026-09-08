@@ -9,6 +9,7 @@ export function Envelope({ hostNames, guestName, kicker, children }: { hostNames
 
   useEffect(() => {
     if (!opened) return;
+    window.dispatchEvent(new CustomEvent("lipliip:open"));
     const t = setTimeout(() => setGone(true), 900);
     return () => clearTimeout(t);
   }, [opened]);

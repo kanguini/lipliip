@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { loginAction, registerAction, type AuthState } from "./actions";
 
-export function AuthForm({ mode }: { mode: "login" | "register" }) {
+export function AuthForm({ mode, notice }: { mode: "login" | "register"; notice?: string }) {
   const action = mode === "login" ? loginAction : registerAction;
   const [state, formAction, pending] = useActionState<AuthState, FormData>(action, {});
 
@@ -17,6 +17,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           <p className="mt-1 text-sm text-stone-500">
             {mode === "login" ? "Bem-vindo de volta." : "Comece a criar os seus convites em segundos."}
           </p>
+          {notice && <p className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">{notice}</p>}
           <form action={formAction} className="mt-6 space-y-4">
             {mode === "register" && (
               <div>

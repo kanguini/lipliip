@@ -15,6 +15,7 @@ export type TemplateEvent = {
   dressCode: string | null;
   coverImageUrl: string | null;
   accentColor: string | null;
+  timezone: string;
 };
 
 export type TemplateProps = {

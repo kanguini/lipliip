@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { generateDeviceToken, generateOtpCode, hashOtp, verifyOtpHash } from "@/lib/tokens";
 import { getSmsProvider, otpMessage } from "@/lib/sms";
 import { DEVICE_COOKIE_DAYS, deviceCookieName, getGuestByToken, logAccess, requestMeta, requireGuestAccess } from "@/lib/guest-access";
+import { rateLimit } from "@/lib/rate-limit";
 
 const OTP_TTL_MIN = 10;
 const OTP_MAX_PER_WINDOW = 3;
@@ -20,6 +21,8 @@ function fail(error: string): ActionResult {
 export async function requestOtpAction(token: string): Promise<ActionResult> {
   const guest = await getGuestByToken(token);
   if (!guest) return fail("Convite inválido.");
+  const meta = await requestMeta();
+  if (!rateLimit(`otp:${meta.ip ?? "?"}`, 10, 15 * 60_000).ok) return fail("Demasiados pedidos a partir desta ligação. Tente mais tarde.");
 
   const windowStart = new Date(Date.now() - OTP_TTL_MIN * 60_000);
   const recent = await db.otpCode.count({ where: { guestId: guest.id, createdAt: { gte: windowStart } } });

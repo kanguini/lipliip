@@ -1,7 +1,7 @@
 import type { Event } from "@prisma/client";
 import { EVENT_TYPES } from "@/lib/event-types";
 import { SUPPORTED_COUNTRIES } from "@/lib/phone";
-import { toDateInput, toDateTimeLocal } from "@/lib/format";
+import { TIMEZONES, dateToLocalDateInput, dateToLocalInput } from "@/lib/timezone";
 import { parseProgram, programToText } from "@/lib/event-types";
 
 /** Campos de detalhe do evento, partilhados entre "novo evento" e "definições". */
@@ -22,11 +22,18 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
           </div>
           <div>
             <label className="label">Data e hora de início</label>
-            <input name="date" type="datetime-local" className="input" required defaultValue={event ? toDateTimeLocal(event.date) : ""} />
+            <input name="date" type="datetime-local" className="input" required defaultValue={event ? dateToLocalInput(event.date, event.timezone) : ""} />
           </div>
           <div>
             <label className="label">Hora de fim (opcional)</label>
             <input name="endTime" className="input" defaultValue={event?.endTime ?? ""} placeholder="02:00" />
+          </div>
+          <div>
+            <label className="label">Fuso horário do evento</label>
+            <select name="timezone" className="input" defaultValue={event?.timezone ?? "Europe/Lisbon"}>
+              {TIMEZONES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+            </select>
+            <p className="hint">As horas do convite, a contagem decrescente e o calendário usam este fuso.</p>
           </div>
         </div>
         <div>
@@ -84,7 +91,7 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
           </div>
           <div>
             <label className="label">Prazo para confirmar presença (opcional)</label>
-            <input name="rsvpDeadline" type="date" className="input" defaultValue={event?.rsvpDeadline ? toDateInput(event.rsvpDeadline) : ""} />
+            <input name="rsvpDeadline" type="date" className="input" defaultValue={event?.rsvpDeadline ? dateToLocalDateInput(event.rsvpDeadline, event.timezone) : ""} />
           </div>
           <div>
             <label className="label">Máximo de dispositivos por convidado</label>

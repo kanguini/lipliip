@@ -39,6 +39,7 @@ export const SAMPLE_EVENTS: Record<string, TemplateEvent> = {
     dressCode: "Formal",
     coverImageUrl: null,
     accentColor: null,
+    timezone: "Europe/Lisbon",
   },
   ENGAGEMENT: {
     type: "ENGAGEMENT",
@@ -54,6 +55,7 @@ export const SAMPLE_EVENTS: Record<string, TemplateEvent> = {
     dressCode: "Cocktail",
     coverImageUrl: null,
     accentColor: null,
+    timezone: "Europe/Lisbon",
   },
   BIRTHDAY: {
     type: "BIRTHDAY",
@@ -69,6 +71,7 @@ export const SAMPLE_EVENTS: Record<string, TemplateEvent> = {
     dressCode: "À vontade",
     coverImageUrl: null,
     accentColor: null,
+    timezone: "Europe/Lisbon",
   },
 };
 

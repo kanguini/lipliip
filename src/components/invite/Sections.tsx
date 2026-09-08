@@ -17,8 +17,8 @@ export function DetailsSection({ event, calendarUrl, googleUrl }: { event: Templ
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <p className="text-xs uppercase tracking-widest opacity-60">Data e hora</p>
-          <p className="mt-1 font-semibold">{formatEventDate(event.date)}</p>
-          <p className="text-sm">{formatTime(event.date)}{event.endTime ? ` – ${event.endTime}` : ""}</p>
+          <p className="mt-1 font-semibold">{formatEventDate(event.date, true, event.timezone)}</p>
+          <p className="text-sm">{formatTime(event.date, event.timezone)}{event.endTime ? ` – ${event.endTime}` : ""}</p>
         </div>
         <div>
           <p className="text-xs uppercase tracking-widest opacity-60">Local</p>

@@ -11,7 +11,10 @@ import { parseGuestImport } from "@/lib/csv";
 import { parseGalleryText, parsePartyText, parseProgramText, parseStoryText } from "@/lib/event-types";
 import { getSmsProvider } from "@/lib/sms";
 import { inviteShareMessage, inviteUrl } from "@/lib/urls";
+import { formatTime } from "@/lib/format";
 import { TEMPLATES } from "@/lib/templates";
+import { httpUrlOrNull } from "@/lib/validation";
+import { COUNTRY_TIMEZONE, isValidTimezone, localInputToDate } from "@/lib/timezone";
 
 function flash(path: string, kind: "ok" | "error", message: string): never {
   redirect(`${path}?${kind}=${encodeURIComponent(message)}`);
@@ -26,10 +29,9 @@ function opt(fd: FormData, key: string, max = 500) {
 function bool(fd: FormData, key: string) {
   return fd.get(key) === "on" || fd.get(key) === "true";
 }
-function dateOrNull(v: string) {
+function dateOrNull(v: string, tz: string) {
   if (!v) return null;
-  const d = new Date(v);
-  return Number.isNaN(d.getTime()) ? null : d;
+  return localInputToDate(v, tz);
 }
 
 // ---------- Eventos ----------
@@ -55,21 +57,24 @@ function eventDataFromForm(fd: FormData) {
     country: fd.get("country") || "PT",
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message } as const;
-  const date = dateOrNull(parsed.data.date);
+  const tzInput = str(fd, "timezone", 60);
+  const timezone = isValidTimezone(tzInput) ? tzInput : (COUNTRY_TIMEZONE[parsed.data.country] ?? "Europe/Lisbon");
+  const date = dateOrNull(parsed.data.date, timezone);
   if (!date) return { error: "Data inválida" } as const;
   return {
     data: {
       ...parsed.data,
+      timezone,
       date,
       endTime: opt(fd, "endTime", 10),
       message: opt(fd, "message", 1000),
       venueAddress: opt(fd, "venueAddress", 200),
-      mapsUrl: opt(fd, "mapsUrl", 500),
+      mapsUrl: httpUrlOrNull(str(fd, "mapsUrl", 500)),
       dressCode: opt(fd, "dressCode", 80),
-      coverImageUrl: opt(fd, "coverImageUrl", 500),
+      coverImageUrl: httpUrlOrNull(str(fd, "coverImageUrl", 500)),
       accentColor: opt(fd, "accentColor", 9),
       currency: str(fd, "currency", 3).toUpperCase() || "EUR",
-      rsvpDeadline: dateOrNull(str(fd, "rsvpDeadline", 30)),
+      rsvpDeadline: dateOrNull(str(fd, "rsvpDeadline", 30) ? `${str(fd, "rsvpDeadline", 30)}T23:59` : "", timezone),
       allowChildren: bool(fd, "allowChildren"),
       verificationRequired: bool(fd, "verificationRequired"),
       maxDevicesPerGuest: Math.min(10, Math.max(1, Number.parseInt(str(fd, "maxDevicesPerGuest", 3), 10) || 2)),
@@ -108,7 +113,7 @@ export async function updateDesignAction(eventId: string, fd: FormData) {
   const accent = opt(fd, "accentColor", 9);
   await db.event.update({
     where: { id: eventId },
-    data: { templateId, accentColor: bool(fd, "useCustomColor") ? accent : null, coverImageUrl: opt(fd, "coverImageUrl", 500) },
+    data: { templateId, accentColor: bool(fd, "useCustomColor") ? accent : null, coverImageUrl: httpUrlOrNull(str(fd, "coverImageUrl", 500)) },
   });
   revalidatePath(`/dashboard/events/${eventId}`);
   flash(`/dashboard/events/${eventId}/design`, "ok", "Design atualizado.");
@@ -117,8 +122,9 @@ export async function updateDesignAction(eventId: string, fd: FormData) {
 export async function updateContentAction(eventId: string, fd: FormData) {
   await requireOwnedEvent(eventId);
   const path = `/dashboard/events/${eventId}/content`;
-  const musicUrl = opt(fd, "musicUrl", 500);
-  if (musicUrl && !/^https?:\/\//i.test(musicUrl)) flash(path, "error", "O link da música tem de começar por http:// ou https://");
+  const musicRaw = str(fd, "musicUrl", 500);
+  const musicUrl = httpUrlOrNull(musicRaw);
+  if (musicRaw && !musicUrl) flash(path, "error", "O link da música tem de ser um URL http(s) válido.");
   await db.event.update({
     where: { id: eventId },
     data: {
@@ -288,12 +294,12 @@ export async function sendSmsInviteAction(guestId: string) {
 }
 
 export async function checkinAction(eventId: string, fd: FormData) {
-  await requireOwnedEvent(eventId);
+  const { event } = await requireOwnedEvent(eventId);
   const path = `/dashboard/events/${eventId}/checkin`;
   const code = str(fd, "code", 12).toUpperCase().replace(/[^A-Z0-9]/g, "");
   const guest = await db.guest.findFirst({ where: { eventId, checkinCode: code } });
   if (!guest) flash(path, "error", `Código ${code || "(vazio)"} não encontrado.`);
-  if (guest.checkedInAt) flash(path, "error", `⚠️ ${guest.name} já fez check-in às ${guest.checkedInAt.toLocaleTimeString("pt-PT")}. Possível entrada duplicada.`);
+  if (guest.checkedInAt) flash(path, "error", `⚠️ ${guest.name} já fez check-in às ${formatTime(guest.checkedInAt, event.timezone)}. Possível entrada duplicada.`);
   await db.guest.update({ where: { id: guest.id }, data: { checkedInAt: new Date() } });
   await db.accessLog.create({ data: { guestId: guest.id, outcome: "CHECKIN" } });
   const extra = guest.rsvpStatus === "ACCEPTED" ? `${guest.companions ? ` +${guest.companions} acompanhante(s)` : ""}${guest.tableNumber ? ` · mesa ${guest.tableNumber}` : ""}` : " (não tinha confirmado presença)";
@@ -322,8 +328,8 @@ export async function addGiftAction(eventId: string, fd: FormData) {
       name,
       description: opt(fd, "description", 300),
       price: Number.isFinite(price) && price > 0 ? price : null,
-      imageUrl: opt(fd, "imageUrl", 500),
-      storeUrl: opt(fd, "storeUrl", 500),
+      imageUrl: httpUrlOrNull(str(fd, "imageUrl", 500)),
+      storeUrl: httpUrlOrNull(str(fd, "storeUrl", 500)),
       quantity: kind === "CASH" ? 1 : Math.max(1, Number.parseInt(str(fd, "quantity", 4), 10) || 1),
     },
   });

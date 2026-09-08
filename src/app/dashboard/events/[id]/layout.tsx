@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireOwnedEvent } from "@/lib/auth";
 import { eventTypeLabel } from "@/lib/event-types";
-import { formatEventDate } from "@/lib/format";
+import { formatEventDate, formatTime } from "@/lib/format";
 import { EventTabs } from "./tabs";
 
 export default async function EventLayout({ children, params }: { children: React.ReactNode; params: Promise<{ id: string }> }) {
@@ -14,7 +14,7 @@ export default async function EventLayout({ children, params }: { children: Reac
         <div>
           <span className="badge bg-stone-100 text-stone-700">{eventTypeLabel(event.type)}</span>
           <h1 className="mt-1 text-2xl font-semibold">{event.title}</h1>
-          <p className="text-sm text-stone-500">{formatEventDate(event.date)} · {event.venueName}</p>
+          <p className="text-sm text-stone-500">{formatEventDate(event.date, true, event.timezone)} · {formatTime(event.date, event.timezone)} · {event.venueName}</p>
         </div>
         <Link href={`/dashboard/events/${event.id}/preview`} className="btn-secondary btn-sm">👁 Ver convite</Link>
       </div>

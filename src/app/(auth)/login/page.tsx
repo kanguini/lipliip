@@ -4,7 +4,8 @@ import { AuthForm } from "../auth-form";
 
 export const metadata = { title: "Entrar" };
 
-export default async function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ ok?: string }> }) {
   if (await getCurrentUser()) redirect("/dashboard");
-  return <AuthForm mode="login" />;
+  const { ok } = await searchParams;
+  return <AuthForm mode="login" notice={ok} />;
 }

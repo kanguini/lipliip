@@ -2,6 +2,7 @@ import { requireOwnedEvent } from "@/lib/auth";
 import { deleteEventAction, updateEventAction } from "@/app/dashboard/actions";
 import { EventDetailsFields } from "@/components/dashboard/EventForm";
 import { FlashFromSearch } from "@/components/ui";
+import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 
 export default async function SettingsPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { id } = await params;
@@ -22,7 +23,7 @@ export default async function SettingsPage({ params, searchParams }: { params: P
         <h2 className="font-semibold text-red-800">Zona de perigo</h2>
         <p className="mt-1 text-sm text-stone-600">Eliminar o evento apaga convidados, respostas, presentes e mensagens. Todos os links deixam de funcionar.</p>
         <form action={deleteEventAction.bind(null, id)} className="mt-3">
-          <button className="btn-danger">Eliminar evento</button>
+          <ConfirmButton className="btn-danger" message={`Eliminar "${event.title}" e todos os convidados, respostas e presentes? Esta ação não pode ser anulada.`}>Eliminar evento</ConfirmButton>
         </form>
       </div>
     </>

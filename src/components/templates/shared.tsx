@@ -18,7 +18,7 @@ export function Greeting({ guestName, className = "" }: { guestName?: string; cl
 export function DateLine({ event, className = "" }: { event: TemplateEvent; className?: string }) {
   return (
     <p className={className}>
-      {formatEventDate(event.date)} · {formatTime(event.date)}
+      {formatEventDate(event.date, true, event.timezone)} · {formatTime(event.date, event.timezone)}
       {event.endTime ? ` – ${event.endTime}` : ""}
     </p>
   );

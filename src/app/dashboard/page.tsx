@@ -37,7 +37,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   <span className="text-xs text-stone-400">{e._count.guests} convidados</span>
                 </div>
                 <p className="mt-3 text-lg font-semibold">{e.title}</p>
-                <p className="text-sm text-stone-500">{formatEventDate(e.date)}</p>
+                <p className="text-sm text-stone-500">{formatEventDate(e.date, true, e.timezone)}</p>
                 <p className="mt-3 text-sm text-stone-600">
                   <strong className="text-emerald-700">{accepted.length}</strong> confirmados · <strong>{people}</strong> pessoas previstas
                 </p>

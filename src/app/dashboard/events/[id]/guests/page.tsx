@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireOwnedEvent } from "@/lib/auth";
 import { formatPhone, phoneForWhatsApp } from "@/lib/phone";
+import { formatEventDate } from "@/lib/format";
 import { inviteShareMessage, inviteUrl } from "@/lib/urls";
 import { addGuestAction, importGuestsAction, markSentAction, sendSmsInviteAction } from "@/app/dashboard/actions";
 import { FlashFromSearch, RsvpBadge } from "@/components/ui";
@@ -17,7 +18,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
   const returnTo = `/dashboard/events/${id}/guests`;
   const pendingSent = guests.filter((g) => g.rsvpStatus === "PENDING" && g.sentAt);
   const reminderText = (g: (typeof guests)[number]) =>
-    `Olá ${g.name.split(" ")[0]}! Ainda não recebemos a tua confirmação para "${event.title}"${event.rsvpDeadline ? ` (prazo: ${event.rsvpDeadline.toLocaleDateString("pt-PT")})` : ""}. Podes confirmar no teu convite: ${inviteUrl(g.token)} 🙏`;
+    `Olá ${g.name.split(" ")[0]}! Ainda não recebemos a tua confirmação para "${event.title}"${event.rsvpDeadline ? ` (prazo: ${formatEventDate(event.rsvpDeadline, false, event.timezone)})` : ""}. Podes confirmar no teu convite: ${inviteUrl(g.token)} 🙏`;
 
   return (
     <>

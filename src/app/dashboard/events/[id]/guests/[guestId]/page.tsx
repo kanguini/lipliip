@@ -7,6 +7,7 @@ import { inviteUrl } from "@/lib/urls";
 import { deleteGuestAction, regenerateTokenAction, resetDevicesAction, updateGuestAction } from "@/app/dashboard/actions";
 import { FlashFromSearch, RsvpBadge } from "@/components/ui";
 import { CopyButton } from "@/components/dashboard/CopyButton";
+import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 
 const OUTCOME_LABEL: Record<string, string> = {
   VIEW: "Abriu o convite",
@@ -89,7 +90,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
             <div className="flex flex-wrap gap-2">
               <CopyButton text={url} />
               <form action={resetDevicesAction.bind(null, guest.id)}><button className="btn-secondary btn-sm">Remover dispositivos</button></form>
-              <form action={regenerateTokenAction.bind(null, guest.id)}><button className="btn-danger btn-sm">Revogar e gerar novo link</button></form>
+              <form action={regenerateTokenAction.bind(null, guest.id)}><ConfirmButton message="O link atual deixa de funcionar e terá de enviar o novo link ao convidado. Continuar?">Revogar e gerar novo link</ConfirmButton></form>
             </div>
             <p className="text-xs text-stone-500">
               Código de entrada: <span className="font-mono font-semibold">{guest.checkinCode}</span> · Telemóvel validado: {guest.verifiedAt ? formatDateTimeShort(guest.verifiedAt) : "não"} · Aberto {guest.openCount}×
@@ -128,7 +129,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
           </div>
 
           <form action={deleteGuestAction.bind(null, guest.id)} className="text-right">
-            <button className="btn-danger btn-sm">Eliminar convidado</button>
+            <ConfirmButton message={`Eliminar ${guest.name} e a sua resposta? Esta ação não pode ser anulada.`}>Eliminar convidado</ConfirmButton>
           </form>
         </div>
       </div>

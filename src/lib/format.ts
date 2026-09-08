@@ -1,19 +1,27 @@
-export function formatEventDate(date: Date, withWeekday = true): string {
-  const text = new Intl.DateTimeFormat("pt-PT", {
-    weekday: withWeekday ? "long" : undefined,
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(date);
+const DEFAULT_TZ = "Europe/Lisbon";
+
+function cap(text: string) {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-export function formatTime(date: Date): string {
-  return new Intl.DateTimeFormat("pt-PT", { hour: "2-digit", minute: "2-digit" }).format(date);
+export function formatEventDate(date: Date, withWeekday = true, tz: string = DEFAULT_TZ): string {
+  return cap(
+    new Intl.DateTimeFormat("pt-PT", {
+      timeZone: tz,
+      weekday: withWeekday ? "long" : undefined,
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(date),
+  );
 }
 
-export function formatDateTimeShort(date: Date): string {
-  return new Intl.DateTimeFormat("pt-PT", { dateStyle: "short", timeStyle: "short" }).format(date);
+export function formatTime(date: Date, tz: string = DEFAULT_TZ): string {
+  return new Intl.DateTimeFormat("pt-PT", { timeZone: tz, hour: "2-digit", minute: "2-digit" }).format(date);
+}
+
+export function formatDateTimeShort(date: Date, tz: string = DEFAULT_TZ): string {
+  return new Intl.DateTimeFormat("pt-PT", { timeZone: tz, dateStyle: "short", timeStyle: "short" }).format(date);
 }
 
 export function formatMoney(value: number, currency = "EUR"): string {
@@ -22,16 +30,6 @@ export function formatMoney(value: number, currency = "EUR"): string {
   } catch {
     return `${value.toFixed(2)} ${currency}`;
   }
-}
-
-/** Converte Date para o valor aceite por <input type="datetime-local"> (hora local do servidor). */
-export function toDateTimeLocal(date: Date): string {
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-export function toDateInput(date: Date): string {
-  return toDateTimeLocal(date).slice(0, 10);
 }
 
 export function daysUntil(date: Date): number {

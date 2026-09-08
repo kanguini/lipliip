@@ -37,6 +37,15 @@ Plataforma web para criar e enviar convites digitais **pessoais e intransmissív
 
 > Nota: nenhum sistema impede uma captura de ecrã. O que se garante é que o **acesso ao convite e a entrada no evento** ficam ligados ao telemóvel e à identidade do convidado.
 
+## Segurança e fiabilidade
+
+- URLs fornecidos pelo organizador (fotos, loja, mapa, música) só são aceites em http(s); nunca `javascript:` ou `data:`.
+- Limite de tentativas em login, registo e pedidos de código SMS, por IP (em memória; com várias réplicas use Redis).
+- Cabeçalhos de segurança (`X-Frame-Options`, `nosniff`, `Referrer-Policy`), `robots.txt` a excluir convites e painel dos motores de busca.
+- Exportação CSV protegida contra injeção de fórmulas no Excel.
+- Datas guardadas em UTC e mostradas sempre no fuso horário do evento (configurável por evento), incluindo contagem decrescente, .ics e Google Calendar.
+- Ações destrutivas (eliminar evento/convidado/presente, revogar link) pedem confirmação. Alterar a palavra-passe termina todas as sessões.
+
 ## Stack
 
 - [Next.js 15](https://nextjs.org) (App Router, Server Actions) + React 19 + TypeScript

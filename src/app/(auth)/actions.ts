@@ -4,6 +4,13 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { createSession, destroySession, hashPassword, verifyPassword } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
+import { headers } from "next/headers";
+
+async function clientIp() {
+  const h = await headers();
+  return h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip") ?? "local";
+}
 
 const registerSchema = z.object({
   name: z.string().trim().min(2, "Indique o seu nome"),
@@ -14,6 +21,8 @@ const registerSchema = z.object({
 export type AuthState = { error?: string };
 
 export async function registerAction(_prev: AuthState, formData: FormData): Promise<AuthState> {
+  const limit = rateLimit(`register:${await clientIp()}`, 10, 60 * 60_000);
+  if (!limit.ok) return { error: "Demasiados registos a partir desta ligação. Tente mais tarde." };
   const parsed = registerSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const { name, email, password } = parsed.data;
@@ -29,6 +38,8 @@ export async function registerAction(_prev: AuthState, formData: FormData): Prom
 export async function loginAction(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
+  const limit = rateLimit(`login:${await clientIp()}:${email}`, 8, 15 * 60_000);
+  if (!limit.ok) return { error: `Demasiadas tentativas. Tente de novo dentro de ${Math.ceil(limit.retryAfterSec / 60)} minutos.` };
   const user = await db.user.findUnique({ where: { email } });
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
     return { error: "Email ou palavra-passe incorretos." };
