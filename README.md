@@ -38,7 +38,7 @@ Plataforma web para criar e enviar convites digitais **pessoais e intransmissív
 
 - [Next.js 15](https://nextjs.org) (App Router, Server Actions) + React 19 + TypeScript
 - Tailwind CSS 4
-- Prisma 6 com SQLite em desenvolvimento (troque o `provider` em `prisma/schema.prisma` para `postgresql` em produção)
+- Prisma 6 com PostgreSQL
 - Autenticação própria por sessão (cookie `httpOnly`) com `bcryptjs`
 - `libphonenumber-js` para normalizar telefones (E.164), `qrcode` para os QR de entrada
 - Vitest para testes unitários
@@ -46,9 +46,10 @@ Plataforma web para criar e enviar convites digitais **pessoais e intransmissív
 ## Começar
 
 ```bash
+docker run -d --name lipliip-db -e POSTGRES_PASSWORD=lipliip -e POSTGRES_DB=lipliip -p 5432:5432 postgres:16
 cp .env.example .env      # ajuste APP_URL, SMS_PROVIDER, etc.
 npm install               # gera o Prisma Client
-npm run db:push           # cria a base de dados
+npm run db:push           # cria as tabelas
 npm run db:seed           # (opcional) conta demo@lipliip.pt / demo12345 com eventos de exemplo
 npm run dev               # http://localhost:3000
 ```
@@ -56,6 +57,13 @@ npm run dev               # http://localhost:3000
 Em desenvolvimento, com `SMS_PROVIDER=console` e `SHOW_OTP_IN_DEV=true`, o código OTP aparece no terminal e no próprio ecrã do convidado, para testar sem gastar SMS.
 
 Testes: `npm test`. Build de produção: `npm run build && npm start`.
+
+## Deploy no Railway
+
+O repositório inclui `railway.json`: build com `npm run build` e arranque com `npm run start:railway` (aplica o esquema à base de dados e inicia o servidor). Serviços necessários:
+
+- **Postgres** (imagem `postgres:16` com volume em `/var/lib/postgresql/data`, `PGDATA=/var/lib/postgresql/data/pgdata`).
+- **Web** ligado a este repositório, com as variáveis `DATABASE_URL` (via rede privada, ex.: `postgresql://postgres:<senha>@postgres.railway.internal:5432/railway`), `APP_URL` (o domínio público), `SMS_PROVIDER` e, para SMS reais, as credenciais Twilio.
 
 ## Configuração de SMS
 

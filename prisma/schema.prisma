@@ -1,12 +1,12 @@
 // Esquema de dados da plataforma de convites digitais.
-// Em produção basta trocar o provider para "postgresql" e ajustar DATABASE_URL.
+// PostgreSQL em produção e desenvolvimento (ver README para arrancar um Postgres local).
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

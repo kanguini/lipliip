@@ -2,17 +2,18 @@
   "name": "lipliip",
   "version": "0.1.0",
   "private": true,
-  "description": "Plataforma de convites digitais para casamentos, noivados e aniversários",
+  "description": "Plataforma de convites digitais para casamentos, noivados e anivers\u00e1rios",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "start": "next start",
+    "start": "next start -p ${PORT:-3000}",
     "lint": "next lint",
     "test": "vitest run",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "start:railway": "prisma db push --skip-generate && next start -p ${PORT:-3000}"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
