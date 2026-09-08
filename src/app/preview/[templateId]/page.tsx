@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TEMPLATES } from "@/lib/templates";
 import { Invite, sampleEventForTemplate } from "@/components/templates";
-import { DetailsSection, ProgramSection } from "@/components/invite/Sections";
+import { DetailsSection, PartySection, ProgramSection, StorySection } from "@/components/invite/Sections";
 
 export function generateStaticParams() {
   return TEMPLATES.map((t) => ({ templateId: t.id }));
@@ -26,8 +26,17 @@ export default async function TemplatePreviewPage({ params }: { params: Promise<
       </div>
       <Invite event={event} guestName="Convidado Exemplo">
         <DetailsSection event={event} />
+        <StorySection
+          title="A nossa história"
+          items={[
+            { date: "2019", title: "Conhecemo-nos", text: "Numa festa de amigos, entre gargalhadas e uma música que ainda hoje é a nossa." },
+            { date: "2023", title: "O pedido", text: "Ao pôr do sol, com o mar por testemunha." },
+            { date: "2027", title: "O grande dia", text: "Queremos-te connosco." },
+          ]}
+        />
         <ProgramSection items={[{ time: "15:00", title: "Cerimónia" }, { time: "17:00", title: "Copo de água" }, { time: "20:00", title: "Jantar e festa" }]} />
-        <div className="invite-card text-center text-sm opacity-70">Aqui aparecem a confirmação de presença, a lista de presentes, o livro de mensagens e o QR de entrada.</div>
+        <PartySection title="Padrinhos e madrinhas" members={[{ name: "Rita Sousa", role: "Madrinha" }, { name: "Tiago Lopes", role: "Padrinho" }, { name: "Leonor", role: "Menina das alianças" }]} />
+        <div className="invite-card text-center text-sm opacity-70">Aqui aparecem a confirmação de presença, a lista de presentes, a galeria, o livro de mensagens e o QR de entrada.</div>
       </Invite>
     </>
   );
