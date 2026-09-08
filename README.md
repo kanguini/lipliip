@@ -16,11 +16,14 @@ Plataforma web para criar e enviar convites digitais **pessoais e intransmissív
 - Check-in no dia do evento: leitura do QR code pela câmara ou código curto, aviso de entrada duplicada, contagem de quem já entrou.
 - Histórico de acessos por convidado e alerta de tentativas suspeitas; revogar e regerar link; remover dispositivos.
 
+- Conteúdo do convite: história (linha do tempo com fotos), galeria, padrinhos/madrinhas, música de fundo, hashtag, informações úteis (alojamento, transporte).
+- Plano de mesas, lembretes por WhatsApp a quem não respondeu, exportação para Excel/CSV, lista de músicas pedidas e restrições alimentares.
+
 **Para o convidado**
 - Link pessoal `/c/<token>`; para abrir tem de validar o telemóvel com um código SMS (OTP).
-- Convite com contagem decrescente, mapa, botão "adicionar ao calendário" (.ics), programa.
-- RSVP: sim/não, número e nomes dos acompanhantes (dentro do limite), restrições alimentares, mensagem; pode alterar até ao prazo.
-- Lista de presentes: reservar um produto (desaparece para os outros) ou contribuir com um valor.
+- Envelope animado de abertura, música de fundo, contagem decrescente ao segundo, mapa, "adicionar ao calendário" (Google ou .ics), programa, história, galeria, padrinhos.
+- RSVP: sim/não, número e nomes dos acompanhantes (dentro do limite), restrições alimentares, pedido de música, mensagem; pode alterar até ao prazo.
+- Lista de presentes: reservar um produto (desaparece para os outros) ou contribuir com um valor; QR code de transferência SEPA (EPC) gerado a partir do IBAN.
 - Livro de mensagens e QR code de entrada pessoal.
 
 ## Como os convites ficam intransmissíveis

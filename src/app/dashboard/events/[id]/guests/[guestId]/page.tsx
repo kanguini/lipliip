@@ -67,6 +67,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
               <ul className="text-sm text-stone-700">
                 <li>Acompanhantes: {guest.companions}{guest.companionNames ? ` (${guest.companionNames})` : ""}</li>
                 {guest.dietaryNotes && <li>Restrições alimentares: {guest.dietaryNotes}</li>}
+                {guest.songRequest && <li>Música pedida: 🎶 {guest.songRequest}</li>}
               </ul>
             )}
             {guest.rsvpMessage && <p className="text-sm italic text-stone-600">“{guest.rsvpMessage}”</p>}

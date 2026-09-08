@@ -24,6 +24,8 @@ export default async function EventOverviewPage({ params, searchParams }: { para
   const cash = gifts.flatMap((g) => g.reservations).reduce((s, r) => s + (r.amount ?? 0), 0);
   const days = daysUntil(event.date);
   const recent = guests.filter((g) => g.respondedAt).slice(0, 8);
+  const songs = accepted.filter((g) => g.songRequest);
+  const dietary = accepted.filter((g) => g.dietaryNotes);
 
   return (
     <>
@@ -45,6 +47,22 @@ export default async function EventOverviewPage({ params, searchParams }: { para
         <StatCard label="Presentes reservados" value={`${reservedGifts}${cash > 0 ? ` + ${formatMoney(cash, event.currency)}` : ""}`} />
       </div>
 
+      {(songs.length > 0 || dietary.length > 0) && (
+        <div className="mt-8 grid gap-6 lg:grid-cols-2">
+          {songs.length > 0 && (
+            <div className="card">
+              <h2 className="font-semibold">🎶 Músicas pedidas ({songs.length})</h2>
+              <ul className="mt-2 space-y-1 text-sm">{songs.map((g) => <li key={g.id}>{g.songRequest} <span className="text-xs text-stone-400">· {g.name}</span></li>)}</ul>
+            </div>
+          )}
+          {dietary.length > 0 && (
+            <div className="card">
+              <h2 className="font-semibold">🥗 Restrições alimentares ({dietary.length})</h2>
+              <ul className="mt-2 space-y-1 text-sm">{dietary.map((g) => <li key={g.id}>{g.name}: {g.dietaryNotes}</li>)}</ul>
+            </div>
+          )}
+        </div>
+      )}
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <div className="card">
           <h2 className="font-semibold">Últimas respostas</h2>
@@ -69,6 +87,8 @@ export default async function EventOverviewPage({ params, searchParams }: { para
           <h2 className="font-semibold">Atalhos</h2>
           <ul className="mt-3 space-y-2 text-sm">
             <li><Link className="text-brand-700 hover:underline" href={`/dashboard/events/${id}/guests`}>→ Gerir convidados e enviar convites</Link></li>
+            <li><Link className="text-brand-700 hover:underline" href={`/dashboard/events/${id}/content`}>→ História, galeria, padrinhos, música e informações úteis</Link></li>
+            <li><Link className="text-brand-700 hover:underline" href={`/dashboard/events/${id}/tables`}>→ Plano de mesas</Link></li>
             <li><Link className="text-brand-700 hover:underline" href={`/dashboard/events/${id}/gifts`}>→ Lista de presentes ({gifts.length} itens)</Link></li>
             <li><Link className="text-brand-700 hover:underline" href={`/dashboard/events/${id}/guestbook`}>→ Livro de mensagens ({guestbookCount})</Link></li>
             <li><Link className="text-brand-700 hover:underline" href={`/dashboard/events/${id}/checkin`}>→ Check-in no dia do evento</Link></li>

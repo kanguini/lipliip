@@ -8,7 +8,7 @@ import { requireOwnedEvent, requireUser } from "@/lib/auth";
 import { normalizePhone } from "@/lib/phone";
 import { generateCheckinCode, generateInviteToken } from "@/lib/tokens";
 import { parseGuestImport } from "@/lib/csv";
-import { parseProgramText } from "@/lib/event-types";
+import { parseGalleryText, parsePartyText, parseProgramText, parseStoryText } from "@/lib/event-types";
 import { getSmsProvider } from "@/lib/sms";
 import { inviteShareMessage, inviteUrl } from "@/lib/urls";
 import { TEMPLATES } from "@/lib/templates";
@@ -112,6 +112,36 @@ export async function updateDesignAction(eventId: string, fd: FormData) {
   });
   revalidatePath(`/dashboard/events/${eventId}`);
   flash(`/dashboard/events/${eventId}/design`, "ok", "Design atualizado.");
+}
+
+export async function updateContentAction(eventId: string, fd: FormData) {
+  await requireOwnedEvent(eventId);
+  const path = `/dashboard/events/${eventId}/content`;
+  const musicUrl = opt(fd, "musicUrl", 500);
+  if (musicUrl && !/^https?:\/\//i.test(musicUrl)) flash(path, "error", "O link da música tem de começar por http:// ou https://");
+  await db.event.update({
+    where: { id: eventId },
+    data: {
+      musicUrl,
+      hashtag: opt(fd, "hashtag", 60),
+      extraInfo: opt(fd, "extraInfo", 3000),
+      galleryJson: JSON.stringify(parseGalleryText(str(fd, "galleryText", 10_000)).slice(0, 30)),
+      storyJson: JSON.stringify(parseStoryText(str(fd, "storyText", 10_000)).slice(0, 20)),
+      partyJson: JSON.stringify(parsePartyText(str(fd, "partyText", 10_000)).slice(0, 30)),
+      envelopeEnabled: bool(fd, "envelopeEnabled"),
+      songRequestsEnabled: bool(fd, "songRequestsEnabled"),
+    },
+  });
+  revalidatePath(`/dashboard/events/${eventId}`);
+  flash(path, "ok", "Conteúdo guardado.");
+}
+
+export async function assignTableAction(eventId: string, fd: FormData) {
+  await requireOwnedEvent(eventId);
+  const guestId = str(fd, "guestId", 40);
+  const tableNumber = opt(fd, "tableNumber", 20);
+  await db.guest.updateMany({ where: { id: guestId, eventId }, data: { tableNumber } });
+  revalidatePath(`/dashboard/events/${eventId}/tables`);
 }
 
 export async function deleteEventAction(eventId: string) {

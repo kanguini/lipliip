@@ -121,3 +121,56 @@ body {
   border-radius: 2px;
   animation: confetti-fall linear infinite;
 }
+
+/* Envelope de abertura do convite */
+.invite-envelope {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  cursor: pointer;
+  background: var(--inv-bg);
+  color: var(--inv-text);
+  font-family: var(--inv-font-body);
+  transition: opacity 0.5s ease 0.4s;
+}
+.invite-envelope-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 22rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  border-radius: 1rem;
+  background: var(--inv-card, rgba(255, 255, 255, 0.85));
+  border: 1px solid color-mix(in srgb, var(--inv-accent) 35%, transparent);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  transition: transform 0.6s ease;
+}
+.invite-envelope-flap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 26rem;
+  height: 26rem;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border-radius: 2rem;
+  border: 2px solid color-mix(in srgb, var(--inv-accent) 30%, transparent);
+  opacity: 0.6;
+  pointer-events: none;
+  transition: transform 0.7s ease, opacity 0.5s ease;
+}
+.invite-envelope-open {
+  opacity: 0;
+  pointer-events: none;
+}
+.invite-envelope-open .invite-envelope-card {
+  transform: translateY(-40px) scale(1.05);
+}
+.invite-envelope-open .invite-envelope-flap {
+  transform: translate(-50%, -50%) rotate(45deg) scale(1.6);
+  opacity: 0;
+}

@@ -56,6 +56,14 @@ model Event {
   guestbookEnabled     Boolean  @default(true)
   giftsEnabled         Boolean  @default(true)
   programJson          String? // JSON: [{time, title, description}]
+  musicUrl             String? // MP3/áudio de fundo do convite
+  galleryJson          String? // JSON: [url, url, ...]
+  storyJson            String? // JSON: [{date, title, text, imageUrl}] história do casal / do aniversariante
+  partyJson            String? // JSON: [{name, role, imageUrl}] padrinhos, madrinhas, damas...
+  hashtag              String? // ex: #AnaEJoao2027
+  extraInfo            String? // informações úteis: alojamento, transporte, estacionamento
+  envelopeEnabled      Boolean  @default(true) // animação de abertura do envelope
+  songRequestsEnabled  Boolean  @default(true) // convidados podem sugerir músicas
   contributionIban     String?
   contributionMbway    String?
   contributionNote     String?
@@ -84,6 +92,7 @@ model Guest {
   companionNames String?
   dietaryNotes   String?
   rsvpMessage    String?
+  songRequest    String?
   respondedAt    DateTime?
   verifiedAt     DateTime?
   firstOpenedAt  DateTime?

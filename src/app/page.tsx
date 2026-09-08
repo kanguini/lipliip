@@ -35,13 +35,28 @@ const FEATURES = [
   },
   {
     title: "Programa, mapa e calendário",
-    text: "Programa do dia, botão para o mapa do local e ficheiro para adicionar ao calendário do telemóvel.",
+    text: "Contagem decrescente ao segundo, programa do dia, mapa do local e botão para adicionar ao calendário (Google ou iPhone).",
     icon: "📍",
   },
   {
-    title: "Livro de mensagens",
-    text: "Os convidados deixam uma mensagem carinhosa que fica guardada com o convite: uma recordação para depois do evento.",
+    title: "A vossa história, galeria e padrinhos",
+    text: "Linha do tempo com fotos, galeria, padrinhos e madrinhas, música de fundo, hashtag e informações úteis (alojamento, transporte).",
+    icon: "📖",
+  },
+  {
+    title: "Envelope animado e música",
+    text: "O convidado toca para abrir o envelope e o convite revela-se com a vossa música. Uma experiência, não um PDF.",
     icon: "💌",
+  },
+  {
+    title: "Lembretes, mesas e Excel",
+    text: "Lembre por WhatsApp quem ainda não respondeu, monte o plano de mesas e exporte tudo (restrições alimentares, músicas pedidas) para Excel.",
+    icon: "📊",
+  },
+  {
+    title: "Livro de mensagens e pedidos de música",
+    text: "Os convidados deixam uma mensagem carinhosa e sugerem a música que não pode faltar. Fica tudo no seu painel.",
+    icon: "🎶",
   },
 ];
 

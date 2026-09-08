@@ -15,6 +15,9 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
   const q = (sp.q ?? "").toLowerCase();
   const filtered = guests.filter((g) => (!q || g.name.toLowerCase().includes(q) || g.phone.includes(q) || (g.groupName ?? "").toLowerCase().includes(q)) && (!sp.status || g.rsvpStatus === sp.status));
   const returnTo = `/dashboard/events/${id}/guests`;
+  const pendingSent = guests.filter((g) => g.rsvpStatus === "PENDING" && g.sentAt);
+  const reminderText = (g: (typeof guests)[number]) =>
+    `Olá ${g.name.split(" ")[0]}! Ainda não recebemos a tua confirmação para "${event.title}"${event.rsvpDeadline ? ` (prazo: ${event.rsvpDeadline.toLocaleDateString("pt-PT")})` : ""}. Podes confirmar no teu convite: ${inviteUrl(g.token)} 🙏`;
 
   return (
     <>
@@ -67,6 +70,8 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
         <div className="card">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-semibold">{guests.length} convidados</h2>
+            <div className="flex flex-wrap gap-2">
+            <a href={`/dashboard/events/${id}/guests/export.csv`} className="btn-secondary btn-sm">⬇ Exportar Excel/CSV</a>
             <form className="flex gap-2">
               <input name="q" className="input w-40" placeholder="Pesquisar" defaultValue={sp.q ?? ""} />
               <select name="status" className="input w-36" defaultValue={sp.status ?? ""}>
@@ -77,6 +82,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
               </select>
               <button className="btn-secondary btn-sm">Filtrar</button>
             </form>
+            </div>
           </div>
 
           {filtered.length === 0 ? (
@@ -116,6 +122,19 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
                 );
               })}
             </ul>
+          )}
+          {pendingSent.length > 0 && (
+            <details className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <summary className="cursor-pointer text-sm font-semibold text-amber-900">🔔 Lembretes: {pendingSent.length} convidado(s) receberam o convite e ainda não responderam</summary>
+              <ul className="mt-3 space-y-2 text-sm">
+                {pendingSent.map((g) => (
+                  <li key={g.id} className="flex items-center justify-between gap-2">
+                    <span>{g.name}{g.firstOpenedAt ? <span className="text-xs text-stone-500"> · abriu {g.openCount}×</span> : <span className="text-xs text-stone-500"> · nunca abriu</span>}</span>
+                    <a href={`https://wa.me/${phoneForWhatsApp(g.phone)}?text=${encodeURIComponent(reminderText(g))}`} target="_blank" rel="noreferrer" className="btn-secondary btn-sm">Lembrar por WhatsApp</a>
+                  </li>
+                ))}
+              </ul>
+            </details>
           )}
           <p className="mt-4 text-xs text-stone-500">
             Dica: o botão WhatsApp abre a conversa com a mensagem e o link pessoal já escritos. Depois de enviar, marque como enviado. O link só abre depois de o convidado validar o telemóvel.

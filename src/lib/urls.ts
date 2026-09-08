@@ -14,3 +14,17 @@ export function inviteShareMessage(opts: { guestName: string; hostNames: string;
     `Este link é só teu e pede confirmação pelo teu número de telemóvel. Por favor não o partilhes.`
   );
 }
+
+/** Link "Adicionar ao Google Calendar" (alternativa ao ficheiro .ics). */
+export function googleCalendarUrl(opts: { title: string; start: Date; durationHours?: number; location?: string; details?: string }) {
+  const fmt = (d: Date) => d.toISOString().replace(/[-:]|\.\d{3}/g, "");
+  const end = new Date(opts.start.getTime() + (opts.durationHours ?? 5) * 3600_000);
+  const p = new URLSearchParams({
+    action: "TEMPLATE",
+    text: opts.title,
+    dates: `${fmt(opts.start)}/${fmt(end)}`,
+  });
+  if (opts.location) p.set("location", opts.location);
+  if (opts.details) p.set("details", opts.details);
+  return `https://calendar.google.com/calendar/render?${p.toString()}`;
+}

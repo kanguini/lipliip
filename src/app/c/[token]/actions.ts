@@ -113,6 +113,7 @@ export async function rsvpAction(token: string, formData: FormData): Promise<Act
       companionNames: String(formData.get("companionNames") ?? "").trim().slice(0, 300) || null,
       dietaryNotes: String(formData.get("dietaryNotes") ?? "").trim().slice(0, 300) || null,
       rsvpMessage: String(formData.get("rsvpMessage") ?? "").trim().slice(0, 500) || null,
+      songRequest: event.songRequestsEnabled ? String(formData.get("songRequest") ?? "").trim().slice(0, 120) || null : guest.songRequest,
       respondedAt: new Date(),
     },
   });

@@ -7,12 +7,13 @@ type Props = {
   token: string;
   maxCompanions: number;
   allowChildren: boolean;
-  current: { rsvpStatus: string; companions: number; companionNames: string | null; dietaryNotes: string | null; rsvpMessage: string | null };
+  current: { rsvpStatus: string; companions: number; companionNames: string | null; dietaryNotes: string | null; rsvpMessage: string | null; songRequest: string | null };
   deadlinePassed: boolean;
   deadlineLabel?: string;
+  songRequests?: boolean;
 };
 
-export function RsvpForm({ token, maxCompanions, allowChildren, current, deadlinePassed, deadlineLabel }: Props) {
+export function RsvpForm({ token, maxCompanions, allowChildren, current, deadlinePassed, deadlineLabel, songRequests }: Props) {
   const [status, setStatus] = useState(current.rsvpStatus === "PENDING" ? "ACCEPTED" : current.rsvpStatus);
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(
     async (_prev, fd) => rsvpAction(token, fd),
@@ -66,6 +67,12 @@ export function RsvpForm({ token, maxCompanions, allowChildren, current, deadlin
                   </select>
                   <input name="companionNames" className="invite-input mt-2" placeholder="Nomes dos acompanhantes" defaultValue={current.companionNames ?? ""} />
                   {!allowChildren && <p className="mt-1 text-xs opacity-70">Este evento é apenas para adultos.</p>}
+                </div>
+              )}
+              {songRequests && (
+                <div>
+                  <label className="mb-1 block text-sm font-medium">Que música não pode faltar na festa? 🎶</label>
+                  <input name="songRequest" className="invite-input" placeholder="Artista - Música" defaultValue={current.songRequest ?? ""} />
                 </div>
               )}
               <div>

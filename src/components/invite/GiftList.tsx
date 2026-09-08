@@ -26,7 +26,7 @@ export function GiftList({
   token: string;
   gifts: GiftView[];
   currency: string;
-  contribution: { iban: string | null; mbway: string | null; note: string | null };
+  contribution: { iban: string | null; mbway: string | null; note: string | null; qrDataUrl?: string | null };
 }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -130,6 +130,13 @@ export function GiftList({
           {contribution.note && <p className="mt-1 opacity-80">{contribution.note}</p>}
           {contribution.iban && <p className="mt-2">IBAN: <span className="font-mono">{contribution.iban}</span></p>}
           {contribution.mbway && <p>MB WAY: <span className="font-mono">{contribution.mbway}</span></p>}
+          {contribution.qrDataUrl && (
+            <div className="mt-3 flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={contribution.qrDataUrl} alt="QR de transferência" className="h-28 w-28 rounded-lg bg-white p-1" />
+              <p className="text-xs opacity-80">Aponte a câmara da app do seu banco a este código: a transferência fica pré-preenchida.</p>
+            </div>
+          )}
         </div>
       )}
     </section>
