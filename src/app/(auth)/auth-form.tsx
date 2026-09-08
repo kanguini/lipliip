@@ -1,0 +1,59 @@
+"use client";
+
+import Link from "next/link";
+import { useActionState } from "react";
+import { loginAction, registerAction, type AuthState } from "./actions";
+
+export function AuthForm({ mode }: { mode: "login" | "register" }) {
+  const action = mode === "login" ? loginAction : registerAction;
+  const [state, formAction, pending] = useActionState<AuthState, FormData>(action, {});
+
+  return (
+    <main className="flex min-h-screen items-center justify-center px-6 py-12">
+      <div className="w-full max-w-md">
+        <Link href="/" className="font-display block text-center text-3xl font-semibold text-brand-700">Lipliip</Link>
+        <div className="card mt-6">
+          <h1 className="text-xl font-semibold">{mode === "login" ? "Entrar" : "Criar conta"}</h1>
+          <p className="mt-1 text-sm text-stone-500">
+            {mode === "login" ? "Bem-vindo de volta." : "Comece a criar os seus convites em segundos."}
+          </p>
+          <form action={formAction} className="mt-6 space-y-4">
+            {mode === "register" && (
+              <div>
+                <label className="label" htmlFor="name">Nome</label>
+                <input id="name" name="name" className="input" required autoComplete="name" />
+              </div>
+            )}
+            <div>
+              <label className="label" htmlFor="email">Email</label>
+              <input id="email" name="email" type="email" className="input" required autoComplete="email" />
+            </div>
+            <div>
+              <label className="label" htmlFor="password">Palavra-passe</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                className="input"
+                required
+                minLength={mode === "register" ? 8 : undefined}
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
+              />
+            </div>
+            {state.error && <p className="text-sm text-red-700">{state.error}</p>}
+            <button className="btn-primary w-full" disabled={pending}>
+              {pending ? "Aguarde…" : mode === "login" ? "Entrar" : "Criar conta"}
+            </button>
+          </form>
+        </div>
+        <p className="mt-4 text-center text-sm text-stone-500">
+          {mode === "login" ? (
+            <>Ainda não tem conta? <Link href="/register" className="text-brand-700 underline">Criar conta</Link></>
+          ) : (
+            <>Já tem conta? <Link href="/login" className="text-brand-700 underline">Entrar</Link></>
+          )}
+        </p>
+      </div>
+    </main>
+  );
+}

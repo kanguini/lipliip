@@ -1,0 +1,76 @@
+import { db } from "@/lib/db";
+import { requireOwnedEvent } from "@/lib/auth";
+import { formatMoney } from "@/lib/format";
+import { addGiftAction, deleteGiftAction } from "@/app/dashboard/actions";
+import { FlashFromSearch } from "@/components/ui";
+
+export default async function GiftsPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
+  const { id } = await params;
+  const sp = await searchParams;
+  const { event } = await requireOwnedEvent(id);
+  const gifts = await db.giftItem.findMany({ where: { eventId: id }, include: { reservations: { include: { guest: { select: { name: true } } } } }, orderBy: { createdAt: "asc" } });
+  const totalCash = gifts.flatMap((g) => g.reservations).reduce((s, r) => s + (r.amount ?? 0), 0);
+
+  return (
+    <>
+      <FlashFromSearch {...sp} />
+      {!event.giftsEnabled && <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">A lista de presentes está desativada nas definições: os convidados não a veem.</p>}
+      <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
+        <form action={addGiftAction.bind(null, id)} className="card space-y-3">
+          <h2 className="font-semibold">Adicionar presente</h2>
+          <div>
+            <label className="label">Tipo</label>
+            <select name="kind" className="input">
+              <option value="PRODUCT">Produto (reservável)</option>
+              <option value="CASH">Contribuição em dinheiro (ex: lua de mel)</option>
+            </select>
+          </div>
+          <div><label className="label">Nome</label><input name="name" className="input" required placeholder="Máquina de café" /></div>
+          <div><label className="label">Descrição</label><input name="description" className="input" placeholder="Modelo, cor, loja…" /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="label">Preço ({event.currency})</label><input name="price" className="input" inputMode="decimal" placeholder="89,90" /></div>
+            <div><label className="label">Quantidade</label><input name="quantity" type="number" min={1} className="input" defaultValue={1} /></div>
+          </div>
+          <div><label className="label">Link da loja</label><input name="storeUrl" type="url" className="input" placeholder="https://…" /></div>
+          <div><label className="label">Imagem (URL)</label><input name="imageUrl" type="url" className="input" placeholder="https://…/foto.jpg" /></div>
+          <button className="btn-primary w-full">Adicionar</button>
+        </form>
+
+        <div className="card">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold">{gifts.length} presentes</h2>
+            {totalCash > 0 && <span className="text-sm text-emerald-700">Contribuições: {formatMoney(totalCash, event.currency)}</span>}
+          </div>
+          {gifts.length === 0 ? (
+            <p className="mt-6 text-center text-sm text-stone-500">Ainda não adicionou presentes. Se preferir só contribuições por IBAN/MB WAY, preencha-as nas Definições.</p>
+          ) : (
+            <ul className="mt-4 divide-y divide-stone-100">
+              {gifts.map((g) => {
+                const reserved = g.reservations.reduce((s, r) => s + r.quantity, 0);
+                return (
+                  <li key={g.id} className="flex items-start justify-between gap-3 py-3">
+                    <div className="text-sm">
+                      <p className="font-medium">{g.kind === "CASH" ? "💝" : "🎁"} {g.name}{g.price != null && <span className="ml-2 text-stone-500">{formatMoney(g.price, event.currency)}</span>}</p>
+                      {g.description && <p className="text-stone-500">{g.description}</p>}
+                      {g.kind === "CASH" ? (
+                        <p className="text-xs text-stone-600">
+                          {g.reservations.length} contribuições
+                          {g.reservations.length > 0 && `: ${g.reservations.map((r) => `${r.guest.name} (${formatMoney(r.amount ?? 0, event.currency)})`).join(", ")}`}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-stone-600">
+                          {reserved}/{g.quantity} reservado{g.reservations.length > 0 && ` por ${g.reservations.map((r) => r.guest.name).join(", ")}`}
+                        </p>
+                      )}
+                    </div>
+                    <form action={deleteGiftAction.bind(null, g.id)}><button className="btn-danger btn-sm">Remover</button></form>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}

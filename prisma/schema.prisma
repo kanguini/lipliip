@@ -1,0 +1,181 @@
+// Esquema de dados da plataforma de convites digitais.
+// Em produção basta trocar o provider para "postgresql" e ajustar DATABASE_URL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  phone        String?
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  events       Event[]
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id                   String   @id @default(cuid())
+  ownerId              String
+  owner                User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  type                 String // WEDDING | ENGAGEMENT | BIRTHDAY | OTHER
+  templateId           String
+  title                String // ex: "Casamento de Ana & João"
+  hostNames            String // ex: "Ana & João"
+  message              String? // texto de abertura do convite
+  date                 DateTime
+  endTime              String? // "23:30"
+  venueName            String
+  venueAddress         String?
+  mapsUrl              String?
+  dressCode            String?
+  coverImageUrl        String?
+  accentColor          String? // sobrepõe a cor principal do template
+  country              String   @default("PT") // país por omissão para normalizar telefones
+  currency             String   @default("EUR")
+  rsvpDeadline         DateTime?
+  allowChildren        Boolean  @default(true)
+  verificationRequired Boolean  @default(true) // exige OTP por SMS para abrir o convite
+  maxDevicesPerGuest   Int      @default(2)
+  guestbookEnabled     Boolean  @default(true)
+  giftsEnabled         Boolean  @default(true)
+  programJson          String? // JSON: [{time, title, description}]
+  contributionIban     String?
+  contributionMbway    String?
+  contributionNote     String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  guests    Guest[]
+  gifts     GiftItem[]
+  guestbook GuestbookEntry[]
+}
+
+model Guest {
+  id             String    @id @default(cuid())
+  eventId        String
+  event          Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name           String
+  phone          String // E.164, ex: +351912345678
+  email          String?
+  token          String    @unique // link pessoal e intransmissível
+  checkinCode    String    @unique // código curto para check-in no dia
+  groupName      String? // Família, Amigos, Trabalho...
+  tableNumber    String?
+  maxCompanions  Int       @default(0)
+  rsvpStatus     String    @default("PENDING") // PENDING | ACCEPTED | DECLINED
+  companions     Int       @default(0)
+  companionNames String?
+  dietaryNotes   String?
+  rsvpMessage    String?
+  respondedAt    DateTime?
+  verifiedAt     DateTime?
+  firstOpenedAt  DateTime?
+  openCount      Int       @default(0)
+  sentAt         DateTime?
+  sentVia        String?
+  checkedInAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  devices      GuestDevice[]
+  otps         OtpCode[]
+  accessLogs   AccessLog[]
+  reservations GiftReservation[]
+  guestbook    GuestbookEntry[]
+
+  @@index([eventId])
+}
+
+model GuestDevice {
+  id          String   @id @default(cuid())
+  guestId     String
+  guest       Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  deviceToken String   @unique
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+}
+
+model OtpCode {
+  id         String    @id @default(cuid())
+  guestId    String
+  guest      Guest     @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  codeHash   String
+  expiresAt  DateTime
+  attempts   Int       @default(0)
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([guestId])
+}
+
+model AccessLog {
+  id        String   @id @default(cuid())
+  guestId   String
+  guest     Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  outcome   String // VIEW | OTP_SENT | OTP_OK | OTP_FAIL | OTP_RATE_LIMIT | DEVICE_LIMIT | CHECKIN
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([guestId])
+}
+
+model GiftItem {
+  id           String            @id @default(cuid())
+  eventId      String
+  event        Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  kind         String            @default("PRODUCT") // PRODUCT | CASH
+  name         String
+  description  String?
+  price        Float?
+  imageUrl     String?
+  storeUrl     String?
+  quantity     Int               @default(1)
+  createdAt    DateTime          @default(now())
+  reservations GiftReservation[]
+
+  @@index([eventId])
+}
+
+model GiftReservation {
+  id        String   @id @default(cuid())
+  giftId    String
+  gift      GiftItem @relation(fields: [giftId], references: [id], onDelete: Cascade)
+  guestId   String
+  guest     Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  quantity  Int      @default(1)
+  amount    Float?
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@unique([giftId, guestId])
+}
+
+model GuestbookEntry {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  guestId   String
+  guest     Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  message   String
+  createdAt DateTime @default(now())
+
+  @@index([eventId])
+}

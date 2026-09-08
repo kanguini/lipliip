@@ -1,0 +1,34 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { TEMPLATES } from "@/lib/templates";
+import { Invite, sampleEventForTemplate } from "@/components/templates";
+import { DetailsSection, ProgramSection } from "@/components/invite/Sections";
+
+export function generateStaticParams() {
+  return TEMPLATES.map((t) => ({ templateId: t.id }));
+}
+
+export default async function TemplatePreviewPage({ params }: { params: Promise<{ templateId: string }> }) {
+  const { templateId } = await params;
+  const meta = TEMPLATES.find((t) => t.id === templateId);
+  if (!meta) notFound();
+  const event = sampleEventForTemplate(templateId);
+  return (
+    <>
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-stone-200 bg-white/90 px-4 py-2 text-sm backdrop-blur">
+        <span>Pré-visualização do template <strong>{meta.name}</strong> (dados de exemplo)</span>
+        <div className="flex gap-2">
+          {TEMPLATES.map((t) => (
+            <Link key={t.id} href={`/preview/${t.id}`} className={`btn-sm ${t.id === templateId ? "btn-primary" : "btn-secondary"}`}>{t.name}</Link>
+          ))}
+          <Link href="/register" className="btn-primary btn-sm">Usar este template</Link>
+        </div>
+      </div>
+      <Invite event={event} guestName="Convidado Exemplo">
+        <DetailsSection event={event} />
+        <ProgramSection items={[{ time: "15:00", title: "Cerimónia" }, { time: "17:00", title: "Copo de água" }, { time: "20:00", title: "Jantar e festa" }]} />
+        <div className="invite-card text-center text-sm opacity-70">Aqui aparecem a confirmação de presença, a lista de presentes, o livro de mensagens e o QR de entrada.</div>
+      </Invite>
+    </>
+  );
+}
