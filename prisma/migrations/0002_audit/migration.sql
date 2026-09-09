@@ -14,7 +14,7 @@ CREATE INDEX "EventMember_userId_idx" ON "EventMember"("userId");
 CREATE INDEX "Payment_budgetItemId_idx" ON "Payment"("budgetItemId");
 
 -- Duplicados criados por condições de corrida antes do índice único: remove apenas cópias posteriores
--- que nunca foram usadas (sem resposta, sem abertura, sem check-in). Se restarem duplicados com dados,
+-- que nunca foram usadas (não enviadas, sem resposta, sem abertura, sem check-in). Se restarem duplicados com dados,
 -- o índice abaixo falha de propósito para serem resolvidos à mão em vez de perder dados.
 DELETE FROM "Guest" g
 USING "Guest" first
@@ -23,6 +23,7 @@ WHERE first."eventId" = g."eventId"
   AND first."id" <> g."id"
   AND (first."createdAt", first."id") < (g."createdAt", g."id")
   AND g."rsvpStatus" = 'PENDING'
+  AND g."sentAt" IS NULL
   AND g."firstOpenedAt" IS NULL
   AND g."checkedInAt" IS NULL;
 

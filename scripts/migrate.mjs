@@ -15,7 +15,12 @@ try {
   );
   if (has_events && !has_migrations) {
     console.log("Base de dados existente sem histórico de migrações: a marcar a migração inicial como aplicada.");
-    run("npx prisma migrate resolve --applied 0001_baseline");
+    try {
+      run("npx prisma migrate resolve --applied 0001_baseline");
+    } catch (e) {
+      // Outra réplica pode ter marcado a migração entretanto (P3008): segue para o deploy, que verifica o estado real.
+      console.warn("Não foi possível marcar a migração inicial (provavelmente já marcada por outra instância):", e.message);
+    }
   }
 } finally {
   await db.$disconnect();

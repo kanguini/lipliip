@@ -12,7 +12,7 @@ export default async function CheckinPage({ params, searchParams }: { params: Pr
   const guests = await db.guest.findMany({ where: { eventId: id }, orderBy: { name: "asc" } });
   const q = (sp.q ?? "").toLowerCase();
   const list = q ? guests.filter((g) => g.name.toLowerCase().includes(q) || g.checkinCode.toLowerCase().includes(q)) : guests;
-  const accepted = guests.filter((g) => g.rsvpStatus === "ACCEPTED");
+  const accepted = guests.filter((g) => g.rsvpStatus === "ACCEPTED" && !g.suspendedAt);
   const arrived = guests.filter((g) => g.checkedInAt);
   const expected = accepted.reduce((s, g) => s + 1 + g.companions, 0);
 

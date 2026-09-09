@@ -16,6 +16,12 @@ export function rateLimit(key: string, max: number, windowMs: number): { ok: boo
   return { ok: true, retryAfterSec: 0 };
 }
 
+/** Devolve a unidade consumida por `rateLimit` quando a operação não chegou a acontecer (ex.: envio falhou). */
+export function rateLimitRefund(key: string) {
+  const b = buckets.get(key);
+  if (b && b.count > 0) b.count--;
+}
+
 // Limpeza periódica para não crescer indefinidamente.
 if (typeof setInterval === "function") {
   const timer = setInterval(() => {

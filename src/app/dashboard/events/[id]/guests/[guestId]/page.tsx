@@ -18,6 +18,7 @@ const OUTCOME_LABEL: Record<string, string> = {
   OTP_FAIL: "Código errado",
   OTP_RATE_LIMIT: "Demasiados pedidos de código",
   DEVICE_LIMIT: "Bloqueado: limite de dispositivos",
+  DEVICE_REPLACED: "Validou noutro dispositivo (o mais antigo deixou de ter acesso)",
   CHECKIN: "Check-in à entrada",
 };
 

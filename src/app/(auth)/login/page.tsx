@@ -12,5 +12,5 @@ const NOTICES: Record<string, string> = {
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ ok?: string }> }) {
   if (await getCurrentUser()) redirect("/dashboard");
   const { ok } = await searchParams;
-  return <AuthForm mode="login" notice={ok ? NOTICES[ok] : undefined} />;
+  return <AuthForm mode="login" notice={ok && Object.hasOwn(NOTICES, ok) ? NOTICES[ok] : undefined} />;
 }

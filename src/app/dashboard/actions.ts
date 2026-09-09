@@ -11,7 +11,7 @@ import { parseGuestImport } from "@/lib/csv";
 import { SUPPORTED_COUNTRIES } from "@/lib/phone";
 import { parseGalleryText, parsePartyText, parseProgramText, parseStoryText } from "@/lib/event-types";
 import { getSmsProvider, isSmsConfigured } from "@/lib/sms";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit, rateLimitRefund } from "@/lib/rate-limit";
 import { flash, str, opt, bool, parseMoney } from "@/lib/form";
 import { inviteShareMessage, inviteUrl } from "@/lib/urls";
 import { formatTime } from "@/lib/format";
@@ -134,11 +134,13 @@ export async function updateContentAction(eventId: string, fd: FormData) {
   const path = `/dashboard/events/${eventId}/content`;
   const musicRaw = str(fd, "musicUrl", 500);
   const musicUrl = httpUrlOrNull(musicRaw);
-  const musicWarning = musicRaw && !musicUrl ? " O link da música foi ignorado: tem de começar por http:// ou https://." : "";
+  const musicInvalid = !!musicRaw && !musicUrl;
+  const musicWarning = musicInvalid ? " O link da música foi ignorado (mantém-se o anterior): tem de começar por http:// ou https://." : "";
   await db.event.update({
     where: { id: eventId },
     data: {
-      musicUrl,
+      // Link inválido: mantém o valor guardado em vez de o apagar.
+      musicUrl: musicInvalid ? undefined : musicUrl,
       hashtag: opt(fd, "hashtag", 60),
       extraInfo: opt(fd, "extraInfo", 3000),
       galleryJson: JSON.stringify(parseGalleryText(str(fd, "galleryText", 10_000)).slice(0, 30)),
@@ -282,6 +284,7 @@ export async function updateGuestAction(guestId: string, fd: FormData) {
   if (phone !== guest.phone) {
     await db.$transaction([
       db.guestDevice.deleteMany({ where: { guestId } }),
+      db.otpCode.deleteMany({ where: { guestId } }),
       db.guest.update({ where: { id: guestId }, data: { ...data, verifiedAt: null } }),
     ]);
   } else {
@@ -357,6 +360,9 @@ export async function sendSmsInviteAction(guestId: string, returnTo?: string | n
   }
   if (!res.ok) {
     console.error("Falha ao enviar SMS de convite:", res.error);
+    // O envio não aconteceu: liberta os limites para permitir nova tentativa.
+    rateLimitRefund(`sms-guest:${guestId}`);
+    rateLimitRefund(`sms-user:${user.id}`);
     flash(path, "error", "Não foi possível enviar o SMS. Verifique a configuração do fornecedor de SMS.");
   }
   await db.guest.update({ where: { id: guestId }, data: { sentAt: new Date(), sentVia: "sms" } });
@@ -385,6 +391,8 @@ export async function toggleCheckinAction(guestId: string) {
   const user = await requireUser();
   const guest = await db.guest.findFirst({ where: { id: guestId, event: accessibleEventWhere(user.id) } });
   if (!guest) redirect("/dashboard");
+  // Um convite suspenso não entra pelo botão manual (o mesmo guarda que o código/QR).
+  if (!guest.checkedInAt && guest.suspendedAt) flash(`/dashboard/events/${guest.eventId}/checkin`, "error", `O convite de ${guest.name} está suspenso. Confirme com os anfitriões antes de deixar entrar.`);
   await db.guest.update({ where: { id: guestId }, data: { checkedInAt: guest.checkedInAt ? null : new Date() } });
   revalidatePath(`/dashboard/events/${guest.eventId}/checkin`);
 }

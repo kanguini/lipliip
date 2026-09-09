@@ -89,9 +89,15 @@ export async function verifyOtpAction(token: string, code: string): Promise<Acti
     orderBy: { createdAt: "desc" },
   });
   if (candidates.length === 0) return fail("Código expirado ou com demasiadas tentativas. Peça um novo código.");
-  // Reserva uma tentativa em cada candidato (incremento atómico) e compara.
-  await db.otpCode.updateMany({ where: { id: { in: candidates.map((c) => c.id) }, attempts: { lt: OTP_MAX_ATTEMPTS } }, data: { attempts: { increment: 1 } } });
-  const match = candidates.find((c) => verifyOtpHash(digits, guest.id, c.codeHash));
+  // Reserva uma tentativa em cada candidato (incremento condicional): só os códigos em que a reserva
+  // foi conseguida contam, para que pedidos simultâneos não ultrapassem o limite de tentativas.
+  const reserved = [];
+  for (const c of candidates) {
+    const { count } = await db.otpCode.updateMany({ where: { id: c.id, attempts: { lt: OTP_MAX_ATTEMPTS } }, data: { attempts: { increment: 1 } } });
+    if (count === 1) reserved.push(c);
+  }
+  if (reserved.length === 0) return fail("Código expirado ou com demasiadas tentativas. Peça um novo código.");
+  const match = reserved.find((c) => verifyOtpHash(digits, guest.id, c.codeHash));
   if (!match) {
     await logAccess(guest.id, "OTP_FAIL");
     return fail("Código incorreto.");
@@ -119,7 +125,7 @@ export async function verifyOtpAction(token: string, code: string): Promise<Acti
         { isolationLevel: "Serializable" },
       );
       if (outcome === "consumed") return fail("Este código já foi utilizado. Peça um novo código.");
-      if (outcome === "replace") await logAccess(guest.id, "DEVICE_LIMIT");
+      if (outcome === "replace") await logAccess(guest.id, "DEVICE_REPLACED");
       break;
     } catch (e) {
       const errCode = (e as { code?: string }).code;

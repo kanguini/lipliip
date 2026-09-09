@@ -19,9 +19,11 @@ export default async function EventOverviewPage({ params, searchParams }: { para
     db.task.findMany({ where: { eventId: id }, orderBy: { dueAt: "asc" } }),
     db.budgetItem.findMany({ where: { eventId: id }, include: { payments: true } }),
   ]);
-  const accepted = guests.filter((g) => g.rsvpStatus === "ACCEPTED");
-  const pending = guests.filter((g) => g.rsvpStatus === "PENDING");
-  const sent = guests.filter((g) => g.sentAt);
+  // Convites suspensos não contam para as estatísticas (tal como na lista de eventos).
+  const active = guests.filter((g) => !g.suspendedAt);
+  const accepted = active.filter((g) => g.rsvpStatus === "ACCEPTED");
+  const pending = active.filter((g) => g.rsvpStatus === "PENDING");
+  const sent = active.filter((g) => g.sentAt);
   const people = accepted.reduce((s, g) => s + 1 + g.companions, 0);
   const days = calendarDaysUntil(event.date, event.timezone);
   const tasksDone = tasks.filter((t) => t.completedAt).length;
@@ -85,13 +87,13 @@ export default async function EventOverviewPage({ params, searchParams }: { para
       <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Link href={`/dashboard/events/${id}/guests`} className="card transition hover:-translate-y-0.5">
           <span className="icon-circle bg-joy-sky/40 text-brand-700"><Users className="h-5 w-5" strokeWidth={1.75} aria-hidden /></span>
-          <p className="font-display mt-4 text-3xl">{accepted.length}<span className="text-base text-muted"> / {guests.length}</span></p>
+          <p className="font-display mt-4 text-3xl">{accepted.length}<span className="text-base text-muted"> / {active.length}</span></p>
           <p className="text-sm text-muted">confirmados · {people} pessoas previstas</p>
           {pending.length > 0 && <p className="mt-1 text-xs text-brand-500">{pending.length} sem resposta</p>}
         </Link>
         <Link href={`/dashboard/events/${id}/guests`} className="card transition hover:-translate-y-0.5">
           <span className="icon-circle bg-joy-lilac/40 text-brand-700"><Mail className="h-5 w-5" strokeWidth={1.75} aria-hidden /></span>
-          <p className="font-display mt-4 text-3xl">{sent.length}<span className="text-base text-muted"> / {guests.length}</span></p>
+          <p className="font-display mt-4 text-3xl">{sent.length}<span className="text-base text-muted"> / {active.length}</span></p>
           <p className="text-sm text-muted">convites enviados · {guests.filter((g) => g.firstOpenedAt).length} abertos</p>
         </Link>
         <Link href={`/dashboard/events/${id}/tasks`} className="card transition hover:-translate-y-0.5">

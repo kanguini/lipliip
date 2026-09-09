@@ -83,6 +83,11 @@ export async function addVendorAction(eventId: string, fd: FormData) {
   flash(path, "ok", "Fornecedor adicionado.");
 }
 
+/** Linha de orçamento criada automaticamente ao contratar o fornecedor (e não editada pelo utilizador). */
+function isAutoBudgetLine(item: { name: string; category: string; notes: string | null; payments: unknown[] }, vendor: { name: string; category: string }) {
+  return item.payments.length === 0 && item.notes == null && item.name === vendor.name && item.category === vendor.category;
+}
+
 export async function updateVendorAction(eventId: string, vendorId: string, fd: FormData) {
   await requireEventAccess(eventId);
   const path = `/dashboard/events/${eventId}/vendors`;
@@ -103,8 +108,9 @@ export async function updateVendorAction(eventId: string, vendorId: string, fd: 
       if (item) await tx.budgetItem.update({ where: { id: item.id }, data: { contracted: data.price } });
       else await tx.budgetItem.create({ data: { eventId, category: vendor.category, name: vendor.name, estimated: data.price, contracted: data.price, vendorId } });
     } else if (item && vendor.status === "HIRED" && data.status !== "HIRED") {
-      // Deixou de estar contratado: a linha automática sem pagamentos desaparece; com pagamentos fica só como estimativa.
-      if (item.payments.length === 0) await tx.budgetItem.delete({ where: { id: item.id } });
+      // Deixou de estar contratado: a linha criada automaticamente ao contratar (mesmo nome, sem pagamentos nem notas)
+      // desaparece; uma linha criada à mão ou com pagamentos fica só como estimativa.
+      if (isAutoBudgetLine(item, vendor)) await tx.budgetItem.delete({ where: { id: item.id } });
       else await tx.budgetItem.update({ where: { id: item.id }, data: { contracted: null } });
     }
   });
@@ -117,12 +123,14 @@ export async function deleteVendorAction(eventId: string, vendorId: string) {
   await requireEventAccess(eventId);
   await db.$transaction(async (tx) => {
     // Linhas de orçamento criadas automaticamente por este fornecedor e sem pagamentos vão com ele.
+    const vendor = await tx.vendor.findFirst({ where: { id: vendorId, eventId } });
+    if (!vendor) return;
     const items = await tx.budgetItem.findMany({ where: { eventId, vendorId }, include: { payments: true } });
     for (const item of items) {
-      if (item.payments.length === 0) await tx.budgetItem.delete({ where: { id: item.id } });
+      if (isAutoBudgetLine(item, vendor)) await tx.budgetItem.delete({ where: { id: item.id } });
       else await tx.budgetItem.update({ where: { id: item.id }, data: { contracted: null } });
     }
-    await tx.vendor.deleteMany({ where: { id: vendorId, eventId } });
+    await tx.vendor.delete({ where: { id: vendorId } });
   });
   flash(`/dashboard/events/${eventId}/vendors`, "ok", "Fornecedor removido.");
 }
@@ -152,9 +160,12 @@ export async function addBudgetItemAction(eventId: string, fd: FormData) {
 export async function updateBudgetItemAction(eventId: string, itemId: string, fd: FormData) {
   await requireEventAccess(eventId);
   const path = `/dashboard/events/${eventId}/budget`;
+  const estimated = num(fd, "estimated");
+  const contracted = num(fd, "contracted");
+  if ((str(fd, "estimated", 24) && estimated == null) || (str(fd, "contracted", 24) && contracted == null)) flash(path, "error", "Valor inválido. Use por exemplo 2500 ou 1.250,00.");
   await db.budgetItem.updateMany({
     where: { id: itemId, eventId },
-    data: { estimated: num(fd, "estimated") ?? 0, contracted: num(fd, "contracted") },
+    data: { estimated: estimated ?? 0, contracted },
   });
   revalidatePath(path);
   redirect(path);
