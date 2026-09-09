@@ -6,10 +6,10 @@ import { usePathname } from "next/navigation";
 type Area = { label: string; pages: [string, string][] };
 const AREAS: Area[] = [
   { label: "Resumo", pages: [["", "Resumo"]] },
-  { label: "Convite", pages: [["/design", "Design"], ["/content", "Conteúdo"], ["/gifts", "Presentes"], ["/preview", "Ver convite"]] },
-  { label: "Convidados", pages: [["/guests", "Lista e envio"], ["/tables", "Mesas"], ["/guestbook", "Mensagens"], ["/checkin", "Check-in"]] },
+  { label: "Convite", pages: [["/design", "Design"], ["/content", "Conteúdo"], ["/photos", "Fotografias"], ["/gifts", "Presentes"], ["/preview", "Ver convite"]] },
+  { label: "Convidados", pages: [["/guests", "Lista e envio"], ["/tables", "Mesas"], ["/guestbook", "Mensagens"], ["/requests", "Pedidos"], ["/checkin", "Check-in"]] },
   { label: "Planeamento", pages: [["/tasks", "Tarefas"], ["/budget", "Orçamento"], ["/vendors", "Fornecedores"]] },
-  { label: "Definições", pages: [["/settings", "Evento"], ["/team", "Equipa"]] },
+  { label: "Definições", pages: [["/settings", "Evento"], ["/team", "Equipa"], ["/activate", "Ativação"]] },
 ];
 
 export function EventTabs({ eventId }: { eventId: string }) {

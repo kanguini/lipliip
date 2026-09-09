@@ -27,7 +27,9 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  serverExternalPackages: ["@prisma/client", "bcryptjs"],
+  serverExternalPackages: ["@prisma/client", "bcryptjs", "sharp"],
+  // Upload de fotografias e comprovativos através de Server Actions.
+  experimental: { serverActions: { bodySizeLimit: "15mb" } },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

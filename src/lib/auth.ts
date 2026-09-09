@@ -47,6 +47,7 @@ export const getCurrentUser = cache(async () => {
   if (!token) return null;
   const session = await db.session.findUnique({ where: { token: sha256(token) }, include: { user: true } });
   if (!session || session.expiresAt < new Date()) return null;
+  if (session.user.suspendedAt) return null; // conta bloqueada pelo administrador
   return session.user;
 });
 

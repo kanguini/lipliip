@@ -33,6 +33,8 @@ export async function requireGuestAccess(token: string) {
   const guest = await getGuestByToken(token);
   if (!guest) throw new Error("Convite inválido.");
   if (guest.suspendedAt) throw new Error("Este convite está suspenso.");
+  const { planForEvent } = await import("./platform");
+  if (!(await planForEvent(guest.event)).canShare) throw new Error("Este convite ainda não está disponível.");
   if (!guest.event.verificationRequired) return { guest, event: guest.event };
   if (!(await isGuestAuthorized(guest, guest.event))) throw new Error("Confirme o seu telemóvel para continuar.");
   return { guest, event: guest.event };

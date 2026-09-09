@@ -19,6 +19,11 @@ import { CheckinSection, DetailsSection, GallerySection, GuestbookSection, InfoS
 import { Envelope } from "@/components/invite/Envelope";
 import { MusicPlayer } from "@/components/invite/MusicPlayer";
 import { eventKicker } from "@/components/templates/shared";
+import { planForEvent } from "@/lib/platform";
+import { parseMenu } from "@/lib/menu";
+import { MenuSection } from "@/components/invite/MenuSection";
+import { LiveGallery } from "@/components/invite/LiveGallery";
+import { RequestsPanel } from "@/components/invite/RequestsPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +41,11 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   if (!guest) notFound();
   const event = guest.event;
 
-  if (guest.suspendedAt) {
+  const plan = await planForEvent(event);
+  if (guest.suspendedAt || !plan.canShare) {
+    const text = guest.suspendedAt
+      ? "Este convite está temporariamente suspenso. Por favor fale com os anfitriões."
+      : "Este convite ainda não está disponível. Os anfitriões vão libertá-lo em breve.";
     return (
       <TemplateFrame templateId={event.templateId} accentColor={event.accentColor}>
         <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-12">
@@ -44,7 +53,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
             <p className="text-xs uppercase tracking-[0.3em] opacity-70">Convite de</p>
             <h1 className="invite-accent mt-2 text-4xl">{event.hostNames}</h1>
             <div className="invite-divider" />
-            <p className="text-sm opacity-80">Este convite está temporariamente suspenso. Por favor fale com os anfitriões.</p>
+            <p className="text-sm opacity-80">{text}</p>
           </div>
         </div>
       </TemplateFrame>
@@ -68,7 +77,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   if (counted.count > 0) await logAccess(guest.id, "VIEW");
 
   const epcPayload = event.contributionIban ? buildEpcPayload({ iban: event.contributionIban, name: event.hostNames, remittance: `Presente ${event.title}`.slice(0, 140) }) : null;
-  const [gifts, guestbook, qrDataUrl, epcQr] = await Promise.all([
+  const [gifts, guestbook, qrDataUrl, epcQr, livePhotos, myRequests] = await Promise.all([
     event.giftsEnabled
       ? db.giftItem.findMany({ where: { eventId: event.id }, include: { reservations: true }, orderBy: [{ kind: "desc" }, { createdAt: "asc" }] })
       : Promise.resolve([]),
@@ -77,6 +86,10 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
       : Promise.resolve([]),
     QRCode.toDataURL(guest.checkinCode, { margin: 1, width: 240 }),
     epcPayload ? QRCode.toDataURL(epcPayload, { margin: 1, width: 220, errorCorrectionLevel: "M" }) : Promise.resolve(null),
+    event.liveGalleryEnabled
+      ? db.eventPhoto.findMany({ where: { eventId: event.id, kind: "LIVE", hiddenAt: null }, include: { guest: { select: { name: true } } }, orderBy: { createdAt: "desc" }, take: 60 })
+      : Promise.resolve([]),
+    event.requestsEnabled ? db.guestRequest.findMany({ where: { guestId: guest.id }, orderBy: { createdAt: "desc" }, take: 20 }) : Promise.resolve([]),
   ]);
 
   const giftViews: GiftView[] = gifts.map((g) => {
@@ -108,6 +121,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
       <ProgramSection items={parseProgram(event.programJson)} />
       <GallerySection images={parseGallery(event.galleryJson)} />
       <PartySection members={parseParty(event.partyJson)} title={partyTitle} />
+      <MenuSection menu={parseMenu(event.menuJson)} />
       <RsvpForm
         token={token}
         maxCompanions={guest.maxCompanions}
@@ -131,6 +145,16 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
         </GuestbookSection>
       )}
       <InfoSection hashtag={event.hashtag} extraInfo={event.extraInfo} />
+      {event.requestsEnabled && (
+        <RequestsPanel token={token} guestName={guest.name} requests={myRequests.map((r) => ({ id: r.id, kind: r.kind, text: r.text, status: r.status, createdAt: r.createdAt }))} eventDate={event.date} />
+      )}
+      {event.liveGalleryEnabled && (
+        <LiveGallery
+          token={token}
+          eventDate={event.date}
+          photos={livePhotos.map((p) => ({ id: p.id, url: `/media/${p.mediaId}`, caption: p.caption, by: p.guest?.name ?? null, mine: p.guestId === guest.id, createdAt: p.createdAt }))}
+        />
+      )}
       <CheckinSection qrDataUrl={qrDataUrl} code={guest.checkinCode} checkedInAt={guest.checkedInAt} tz={event.timezone} />
       <p className="pb-6 text-center text-xs opacity-50">
         Convite pessoal de {guest.name} · intransmissível · criado com Liplip

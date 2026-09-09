@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { logoutAction } from "@/app/(auth)/actions";
 import { DashboardNav } from "./nav";
+import { isAdmin } from "@/lib/admin";
 import { LogOut } from "lucide-react";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -15,7 +16,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <button className="btn-ghost btn-sm">Sair</button>
           </form>
         </div>
-        <DashboardNav />
+        <DashboardNav admin={isAdmin(user)} />
         <div className="mx-6 mt-8 hidden rounded-3xl bg-brand-50 p-5 text-[0.8125rem] text-muted lg:block">
           <p className="font-display text-lg leading-snug text-brand-700">As pessoas certas.<br />O seu momento.</p>
           <p className="mt-2 leading-relaxed">Um convite pessoal, ligado ao contacto de cada convidado.</p>

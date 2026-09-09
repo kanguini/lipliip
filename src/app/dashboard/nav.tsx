@@ -2,19 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarHeart, Mail, UserRound } from "lucide-react";
+import { CalendarHeart, Mail, ShieldCheck, Store, UserRound } from "lucide-react";
 
 const ITEMS = [
   { href: "/dashboard/invites", label: "Convites digitais", hint: "Templates e criar convite", icon: Mail, mobileOnly: false },
   { href: "/dashboard", label: "Eventos", hint: "Os seus eventos e convidados", icon: CalendarHeart, mobileOnly: false },
+  { href: "/fornecedores", label: "Fornecedores", hint: "Salões, buffet, decoração e mais", icon: Store, mobileOnly: false },
   { href: "/dashboard/account", label: "A minha conta", hint: "Perfil e palavra-passe", icon: UserRound, mobileOnly: true },
 ];
+const ADMIN_ITEM = { href: "/admin", label: "Administração", hint: "Utilizadores, pagamentos e site", icon: ShieldCheck, mobileOnly: false };
 
-export function DashboardNav() {
+export function DashboardNav({ admin = false }: { admin?: boolean }) {
   const pathname = usePathname();
+  const items = admin ? [...ITEMS, ADMIN_ITEM] : ITEMS;
   return (
     <nav className="flex gap-2 overflow-x-auto px-4 pb-3 lg:block lg:space-y-1 lg:px-4 lg:pb-0">
-      {ITEMS.map((it) => {
+      {items.map((it) => {
         const active = it.href === "/dashboard" ? pathname === "/dashboard" || pathname.startsWith("/dashboard/events") : pathname.startsWith(it.href);
         return (
           <Link

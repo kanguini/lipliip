@@ -16,11 +16,18 @@ model User {
   email        String          @unique
   phone        String?
   passwordHash String
+  role         String          @default("USER") // USER | ADMIN
+  suspendedAt  DateTime? // conta bloqueada pelo administrador
+  notifiedAt   DateTime? // última vez que viu as notificações
   createdAt    DateTime        @default(now())
   events       Event[]
   sessions     Session[]
   resets       PasswordReset[]
   memberships  EventMember[]
+  orders          Order[]
+  reviewedOrders  Order[]          @relation("OrderReviewer")
+  serviceRequests ServiceRequest[]
+  media           Media[]
 }
 
 model Session {
@@ -58,12 +65,14 @@ model Event {
   venueName            String
   venueAddress         String?
   mapsUrl              String?
+  venueLat             Float? // coordenadas escolhidas no mapa
+  venueLng             Float?
   dressCode            String?
   coverImageUrl        String?
   accentColor          String? // sobrepõe a cor principal do template
-  country              String    @default("PT") // país por omissão para normalizar telefones
-  timezone             String    @default("Europe/Lisbon") // fuso horário do evento
-  currency             String    @default("EUR")
+  country              String    @default("AO") // país por omissão para normalizar telefones
+  timezone             String    @default("Africa/Luanda") // fuso horário do evento
+  currency             String    @default("AOA")
   rsvpDeadline         DateTime?
   allowChildren        Boolean   @default(true)
   verificationRequired Boolean   @default(true) // exige OTP por SMS para abrir o convite
@@ -82,6 +91,12 @@ model Event {
   contributionIban     String?
   contributionMbway    String?
   contributionNote     String?
+  menuJson             String? // ementa (secções e pratos) mostrada aos convidados
+  liveGalleryEnabled   Boolean   @default(true) // convidados partilham fotos no dia
+  requestsEnabled      Boolean   @default(true) // convidados fazem pedidos (comida, bebida, música)
+  activatedAt          DateTime? // evento pago/libertado pelo administrador
+  checkinToken         String?   @unique // acesso de receção sem conta (link + PIN)
+  checkinPin           String?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
@@ -92,6 +107,11 @@ model Event {
   tasks     Task[]
   budget    BudgetItem[]
   vendors   Vendor[]
+  photos          EventPhoto[]
+  requests        GuestRequest[]
+  orders          Order[]
+  serviceRequests ServiceRequest[]
+  media           Media[]
 
   @@index([ownerId])
 }
@@ -209,6 +229,8 @@ model Guest {
   accessLogs   AccessLog[]
   reservations GiftReservation[]
   guestbook    GuestbookEntry[]
+  photos       EventPhoto[]
+  requests     GuestRequest[]
 
   @@unique([eventId, phone])
   @@index([eventId])
@@ -294,4 +316,155 @@ model GuestbookEntry {
 
   @@index([eventId])
   @@index([guestId])
+}
+
+/// Ficheiro (imagem ou comprovativo) guardado na base de dados, já redimensionado.
+model Media {
+  id          String   @id @default(cuid())
+  kind        String   @default("IMAGE") // IMAGE | DOCUMENT
+  mime        String
+  size        Int
+  width       Int?
+  height      Int?
+  data        Bytes
+  eventId     String?
+  event       Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  photos      EventPhoto[]
+  orders      Order[]
+  suppliers   Supplier[]
+
+  @@index([eventId])
+}
+
+/// Fotografia do evento: do álbum dos anfitriões (ALBUM) ou partilhada por um convidado no dia (LIVE).
+model EventPhoto {
+  id        String    @id @default(cuid())
+  eventId   String
+  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  guestId   String?
+  guest     Guest?    @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  mediaId   String
+  media     Media     @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  kind      String    @default("LIVE") // ALBUM | LIVE
+  caption   String?
+  hiddenAt  DateTime? // escondida pelos anfitriões
+  createdAt DateTime  @default(now())
+
+  @@index([eventId, kind])
+  @@index([guestId])
+}
+
+/// Pedido feito por um convidado a partir do convite (comida, bebida, música, outro).
+model GuestRequest {
+  id        String    @id @default(cuid())
+  eventId   String
+  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  guestId   String
+  guest     Guest     @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  kind      String    @default("OTHER") // FOOD | DRINK | MUSIC | OTHER
+  text      String
+  status    String    @default("NEW") // NEW | DONE
+  doneAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([eventId, status])
+  @@index([guestId])
+}
+
+/// Configuração global da plataforma (uma única linha, id "default").
+model PlatformSettings {
+  id              String   @id @default("default")
+  eventPrice      Float    @default(0) // preço de ativação de um evento
+  currency        String   @default("AOA")
+  bankName        String?
+  bankAccount     String? // IBAN / número de conta
+  bankHolder      String?
+  paymentNote     String? // instruções mostradas ao utilizador
+  freeGuestLimit  Int      @default(5) // convidados que se podem adicionar antes da ativação
+  gatePlanner     Boolean  @default(false) // bloquear planeamento antes da ativação
+  gateSharing     Boolean  @default(true) // bloquear envio/abertura dos convites antes da ativação
+  updatedAt       DateTime @updatedAt
+}
+
+/// Pedido de ativação de um evento por transferência bancária, com comprovativo, aprovado pelo administrador.
+model Order {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId      String
+  event        Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  amount       Float
+  currency     String
+  reference    String    @unique // referência a indicar na transferência
+  status       String    @default("PENDING") // PENDING | APPROVED | REJECTED
+  proofMediaId String?
+  proof        Media?    @relation(fields: [proofMediaId], references: [id], onDelete: SetNull)
+  note         String? // nota do utilizador
+  adminNote    String? // motivo de rejeição, etc.
+  reviewedAt   DateTime?
+  reviewedById String?
+  reviewedBy   User?     @relation("OrderReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime  @default(now())
+
+  @@index([userId])
+  @@index([eventId])
+  @@index([status])
+}
+
+/// Fornecedor do diretório público (salões, buffet, decoração, música, …), gerido pelo administrador.
+model Supplier {
+  id           String           @id @default(cuid())
+  name         String
+  category     String
+  city         String?
+  province     String?
+  address      String?
+  lat          Float?
+  lng          Float?
+  phone        String?
+  whatsapp     String?
+  email        String?
+  website      String?
+  description  String?
+  imageMediaId String?
+  image        Media?           @relation(fields: [imageMediaId], references: [id], onDelete: SetNull)
+  featured     Boolean          @default(false)
+  active       Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  requests     ServiceRequest[]
+
+  @@index([category])
+  @@index([active, featured])
+}
+
+/// Pedido de orçamento/contacto feito a um fornecedor através da plataforma.
+model ServiceRequest {
+  id         String    @id @default(cuid())
+  supplierId String
+  supplier   Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  eventId    String?
+  event      Event?    @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  name       String
+  phone      String
+  email      String?
+  message    String
+  status     String    @default("NEW") // NEW | CONTACTED | CLOSED
+  createdAt  DateTime  @default(now())
+
+  @@index([supplierId, status])
+}
+
+/// Estado de cada template (ativo, premium), editável pelo administrador.
+model TemplateSetting {
+  id        String   @id // templateId
+  enabled   Boolean  @default(true)
+  premium   Boolean  @default(false)
+  sortOrder Int      @default(0)
+  updatedAt DateTime @updatedAt
 }
