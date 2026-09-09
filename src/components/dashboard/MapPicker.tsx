@@ -21,6 +21,7 @@ export function MapPicker({ initialLat, initialLng, addressInputName = "venueAdd
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
@@ -60,6 +61,8 @@ export function MapPicker({ initialLat, initialLng, addressInputName = "venueAdd
       mapRef.current = map;
       if (position) placeMarker(position, false);
       setReady(true);
+    }).catch(() => {
+      if (!cancelled) setLoadError(true);
     });
     return () => {
       cancelled = true;
@@ -154,8 +157,9 @@ export function MapPicker({ initialLat, initialLng, addressInputName = "venueAdd
       </div>
 
       <div className="relative">
-        <div ref={containerRef} className="h-72 w-full overflow-hidden rounded-2xl bg-stone-100" aria-label="Mapa para escolher o local" />
-        {!ready && (
+        <div ref={containerRef} className="relative z-0 h-72 w-full overflow-hidden rounded-2xl bg-stone-100" style={{ isolation: "isolate" }} aria-label="Mapa para escolher o local" />
+        {loadError && <p className="text-sm text-red-700" role="alert">Não foi possível carregar o mapa. Pode indicar as coordenadas mais tarde ou colar um link do Google Maps.</p>}
+        {!ready && !loadError && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-muted">
             <LoaderCircle className="mr-2 h-4 w-4 animate-spin" aria-hidden />A carregar o mapa…
           </div>

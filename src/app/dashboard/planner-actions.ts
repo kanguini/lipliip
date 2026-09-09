@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireEventAccess } from "@/lib/access";
+import { planForEvent } from "@/lib/platform";
 import { buildChecklist } from "@/lib/checklists";
 import { localInputToDate } from "@/lib/timezone";
 import { httpUrlOrNull } from "@/lib/validation";
@@ -15,8 +16,15 @@ const VENDOR_STATUSES = Object.keys(VENDOR_STATUS);
 
 // ---------- Tarefas ----------
 
+/** Planeamento bloqueado até à ativação quando a plataforma o exige (gatePlanner). */
+async function requirePlanning(eventId: string) {
+  const access = await requireEventAccess(eventId);
+  if (!(await planForEvent(access.event)).canPlan) flash(`/dashboard/events/${eventId}/activate`, "error", "Ative o evento para usar o planeamento (tarefas, orçamento e fornecedores).");
+  return access;
+}
+
 export async function addTaskAction(eventId: string, fd: FormData) {
-  const { event } = await requireEventAccess(eventId);
+  const { event } = await requirePlanning(eventId);
   const path = `/dashboard/events/${eventId}/tasks`;
   const title = str(fd, "title", 160);
   if (title.length < 2) flash(path, "error", "Indique a tarefa.");
@@ -62,7 +70,7 @@ export async function generateChecklistAction(eventId: string) {
 // ---------- Fornecedores ----------
 
 export async function addVendorAction(eventId: string, fd: FormData) {
-  await requireEventAccess(eventId);
+  await requirePlanning(eventId);
   const path = `/dashboard/events/${eventId}/vendors`;
   const name = str(fd, "name", 120);
   if (name.length < 2) flash(path, "error", "Indique o nome do fornecedor.");
@@ -142,7 +150,7 @@ export async function deleteVendorAction(eventId: string, vendorId: string) {
 // ---------- Orçamento ----------
 
 export async function addBudgetItemAction(eventId: string, fd: FormData) {
-  await requireEventAccess(eventId);
+  await requirePlanning(eventId);
   const path = `/dashboard/events/${eventId}/budget`;
   const name = str(fd, "name", 120);
   if (name.length < 2) flash(path, "error", "Indique o item.");
@@ -183,7 +191,7 @@ export async function deleteBudgetItemAction(eventId: string, itemId: string) {
 }
 
 export async function addPaymentAction(eventId: string, itemId: string, fd: FormData) {
-  const { event } = await requireEventAccess(eventId);
+  const { event } = await requirePlanning(eventId);
   const path = `/dashboard/events/${eventId}/budget`;
   const item = await db.budgetItem.findFirst({ where: { id: itemId, eventId } });
   if (!item) flash(path, "error", "Item não encontrado.");

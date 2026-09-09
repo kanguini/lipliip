@@ -1,7 +1,7 @@
 import { cache } from "react";
 import type { User } from "@prisma/client";
 import { db } from "@/lib/db";
-import { accessibleEventWhere } from "@/lib/access";
+import { editableEventWhere } from "@/lib/access";
 import { NOTIFICATION_TAKE, NOTIFICATION_WINDOW_DAYS, buildNotifications, countUnread, type NotificationItem } from "@/lib/notifications";
 
 /**
@@ -11,7 +11,8 @@ import { NOTIFICATION_TAKE, NOTIFICATION_WINDOW_DAYS, buildNotifications, countU
 export const loadNotifications = cache(async (user: Pick<User, "id" | "notifiedAt">): Promise<{ items: NotificationItem[]; unread: number }> => {
   const now = new Date();
   const since = new Date(now.getTime() - NOTIFICATION_WINDOW_DAYS * 86_400_000);
-  const event = accessibleEventWhere(user.id);
+  // Só eventos em que o utilizador é dono ou editor: a receção não recebe respostas, mensagens nem pagamentos.
+  const event = editableEventWhere(user.id);
   const take = NOTIFICATION_TAKE;
   const [rsvps, guestbook, requests, photos, orders] = await Promise.all([
     db.guest.findMany({

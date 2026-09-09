@@ -76,7 +76,8 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   });
   if (counted.count > 0) await logAccess(guest.id, "VIEW");
 
-  const epcPayload = event.contributionIban ? buildEpcPayload({ iban: event.contributionIban, name: event.hostNames, remittance: `Presente ${event.title}`.slice(0, 140) }) : null;
+  // O QR de transferência EPC é um formato SEPA (só euros): fora da zona euro mostra-se apenas o IBAN.
+  const epcPayload = event.contributionIban && event.currency === "EUR" ? buildEpcPayload({ iban: event.contributionIban, name: event.hostNames, remittance: `Presente ${event.title}`.slice(0, 140) }) : null;
   const [gifts, guestbook, qrDataUrl, epcQr, livePhotos, myRequests, albumPhotos] = await Promise.all([
     event.giftsEnabled
       ? db.giftItem.findMany({ where: { eventId: event.id }, include: { reservations: true }, orderBy: [{ kind: "desc" }, { createdAt: "asc" }] })

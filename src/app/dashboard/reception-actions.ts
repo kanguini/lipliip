@@ -65,6 +65,8 @@ export async function receptionPinAction(token: string, fd: FormData) {
   if (!event) flash(path, "error", "Este link de receção já não é válido.");
   const meta = await requestMeta();
   if (!rateLimit(`reception-pin:${meta.ip ?? "?"}:${token}`, PIN_MAX_ATTEMPTS, PIN_WINDOW_MS).ok) flash(path, "error", "Demasiadas tentativas. Aguarde 15 minutos e tente de novo.");
+  // Limite também por link (independente do IP): 30 tentativas por 15 minutos contra 10 000 PINs possíveis.
+  if (!rateLimit(`reception-pin-link:${token}`, 30, PIN_WINDOW_MS).ok) flash(path, "error", "Demasiadas tentativas neste link. Aguarde 15 minutos e tente de novo.");
   const pin = str(fd, "pin", 8).replace(/\D/g, "");
   if (pin.length !== 4 || !verifyReceptionPin(pin, event.checkinPin!)) flash(path, "error", "PIN incorreto.");
   const store = await cookies();

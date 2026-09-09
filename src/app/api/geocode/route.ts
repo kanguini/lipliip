@@ -31,6 +31,8 @@ export async function GET(req: Request) {
 
   const ip = clientIpFromHeaders(await headers()) ?? "local";
   const limit = rateLimit(`geocode:${ip}`, 1, 1000);
+  // Política do Nominatim: no máximo 1 pedido por segundo por aplicação, não por utilizador.
+  if (limit.ok && !rateLimit("geocode:global", 1, 1000).ok) return json({ error: "Muitas pesquisas ao mesmo tempo. Tente de novo dentro de um segundo." }, 429, { "Retry-After": "1" });
   if (!limit.ok) return json({ error: "Aguarde um segundo antes de pesquisar de novo." }, 429, { "Retry-After": String(Math.max(1, limit.retryAfterSec)) });
 
   const url = `${NOMINATIM}?format=jsonv2&limit=5&addressdetails=0&q=${encodeURIComponent(q)}`;

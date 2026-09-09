@@ -17,9 +17,6 @@ export async function requestQuoteAction(supplierId: string, fd: FormData) {
   const supplier = await db.supplier.findFirst({ where: { id: supplierId, active: true }, select: { id: true, name: true } });
   if (!supplier) flash("/fornecedores", "error", "Este fornecedor já não está disponível.");
 
-  const meta = await requestMeta();
-  if (!rateLimit(`quote:${meta.ip ?? "?"}`, 5, 60 * 60_000).ok) flash(path, "error", "Demasiados pedidos a partir desta ligação. Tente novamente dentro de uma hora.");
-
   const name = str(fd, "name", 80);
   if (name.length < 2) flash(path, "error", "Indique o seu nome.");
   const phone = normalizePhone(str(fd, "phone", 30), "AO");
@@ -28,6 +25,9 @@ export async function requestQuoteAction(supplierId: string, fd: FormData) {
   if (email && !EMAIL.test(email)) flash(path, "error", "Email inválido.");
   const message = str(fd, "message", 1500);
   if (message.length < 10) flash(path, "error", "Descreva o que precisa (data, número de convidados, local…).");
+  // O limite só conta pedidos válidos, para um engano no formulário não bloquear a pessoa durante uma hora.
+  const meta = await requestMeta();
+  if (!rateLimit(`quote:${meta.ip ?? "?"}`, 5, 60 * 60_000).ok) flash(path, "error", "Demasiados pedidos a partir desta ligação. Tente novamente dentro de uma hora.");
 
   const user = await getCurrentUser();
   let eventId: string | null = null;

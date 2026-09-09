@@ -149,7 +149,7 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
             <input name="contributionIban" className="input" defaultValue={event?.contributionIban ?? ""} />
           </div>
           <div>
-            <label className="label">MB WAY / número para transferência</label>
+            <label className="label">Multicaixa Express / MB WAY (número de telemóvel)</label>
             <input name="contributionMbway" className="input" defaultValue={event?.contributionMbway ?? ""} />
           </div>
         </div>

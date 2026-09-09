@@ -1,4 +1,4 @@
-const DEFAULT_TZ = "Europe/Lisbon";
+const DEFAULT_TZ = "Africa/Luanda"; // fuso por omissão da plataforma (cada evento tem o seu)
 
 function cap(text: string) {
   return text.charAt(0).toUpperCase() + text.slice(1);

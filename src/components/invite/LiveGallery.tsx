@@ -12,6 +12,32 @@ import { deleteGuestPhotoAction, uploadGuestPhotosAction } from "@/app/c/[token]
 export type LivePhoto = { id: string; url: string; caption: string | null; by: string | null; mine: boolean; createdAt: Date };
 
 const MAX_PER_SUBMIT = 10;
+const CLIENT_MAX_SIDE = 1600;
+
+/** Reduz a fotografia no próprio telemóvel (lado maior 1600 px, JPEG) para o envio ser rápido e caber no limite do servidor. */
+async function shrinkImage(file: File): Promise<File> {
+  if (!file.type.startsWith("image/") || file.type === "image/gif") return file;
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, CLIENT_MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+    if (scale === 1 && file.size < 1_500_000) {
+      bitmap.close();
+      return file;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.86));
+    if (!blob) return file;
+    return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
+  } catch {
+    return file; // formatos que o browser não descodifica (ex.: HEIC) seguem originais; o servidor trata-os
+  }
+}
 
 function timeLabel(d: Date, tz?: string) {
   try {
@@ -41,7 +67,7 @@ export function LiveGallery({ token, eventDate, photos, tz }: { token: string; e
       setProgress(`A enviar ${files.length} fotografia${files.length > 1 ? "s" : ""}…`);
       startUpload(async () => {
         const fd = new FormData();
-        for (const f of files) fd.append("photos", f);
+        for (const f of files) fd.append("photos", await shrinkImage(f));
         let res;
         try {
           res = await uploadGuestPhotosAction(token, fd);

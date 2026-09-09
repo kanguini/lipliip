@@ -39,5 +39,5 @@ export function VenueMap({ lat, lng, className = "" }: { lat: number; lng: numbe
     };
   }, [lat, lng]);
 
-  return <div ref={ref} className={`h-44 w-full overflow-hidden rounded-xl bg-stone-100 ${className}`} role="img" aria-label="Mapa com a localização do evento" />;
+  return <div ref={ref} className={`relative z-0 h-44 w-full overflow-hidden rounded-xl bg-stone-100 ${className}`} style={{ isolation: "isolate" }} role="img" aria-label="Mapa com a localização do evento" />;
 }

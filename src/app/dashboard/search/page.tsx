@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
-import { accessibleEventWhere } from "@/lib/access";
+import { accessibleEventWhere, editableEventWhere } from "@/lib/access";
 import { formatEventDate } from "@/lib/format";
 import { formatPhone } from "@/lib/phone";
 import { supplierCategoryLabel, supplierLocation } from "@/lib/suppliers";
@@ -20,13 +20,14 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const [events, guests, suppliers] = q
     ? await Promise.all([
         db.event.findMany({
-          where: { ...accessibleEventWhere(user.id), OR: [{ title: ci }, { hostNames: ci }, { venueName: ci }] },
+          where: { AND: [accessibleEventWhere(user.id), { OR: [{ title: ci }, { hostNames: ci }, { venueName: ci }] }] },
           orderBy: { date: "asc" },
           take: 10,
           select: { id: true, title: true, hostNames: true, venueName: true, date: true, timezone: true },
         }),
         db.guest.findMany({
-          where: { event: accessibleEventWhere(user.id), OR: [{ name: ci }, ...(digits.length >= 3 ? [{ phone: { contains: digits } }] : [])] },
+          // Dados dos convidados só para dono e editores (a receção não os vê na lista de convidados).
+          where: { event: editableEventWhere(user.id), OR: [{ name: ci }, ...(digits.length >= 3 ? [{ phone: { contains: digits } }] : [])] },
           orderBy: { name: "asc" },
           take: 20,
           select: { id: true, name: true, phone: true, rsvpStatus: true, suspendedAt: true, eventId: true, event: { select: { title: true } } },

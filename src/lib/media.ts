@@ -21,7 +21,7 @@ export type SavedMedia = { id: string; mime: string; width: number | null; heigh
 /** Redimensiona (lado maior ≤ maxSide), remove metadados e guarda como JPEG/WebP. */
 export async function saveImage(
   input: Buffer | Uint8Array,
-  opts: { eventId?: string | null; userId?: string | null; maxSide?: number; quality?: number } = {},
+  opts: { eventId?: string | null; userId?: string | null; maxSide?: number; quality?: number; kind?: "IMAGE" | "DOCUMENT" } = {},
 ): Promise<SavedMedia> {
   const maxSide = opts.maxSide ?? 1600;
   const pipeline = sharp(Buffer.from(input), { failOn: "none", limitInputPixels: 50_000_000 })
@@ -30,7 +30,7 @@ export async function saveImage(
     .webp({ quality: opts.quality ?? 80 });
   const { data, info } = await pipeline.toBuffer({ resolveWithObject: true });
   const media = await db.media.create({
-    data: { kind: "IMAGE", mime: "image/webp", size: data.length, width: info.width, height: info.height, data: toBytes(data), eventId: opts.eventId ?? null, userId: opts.userId ?? null },
+    data: { kind: opts.kind ?? "IMAGE", mime: "image/webp", size: data.length, width: info.width, height: info.height, data: toBytes(data), eventId: opts.eventId ?? null, userId: opts.userId ?? null },
     select: { id: true, mime: true, width: true, height: true, size: true },
   });
   return media;
@@ -38,7 +38,8 @@ export async function saveImage(
 
 /** Guarda um documento (PDF ou imagem de comprovativo) sem o alterar, com limite de tamanho. */
 export async function saveDocument(input: Buffer | Uint8Array, mime: string, opts: { eventId?: string | null; userId?: string | null } = {}): Promise<SavedMedia> {
-  if (IMAGE_MIMES.has(mime)) return saveImage(input, { ...opts, maxSide: 2000, quality: 85 });
+  // Comprovativos em imagem ficam como DOCUMENT: só o administrador e quem os enviou os podem ver.
+  if (IMAGE_MIMES.has(mime)) return saveImage(input, { ...opts, maxSide: 2000, quality: 85, kind: "DOCUMENT" });
   if (!DOCUMENT_MIMES.has(mime)) throw new Error("Formato não suportado. Envie PDF ou imagem.");
   const data = Buffer.from(input);
   if (data.length > 5 * 1024 * 1024) throw new Error("O ficheiro tem mais de 5 MB.");

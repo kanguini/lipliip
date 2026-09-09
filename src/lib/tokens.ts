@@ -34,6 +34,14 @@ export function sha256(value: string): string {
   return createHash("sha256").update(value).digest("hex");
 }
 
+/**
+ * Segredo do servidor para derivar valores que não podem ser calculados por quem só conhece dados públicos
+ * (ex.: cookie da receção a partir do PIN). APP_SECRET no ambiente; sem ele, deriva do DATABASE_URL.
+ */
+export function serverSecret(): string {
+  return process.env.APP_SECRET || sha256(`liplip-secret:${process.env.DATABASE_URL ?? ""}`);
+}
+
 export function hashOtp(code: string, guestId: string): string {
   return createHash("sha256").update(`${guestId}:${code.trim()}`).digest("hex");
 }

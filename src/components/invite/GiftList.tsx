@@ -134,7 +134,7 @@ export function GiftList({
           <p className="font-semibold">Prefere contribuir diretamente?</p>
           {contribution.note && <p className="mt-1 opacity-80">{contribution.note}</p>}
           {contribution.iban && <p className="mt-2">IBAN: <span className="font-mono">{contribution.iban}</span></p>}
-          {contribution.mbway && <p>MB WAY: <span className="font-mono">{contribution.mbway}</span></p>}
+          {contribution.mbway && <p>Multicaixa Express / MB WAY: <span className="font-mono">{contribution.mbway}</span></p>}
           {contribution.qrDataUrl && (
             <div className="mt-3 flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}

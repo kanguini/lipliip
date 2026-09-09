@@ -105,7 +105,7 @@ export default async function ActivatePage({ params, searchParams }: { params: P
             <form action={submitActivationProofAction.bind(null, id)} className="card space-y-3" encType="multipart/form-data">
               <h2 className="flex items-center gap-2 font-semibold"><FileText className="h-4 w-4 text-brand-600" strokeWidth={1.75} aria-hidden />{pending ? "Substituir o comprovativo" : "Enviar o comprovativo"}</h2>
               <div>
-                <label className="label" htmlFor="proof">Comprovativo (PDF ou imagem, até 12 MB)</label>
+                <label className="label" htmlFor="proof">Comprovativo (imagem até 12 MB ou PDF até 5 MB)</label>
                 <input id="proof" name="proof" type="file" accept="image/*,application/pdf" className="input file:mr-3 file:rounded-full file:border-0 file:bg-brand-100 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-brand-700" required />
               </div>
               <div>

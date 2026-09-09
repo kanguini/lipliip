@@ -59,6 +59,7 @@ export async function loginAction(_prev: AuthState, formData: FormData): Promise
   if (!user || !ok) {
     return { email, error: "Email ou palavra-passe incorretos." };
   }
+  if (user.suspendedAt) return { email, error: "Esta conta está suspensa. Contacte o suporte da plataforma." };
   await createSession(user.id);
   redirect("/dashboard");
 }

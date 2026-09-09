@@ -1,6 +1,6 @@
 import { randomBytes, randomInt, timingSafeEqual } from "node:crypto";
 import { db } from "./db";
-import { sha256 } from "./tokens";
+import { sha256, serverSecret } from "./tokens";
 import { formatTime } from "./format";
 
 /**
@@ -90,7 +90,8 @@ export function receptionCookieName(eventId: string): string {
  * muda ambos, pelo que os cookies antigos deixam de ser válidos de imediato. Não depende do PIN em claro.
  */
 export function receptionCookieValue(pinHash: string, token: string): string {
-  return sha256(`reception-session:${pinHash}:${token}`);
+  // Inclui o segredo do servidor: sem ele, o cookie podia ser calculado offline a partir do link e dos 10 000 PINs possíveis.
+  return sha256(`reception-session:${serverSecret()}:${pinHash}:${token}`);
 }
 
 export function isReceptionCookieValid(cookie: string | undefined, pinHash: string | null, token: string | null): boolean {

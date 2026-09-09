@@ -8,7 +8,7 @@ import { checkUpload, deleteMedia, saveImage } from "@/lib/media";
 
 /** Fotografias do evento: álbum dos anfitriões (ALBUM) e moderação dos momentos dos convidados (LIVE). */
 
-const MAX_ALBUM_PER_SUBMIT = 20;
+const MAX_ALBUM_PER_SUBMIT = 8; // 8 × 12 MB cabe no limite das Server Actions (60 MB)
 const MAX_ALBUM_PHOTOS = 200;
 
 export async function uploadAlbumPhotosAction(eventId: string, fd: FormData) {

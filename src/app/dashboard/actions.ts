@@ -23,7 +23,7 @@ import { httpUrlOrNull } from "@/lib/validation";
 import { accessibleEventWhere, editableEventWhere, requireEventAccess } from "@/lib/access";
 import { buildChecklist } from "@/lib/checklists";
 import { COUNTRY_TIMEZONE, DEFAULT_TIMEZONE, isValidTimezone, localInputToDate } from "@/lib/timezone";
-import { planForEvent } from "@/lib/platform";
+import { getPlatformSettings, planForEvent } from "@/lib/platform";
 import { getTemplateState } from "@/lib/templates-settings";
 
 function dateOrNull(v: string, tz: string) {
@@ -46,11 +46,12 @@ const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 const CURRENCY_CODE = /^[A-Z]{3}$/;
 
 /** Moeda: opção da lista ou, se "Outra", o código escrito à mão. Por omissão, Kwanza. */
-function currencyFromForm(fd: FormData): string {
+function currencyFromForm(fd: FormData): string | null {
   const chosen = str(fd, "currency", 3).toUpperCase();
   const other = str(fd, "currencyOther", 3).toUpperCase();
   const code = chosen || other;
-  return CURRENCY_CODE.test(code) ? code : DEFAULT_CURRENCY;
+  if (!code) return DEFAULT_CURRENCY;
+  return CURRENCY_CODE.test(code) ? code : null; // "Outra" com código inválido → erro no formulário
 }
 
 function eventDataFromForm(fd: FormData) {
@@ -68,6 +69,8 @@ function eventDataFromForm(fd: FormData) {
   const timezone = isValidTimezone(tzInput) ? tzInput : (COUNTRY_TIMEZONE[parsed.data.country] ?? DEFAULT_TIMEZONE);
   const date = dateOrNull(parsed.data.date, timezone);
   if (!date) return { error: "Data inválida" } as const;
+  const currency = currencyFromForm(fd);
+  if (!currency) return { error: "Moeda inválida: use um código de 3 letras (ex.: AOA, EUR, USD)." } as const;
   // Coordenadas do marcador: só são guardadas se vierem ambas e dentro dos limites; caso contrário ficam a null.
   const latRaw = str(fd, "venueLat", 30);
   const lngRaw = str(fd, "venueLng", 30);
@@ -89,7 +92,7 @@ function eventDataFromForm(fd: FormData) {
       dressCode: opt(fd, "dressCode", 80),
       coverImageUrl: httpUrlOrNull(str(fd, "coverImageUrl", 500)),
       accentColor: HEX_COLOR.test(str(fd, "accentColor", 9)) ? str(fd, "accentColor", 9) : null,
-      currency: currencyFromForm(fd),
+      currency,
       rsvpDeadline: dateOrNull(str(fd, "rsvpDeadline", 30) ? `${str(fd, "rsvpDeadline", 30)}T23:59` : "", timezone),
       allowChildren: fd.has("_full") ? bool(fd, "allowChildren") : true,
       verificationRequired: !fd.has("_full") ? true : bool(fd, "verificationRequired"),
@@ -108,6 +111,10 @@ export async function createEventAction(fd: FormData) {
   const user = await requireUser();
   const result = eventDataFromForm(fd);
   if (result.error !== undefined) flash(`/dashboard/events/new?type=${encodeURIComponent(str(fd, "type", 20))}&template=${encodeURIComponent(str(fd, "templateId", 40))}`, "error", result.error);
+  // Templates desativados ou Premium (um evento novo nunca está ativado) não podem ser escolhidos na criação.
+  const templateState = await getTemplateState(result.data.templateId);
+  if (!templateState || !templateState.enabled) flash(`/dashboard/events/new?type=${encodeURIComponent(result.data.type)}`, "error", "Este template já não está disponível. Escolha outro.");
+  if (templateState.premium && (await getPlatformSettings()).eventPrice > 0) flash(`/dashboard/events/new?type=${encodeURIComponent(result.data.type)}`, "error", `O template "${templateState.name}" é Premium: crie o evento com outro template e mude para este depois de o ativar.`);
   // Evento e checklist inicial (prazos calculados a partir da data) numa única escrita.
   const event = await db.event.create({
     data: { ...result.data, ownerId: user.id, tasks: { createMany: { data: buildChecklist(result.data.type, result.data.date) } } },
@@ -238,7 +245,7 @@ async function createGuest(eventId: string, input: { name: string; phone: string
 async function guestLimitFor(event: { activatedAt: Date | null }, eventId: string) {
   const plan = await planForEvent(event);
   if (!Number.isFinite(plan.guestLimit)) return { limit: plan.guestLimit, used: 0, remaining: Number.POSITIVE_INFINITY };
-  const used = await db.guest.count({ where: { eventId, suspendedAt: null } });
+  const used = await db.guest.count({ where: { eventId } }); // suspender não liberta lugares do plano gratuito
   return { limit: plan.guestLimit, used, remaining: Math.max(0, plan.guestLimit - used) };
 }
 
@@ -397,6 +404,7 @@ export async function resetDevicesAction(guestId: string) {
 
 export async function markSentAction(guestId: string, via: string, returnTo?: string) {
   const guest = await requireOwnedGuest(guestId);
+  if (!(await planForEvent(guest.event)).canShare) flash(returnTo ?? `/dashboard/events/${guest.eventId}/guests`, "error", "Ative o evento antes de enviar os convites (Definições > Ativação).");
   await db.guest.update({ where: { id: guestId }, data: { sentAt: new Date(), sentVia: via.slice(0, 20) } });
   revalidatePath(`/dashboard/events/${guest.eventId}/guests`);
   if (returnTo) flash(returnTo, "ok", `${guest.name}: marcado como enviado.`);
@@ -406,6 +414,7 @@ export async function sendSmsInviteAction(guestId: string, returnTo?: string | n
   const guest = await requireOwnedGuest(guestId);
   const path = returnTo ?? `/dashboard/events/${guest.eventId}/guests`;
   if (!isSmsConfigured()) flash(path, "error", "O envio de SMS não está configurado. Use o WhatsApp ou copie o link.");
+  if (!(await planForEvent(guest.event)).canShare) flash(path, "error", "Ative o evento antes de enviar os convites (Definições > Ativação).");
   const user = await requireUser();
   if (!rateLimit(`sms-guest:${guestId}`, 1, 10 * 60_000).ok) flash(path, "error", `Já foi enviado um SMS a ${guest.name} há menos de 10 minutos.`);
   if (!rateLimit(`sms-user:${user.id}`, 200, 24 * 60 * 60_000).ok) flash(path, "error", "Limite diário de SMS atingido para a sua conta. Use o WhatsApp para os restantes convidados.");

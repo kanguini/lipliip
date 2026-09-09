@@ -21,7 +21,7 @@ const FEATURES: { title: string; text: string; icon: LucideIcon }[] = [
   },
   {
     title: "Lista de presentes",
-    text: "Adicione presentes com preço e link da loja, ou aceite contribuições por IBAN / MB WAY. Os convidados reservam sem repetições.",
+    text: "Adicione presentes com preço e link da loja, ou aceite contribuições por IBAN, Multicaixa Express ou MB WAY. Os convidados reservam sem repetições.",
     icon: Gift,
   },
   {

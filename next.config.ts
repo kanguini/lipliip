@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   serverExternalPackages: ["@prisma/client", "bcryptjs", "sharp"],
   // Upload de fotografias e comprovativos através de Server Actions.
-  experimental: { serverActions: { bodySizeLimit: "15mb" } },
+  experimental: { serverActions: { bodySizeLimit: "60mb" } },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

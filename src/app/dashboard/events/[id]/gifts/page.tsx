@@ -47,7 +47,7 @@ export default async function GiftsPage({ params, searchParams }: { params: Prom
             {totalCash > 0 && <span className="text-sm text-emerald-700">Contribuições: {formatMoney(totalCash, event.currency)}</span>}
           </div>
           {gifts.length === 0 ? (
-            <p className="mt-6 text-center text-sm text-stone-500">Ainda não adicionou presentes. Se preferir só contribuições por IBAN/MB WAY, preencha-as nas Definições.</p>
+            <p className="mt-6 text-center text-sm text-stone-500">Ainda não adicionou presentes. Se preferir só contribuições por IBAN, Multicaixa Express ou MB WAY, preencha-as nas Definições.</p>
           ) : (
             <ul className="mt-4 divide-y divide-stone-100">
               {gifts.map((g) => {
