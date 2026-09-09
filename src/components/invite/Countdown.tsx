@@ -24,7 +24,7 @@ export function Countdown({ date }: { date: string }) {
   }, [target]);
 
   if (!t) return <div className="h-16" />;
-  if (t.over) return <p className="invite-accent text-center text-xl font-semibold">É hoje! 🎉</p>;
+  if (t.over) return <p className="invite-accent text-center text-xl font-semibold">É hoje!</p>;
   const cells = [
     [t.days, "dias"],
     [t.hours, "horas"],

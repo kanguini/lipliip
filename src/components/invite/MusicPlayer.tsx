@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Music, Play } from "lucide-react";
 
 /** Botão flutuante para tocar/pausar a música de fundo do convite. */
 export function MusicPlayer({ src, autoplay = false }: { src: string; autoplay?: boolean }) {
@@ -35,7 +36,7 @@ export function MusicPlayer({ src, autoplay = false }: { src: string; autoplay?:
         className="fixed bottom-4 right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full shadow-lg"
         style={{ background: "var(--inv-accent)", color: "var(--inv-on-accent, #fff)" }}
       >
-        <span className={playing ? "animate-pulse" : ""}>{playing ? "♫" : "▶"}</span>
+        {playing ? <Music className="h-5 w-5 animate-pulse" aria-hidden /> : <Play className="h-5 w-5" aria-hidden />}
       </button>
     </>
   );

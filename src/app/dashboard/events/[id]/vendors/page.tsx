@@ -4,6 +4,7 @@ import { formatMoney } from "@/lib/format";
 import { BUDGET_CATEGORIES, VENDOR_STATUS } from "@/lib/checklists";
 import { addVendorAction, deleteVendorAction, updateVendorAction } from "@/app/dashboard/planner-actions";
 import { FlashFromSearch } from "@/components/ui";
+import { ArrowUpRight, Plus } from "lucide-react";
 
 const STATUS_STYLE: Record<string, string> = {
   CONTACTING: "bg-[#f8f0de] text-[#8b6b2d]",
@@ -24,8 +25,9 @@ export default async function VendorsPage({ params, searchParams }: { params: Pr
     <>
       <FlashFromSearch {...sp} />
       <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
-        <form action={addVendorAction.bind(null, id)} className="card space-y-3">
-          <h2 className="font-semibold">Novo fornecedor</h2>
+        <details className="card" open={vendors.length === 0}>
+          <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-brand-800"><span>Novo fornecedor</span><span className="icon-circle h-8 w-8 bg-brand-100 text-brand-700"><Plus className="h-4 w-4" aria-hidden /></span></summary>
+          <form action={addVendorAction.bind(null, id)} className="mt-4 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div><label className="label">Categoria</label><select name="category" className="input">{BUDGET_CATEGORIES.map((c) => <option key={c}>{c}</option>)}</select></div>
             <div><label className="label">Estado</label><select name="status" className="input">{Object.entries(VENDOR_STATUS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
@@ -41,6 +43,7 @@ export default async function VendorsPage({ params, searchParams }: { params: Pr
           <div><label className="label">Notas</label><textarea name="notes" className="input" rows={2} placeholder="O que inclui, condições, impressão…" /></div>
           <button className="btn-primary w-full">Adicionar</button>
         </form>
+        </details>
 
         <div className="space-y-4">
           {vendors.length === 0 && <p className="card text-sm text-[#8c7b87]">Registe aqui as propostas que recebe. Ao marcar um fornecedor como contratado, o valor entra automaticamente no orçamento.</p>}
@@ -55,7 +58,7 @@ export default async function VendorsPage({ params, searchParams }: { params: Pr
                         <p className="font-medium">{v.name} <span className={`badge ml-1 ${STATUS_STYLE[v.status]}`}>{VENDOR_STATUS[v.status]}</span></p>
                         <p className="mt-0.5 text-xs text-[#8c7b87]">
                           {[v.contactName, v.phone, v.email].filter(Boolean).join(" · ")}
-                          {v.website && <> · <a href={v.website} target="_blank" rel="noreferrer" className="underline">site ↗</a></>}
+                          {v.website && <> · <a href={v.website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 underline">site<ArrowUpRight className="h-3 w-3" aria-hidden /></a></>}
                         </p>
                         {v.notes && <p className="mt-1 text-xs text-[#8c7b87]">{v.notes}</p>}
                       </div>

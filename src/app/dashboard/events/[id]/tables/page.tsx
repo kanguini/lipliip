@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { requireOwnedEvent } from "@/lib/auth";
 import { assignTableAction } from "@/app/dashboard/actions";
+import { X } from "lucide-react";
 
 export default async function TablesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -49,7 +50,7 @@ export default async function TablesPage({ params }: { params: Promise<{ id: str
                   <form action={assignTableAction.bind(null, id)}>
                     <input type="hidden" name="guestId" value={g.id} />
                     <input type="hidden" name="tableNumber" value="" />
-                    <button className="text-xs text-stone-400 hover:text-red-700" title="Tirar da mesa">✕</button>
+                    <button className="text-[#a1939c] hover:text-red-700" title="Tirar da mesa" aria-label="Tirar da mesa"><X className="h-3.5 w-3.5" aria-hidden /></button>
                   </form>
                 </li>
               ))}

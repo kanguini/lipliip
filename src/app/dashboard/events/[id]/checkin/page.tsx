@@ -3,6 +3,7 @@ import { requireEventAccess } from "@/lib/access";
 import { checkinAction, toggleCheckinAction } from "@/app/dashboard/actions";
 import { FlashFromSearch, StatCard } from "@/components/ui";
 import { CheckinForm } from "./CheckinForm";
+import { CheckCircle2 } from "lucide-react";
 
 export default async function CheckinPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string; q?: string }> }) {
   const { id } = await params;
@@ -38,7 +39,7 @@ export default async function CheckinPage({ params, searchParams }: { params: Pr
             {list.map((g) => (
               <li key={g.id} className="flex items-center justify-between py-2">
                 <div>
-                  <span className={g.checkedInAt ? "font-medium text-emerald-700" : "font-medium"}>{g.checkedInAt ? "✅ " : ""}{g.name}</span>
+                  <span className={g.checkedInAt ? "inline-flex items-center gap-1 font-medium text-emerald-700" : "font-medium"}>{g.checkedInAt ? <CheckCircle2 className="h-4 w-4" aria-hidden /> : null}{g.name}</span>
                   <span className="ml-2 font-mono text-xs text-stone-400">{g.checkinCode}</span>
                   <span className="ml-2 text-xs text-stone-500">
                     {g.rsvpStatus === "ACCEPTED" ? `confirmado${g.companions ? ` +${g.companions}` : ""}` : g.rsvpStatus === "DECLINED" ? "não vinha" : "sem resposta"}

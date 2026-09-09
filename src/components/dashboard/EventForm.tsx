@@ -9,8 +9,9 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
   const t = EVENT_TYPES[type as keyof typeof EVENT_TYPES] ?? EVENT_TYPES.OTHER;
   return (
     <div className="space-y-6">
+      <input type="hidden" name="_full" value="1" />
       <fieldset className="card space-y-4">
-        <legend className="px-1 text-sm font-semibold text-stone-700">O essencial</legend>
+        <legend>O essencial</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="label">Título do evento</label>
@@ -43,7 +44,7 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
       </fieldset>
 
       <fieldset className="card space-y-4">
-        <legend className="px-1 text-sm font-semibold text-stone-700">Local</legend>
+        <legend>Local</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="label">Nome do local</label>
@@ -66,7 +67,7 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
       </fieldset>
 
       <fieldset className="card space-y-4">
-        <legend className="px-1 text-sm font-semibold text-stone-700">Programa do dia</legend>
+        <legend>Programa do dia</legend>
         <textarea
           name="programText"
           className="input font-mono text-xs"
@@ -78,7 +79,7 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
       </fieldset>
 
       <fieldset className="card space-y-4">
-        <legend className="px-1 text-sm font-semibold text-stone-700">Convidados e segurança</legend>
+        <legend>Convidados e segurança</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="label">País dos telefones (por omissão)</label>
@@ -120,7 +121,7 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
       </fieldset>
 
       <fieldset className="card space-y-4">
-        <legend className="px-1 text-sm font-semibold text-stone-700">Contribuições em dinheiro (opcional)</legend>
+        <legend>Contribuições em dinheiro (opcional)</legend>
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label className="label">Moeda</label>
@@ -137,7 +138,7 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
         </div>
         <div>
           <label className="label">Nota para os convidados</label>
-          <input name="contributionNote" className="input" defaultValue={event?.contributionNote ?? ""} placeholder="Ex: Estamos a juntar para a lua de mel em Bali 🌴" />
+          <input name="contributionNote" className="input" defaultValue={event?.contributionNote ?? ""} placeholder="Ex: Estamos a juntar para a lua de mel" />
         </div>
       </fieldset>
     </div>

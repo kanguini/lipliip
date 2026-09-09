@@ -1,11 +1,12 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { ChevronLeft } from "lucide-react";
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="display-title text-3xl">{title}<span className="plum">.</span></h1>
+        <h1 className="display-title text-4xl">{title}<span className="plum">.</span></h1>
         {subtitle && <p className="mt-1 text-sm text-[#8c7b87]">{subtitle}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
@@ -50,8 +51,8 @@ export function Alert({ kind = "info", children }: { kind?: "info" | "error" | "
 
 export function EmptyState({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
   return (
-    <div className="card flex flex-col items-center py-12 text-center">
-      <p className="text-lg font-medium">{title}</p>
+    <div className="card flex flex-col items-center py-14 text-center">
+      <p className="font-display text-2xl">{title}</p>
       {description && <p className="mt-1 max-w-md text-sm text-stone-500">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
@@ -60,8 +61,8 @@ export function EmptyState({ title, description, action }: { title: string; desc
 
 export function BackLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link href={href} className="mb-4 inline-flex items-center gap-1 text-sm text-stone-500 hover:text-stone-900">
-      ← {children}
+    <Link href={href} className="mb-4 inline-flex items-center gap-1 text-sm text-[#8c7b87] hover:text-brand-700">
+      <ChevronLeft className="h-4 w-4" aria-hidden />{children}
     </Link>
   );
 }

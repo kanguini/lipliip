@@ -45,7 +45,7 @@ export function buildIcs(opts: {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Lipliip//Convites Digitais//PT",
+    "PRODID:-//Liplip//Convites Digitais//PT",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",

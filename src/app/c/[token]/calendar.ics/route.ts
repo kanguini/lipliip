@@ -12,7 +12,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
   if (!(await isGuestAuthorized(guest, guest.event))) return new Response("Forbidden", { status: 403 });
   const e = guest.event;
   const ics = buildIcs({
-    uid: `${e.id}-${guest.id}@lipliip`,
+    uid: `${e.id}-${guest.id}@liplip`,
     title: e.title,
     description: e.message ?? undefined,
     location: [e.venueName, e.venueAddress].filter(Boolean).join(", "),

@@ -3,6 +3,7 @@ import { requireOwnedEvent } from "@/lib/auth";
 import { formatMoney } from "@/lib/format";
 import { addGiftAction, deleteGiftAction } from "@/app/dashboard/actions";
 import { FlashFromSearch } from "@/components/ui";
+import { Gift, HeartHandshake, Plus } from "lucide-react";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 
 export default async function GiftsPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
@@ -17,8 +18,9 @@ export default async function GiftsPage({ params, searchParams }: { params: Prom
       <FlashFromSearch {...sp} />
       {!event.giftsEnabled && <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">A lista de presentes está desativada nas definições: os convidados não a veem.</p>}
       <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
-        <form action={addGiftAction.bind(null, id)} className="card space-y-3">
-          <h2 className="font-semibold">Adicionar presente</h2>
+        <details className="card" open={gifts.length === 0}>
+          <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-brand-800"><span>Adicionar presente</span><span className="icon-circle h-8 w-8 bg-brand-100 text-brand-700"><Plus className="h-4 w-4" aria-hidden /></span></summary>
+          <form action={addGiftAction.bind(null, id)} className="mt-4 space-y-3">
           <div>
             <label className="label">Tipo</label>
             <select name="kind" className="input">
@@ -36,6 +38,7 @@ export default async function GiftsPage({ params, searchParams }: { params: Prom
           <div><label className="label">Imagem (URL)</label><input name="imageUrl" type="url" className="input" placeholder="https://…/foto.jpg" /></div>
           <button className="btn-primary w-full">Adicionar</button>
         </form>
+        </details>
 
         <div className="card">
           <div className="flex items-center justify-between">
@@ -51,7 +54,7 @@ export default async function GiftsPage({ params, searchParams }: { params: Prom
                 return (
                   <li key={g.id} className="flex items-start justify-between gap-3 py-3">
                     <div className="text-sm">
-                      <p className="font-medium">{g.kind === "CASH" ? "💝" : "🎁"} {g.name}{g.price != null && <span className="ml-2 text-stone-500">{formatMoney(g.price, event.currency)}</span>}</p>
+                      <p className="flex items-center gap-2 font-medium">{g.kind === "CASH" ? <HeartHandshake className="h-4 w-4 text-brand-600" aria-hidden /> : <Gift className="h-4 w-4 text-brand-600" aria-hidden />}{g.name}{g.price != null && <span className="ml-2 text-stone-500">{formatMoney(g.price, event.currency)}</span>}</p>
                       {g.description && <p className="text-stone-500">{g.description}</p>}
                       {g.kind === "CASH" ? (
                         <p className="text-xs text-stone-600">

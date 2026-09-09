@@ -5,6 +5,7 @@ import { calendarDaysUntil } from "@/lib/timezone";
 import { BUDGET_CATEGORIES } from "@/lib/checklists";
 import { addBudgetItemAction, addPaymentAction, deleteBudgetItemAction, deletePaymentAction, togglePaymentAction, updateBudgetItemAction } from "@/app/dashboard/planner-actions";
 import { FlashFromSearch, StatCard } from "@/components/ui";
+import { Check, X, Plus } from "lucide-react";
 
 export default async function BudgetPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { id } = await params;
@@ -37,8 +38,9 @@ export default async function BudgetPage({ params, searchParams }: { params: Pro
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_2fr]">
         <div className="space-y-6">
-          <form action={addBudgetItemAction.bind(null, id)} className="card space-y-3">
-            <h2 className="font-semibold">Novo item</h2>
+          <details className="card" open={items.length === 0}>
+            <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-brand-800"><span>Novo item</span><span className="icon-circle h-8 w-8 bg-brand-100 text-brand-700"><Plus className="h-4 w-4" aria-hidden /></span></summary>
+            <form action={addBudgetItemAction.bind(null, id)} className="mt-4 space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div><label className="label">Categoria</label><select name="category" className="input">{BUDGET_CATEGORIES.map((c) => <option key={c}>{c}</option>)}</select></div>
               <div><label className="label">Fornecedor</label><select name="vendorId" className="input"><option value="">—</option>{vendors.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}</select></div>
@@ -50,6 +52,7 @@ export default async function BudgetPage({ params, searchParams }: { params: Pro
             </div>
             <button className="btn-primary w-full">Adicionar</button>
           </form>
+          </details>
           {upcoming.length > 0 && (
             <div className="card">
               <h2 className="font-semibold">Próximos pagamentos</h2>
@@ -101,9 +104,9 @@ export default async function BudgetPage({ params, searchParams }: { params: Pro
                           <ul className="mt-2 space-y-1 text-xs">
                             {i.payments.map((p) => (
                               <li key={p.id} className="flex items-center gap-2">
-                                <form action={togglePaymentAction.bind(null, id, p.id)}><button className={`flex h-4 w-4 items-center justify-center rounded border text-[10px] ${p.paidAt ? "border-emerald-600 bg-emerald-600 text-white" : "border-brand-300"}`} aria-label="Marcar pago">{p.paidAt ? "✓" : ""}</button></form>
+                                <form action={togglePaymentAction.bind(null, id, p.id)}><button className={`flex h-4 w-4 items-center justify-center rounded border text-[10px] ${p.paidAt ? "border-emerald-600 bg-emerald-600 text-white" : "border-brand-300"}`} aria-label="Marcar pago">{p.paidAt ? <Check className="h-3 w-3" aria-hidden /> : null}</button></form>
                                 <span className={p.paidAt ? "text-[#a1939c] line-through" : ""}>{p.label ?? "Pagamento"} · {formatMoney(p.amount, cur)}{p.dueAt ? ` · ${formatEventDate(p.dueAt, false, event.timezone)}` : ""}</span>
-                                <form action={deletePaymentAction.bind(null, id, p.id)}><button className="text-[#a1939c] hover:text-red-700" title="Remover">✕</button></form>
+                                <form action={deletePaymentAction.bind(null, id, p.id)}><button className="text-[#a1939c] hover:text-red-700" title="Remover" aria-label="Remover pagamento"><X className="h-3 w-3" aria-hidden /></button></form>
                               </li>
                             ))}
                           </ul>

@@ -7,6 +7,7 @@ import { inviteUrl } from "@/lib/urls";
 import { deleteGuestAction, regenerateTokenAction, resetDevicesAction, toggleSuspendAction, updateGuestAction } from "@/app/dashboard/actions";
 import { FlashFromSearch, RsvpBadge } from "@/components/ui";
 import { CopyButton } from "@/components/dashboard/CopyButton";
+import { ChevronLeft, Music, TriangleAlert } from "lucide-react";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 
 const OUTCOME_LABEL: Record<string, string> = {
@@ -38,7 +39,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
 
   return (
     <>
-      <Link href={`/dashboard/events/${id}/guests`} className="mb-3 inline-block text-sm text-stone-500 hover:text-stone-900">← Convidados</Link>
+      <Link href={`/dashboard/events/${id}/guests`} className="mb-3 inline-flex items-center gap-1 text-sm text-[#8c7b87] hover:text-brand-700"><ChevronLeft className="h-4 w-4" aria-hidden />Convidados</Link>
       <FlashFromSearch {...sp} />
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-6">
@@ -69,7 +70,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
               <ul className="text-sm text-stone-700">
                 <li>Acompanhantes: {guest.companions}{guest.companionNames ? ` (${guest.companionNames})` : ""}</li>
                 {guest.dietaryNotes && <li>Restrições alimentares: {guest.dietaryNotes}</li>}
-                {guest.songRequest && <li>Música pedida: 🎶 {guest.songRequest}</li>}
+                {guest.songRequest && <li className="flex items-center gap-1"><Music className="h-3.5 w-3.5 text-brand-600" aria-hidden />Música pedida: {guest.songRequest}</li>}
               </ul>
             )}
             {guest.rsvpMessage && <p className="text-sm italic text-stone-600">“{guest.rsvpMessage}”</p>}
@@ -98,8 +99,8 @@ export default async function GuestDetailPage({ params, searchParams }: { params
               Código de entrada: <span className="font-mono font-semibold">{guest.checkinCode}</span> · Telemóvel validado: {guest.verifiedAt ? formatDateTimeShort(guest.verifiedAt, tz) : "não"} · Aberto {guest.openCount}×
             </p>
             {suspicious && (
-              <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                ⚠️ Há tentativas bloqueadas neste convite. Pode ser o próprio convidado num terceiro dispositivo, ou o link a ser repassado. Se necessário, revogue e gere um novo link.
+              <p className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                <TriangleAlert className="h-4 w-4 flex-none" aria-hidden /><span>Há tentativas bloqueadas neste convite. Pode ser o próprio convidado num terceiro dispositivo, ou o link a ser repassado. Se necessário, revogue e gere um novo link.</span>
               </p>
             )}
             <div>

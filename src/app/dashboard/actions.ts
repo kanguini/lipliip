@@ -42,7 +42,7 @@ function dateOrNull(v: string, tz: string) {
 const eventSchema = z.object({
   type: z.enum(["WEDDING", "ENGAGEMENT", "BIRTHDAY", "OTHER"]),
   templateId: z.string().refine((id) => TEMPLATES.some((t) => t.id === id), "Template inválido"),
-  title: z.string().trim().min(3, "Indique o título do evento").max(120),
+  title: z.string().trim().max(120).optional().default(""),
   hostNames: z.string().trim().min(1, "Indique os nomes dos anfitriões").max(120),
   date: z.string().min(1, "Indique a data"),
   venueName: z.string().trim().min(2, "Indique o local").max(120),
@@ -54,7 +54,7 @@ function eventDataFromForm(fd: FormData) {
   const parsed = eventSchema.safeParse({
     type: fd.get("type"),
     templateId: fd.get("templateId"),
-    title: fd.get("title"),
+    title: fd.get("title") ?? "",
     hostNames: fd.get("hostNames"),
     date: fd.get("date"),
     venueName: fd.get("venueName"),
@@ -65,9 +65,11 @@ function eventDataFromForm(fd: FormData) {
   const timezone = isValidTimezone(tzInput) ? tzInput : (COUNTRY_TIMEZONE[parsed.data.country] ?? "Europe/Lisbon");
   const date = dateOrNull(parsed.data.date, timezone);
   if (!date) return { error: "Data inválida" } as const;
+  const typeLabel = { WEDDING: "Casamento de", ENGAGEMENT: "Noivado de", BIRTHDAY: "Aniversário de", OTHER: "Festa de" }[parsed.data.type];
   return {
     data: {
       ...parsed.data,
+      title: parsed.data.title || `${typeLabel} ${parsed.data.hostNames}`.slice(0, 120),
       timezone,
       date,
       endTime: opt(fd, "endTime", 10),
@@ -79,11 +81,11 @@ function eventDataFromForm(fd: FormData) {
       accentColor: HEX_COLOR.test(str(fd, "accentColor", 9)) ? str(fd, "accentColor", 9) : null,
       currency: str(fd, "currency", 3).toUpperCase() || "EUR",
       rsvpDeadline: dateOrNull(str(fd, "rsvpDeadline", 30) ? `${str(fd, "rsvpDeadline", 30)}T23:59` : "", timezone),
-      allowChildren: bool(fd, "allowChildren"),
-      verificationRequired: bool(fd, "verificationRequired"),
+      allowChildren: fd.has("_full") ? bool(fd, "allowChildren") : true,
+      verificationRequired: !fd.has("_full") ? true : bool(fd, "verificationRequired"),
       maxDevicesPerGuest: Math.min(10, Math.max(1, Number.parseInt(str(fd, "maxDevicesPerGuest", 3), 10) || 2)),
-      guestbookEnabled: bool(fd, "guestbookEnabled"),
-      giftsEnabled: bool(fd, "giftsEnabled"),
+      guestbookEnabled: !fd.has("_full") ? true : bool(fd, "guestbookEnabled"),
+      giftsEnabled: !fd.has("_full") ? true : bool(fd, "giftsEnabled"),
       programJson: JSON.stringify(parseProgramText(str(fd, "programText", 3000))),
       contributionIban: opt(fd, "contributionIban", 40),
       contributionMbway: opt(fd, "contributionMbway", 30),
@@ -343,11 +345,11 @@ export async function checkinAction(eventId: string, fd: FormData) {
   const { count } = await db.guest.updateMany({ where: { id: guest.id, checkedInAt: null }, data: { checkedInAt: new Date() } });
   if (count === 0) {
     const when = guest.checkedInAt ?? new Date();
-    flash(path, "error", `⚠️ ${guest.name} já fez check-in às ${formatTime(when, event.timezone)}. Possível entrada duplicada.`);
+    flash(path, "error", `Atenção: ${guest.name} já fez check-in às ${formatTime(when, event.timezone)}. Possível entrada duplicada.`);
   }
   await db.accessLog.create({ data: { guestId: guest.id, outcome: "CHECKIN" } });
   const extra = guest.rsvpStatus === "ACCEPTED" ? `${guest.companions ? ` +${guest.companions} acompanhante(s)` : ""}${guest.tableNumber ? ` · mesa ${guest.tableNumber}` : ""}` : " (não tinha confirmado presença)";
-  flash(path, "ok", `✅ ${guest.name}${extra}`);
+  flash(path, "ok", `Entrada registada: ${guest.name}${extra}`);
 }
 
 export async function toggleCheckinAction(guestId: string) {

@@ -1,8 +1,8 @@
 export const EVENT_TYPES = {
-  WEDDING: { label: "Casamento", emoji: "💍", hostLabel: "Nomes dos noivos", hostPlaceholder: "Ana & João" },
-  ENGAGEMENT: { label: "Noivado", emoji: "💐", hostLabel: "Nomes do casal", hostPlaceholder: "Sofia & Miguel" },
-  BIRTHDAY: { label: "Aniversário", emoji: "🎂", hostLabel: "Nome do aniversariante", hostPlaceholder: "Maria" },
-  OTHER: { label: "Outro evento", emoji: "🎉", hostLabel: "Anfitrião(ões)", hostPlaceholder: "Família Silva" },
+  WEDDING: { label: "Casamento", hostLabel: "Nomes dos noivos", hostPlaceholder: "Ana & João" },
+  ENGAGEMENT: { label: "Noivado", hostLabel: "Nomes do casal", hostPlaceholder: "Sofia & Miguel" },
+  BIRTHDAY: { label: "Aniversário", hostLabel: "Nome do aniversariante", hostPlaceholder: "Maria" },
+  OTHER: { label: "Outro evento", hostLabel: "Anfitrião(ões)", hostPlaceholder: "Família Silva" },
 } as const;
 
 export type EventType = keyof typeof EVENT_TYPES;

@@ -1,4 +1,4 @@
-# Lipliip · Convites digitais
+# Liplip · Convites digitais
 
 Plataforma web para criar e enviar convites digitais **pessoais e intransmissíveis** para casamentos, noivados, aniversários e outros eventos, com confirmação de presença, lista de presentes, livro de mensagens e check-in por QR code.
 
@@ -72,7 +72,7 @@ docker run -d --name lipliip-db -e POSTGRES_PASSWORD=lipliip -e POSTGRES_DB=lipl
 cp .env.example .env      # ajuste APP_URL, SMS_PROVIDER, etc.
 npm install               # gera o Prisma Client
 npm run db:push           # cria as tabelas
-npm run db:seed           # (opcional) conta demo@lipliip.pt / demo12345 com eventos de exemplo
+npm run db:seed           # (opcional) conta demo@liplip.online / demo12345 com eventos de exemplo
 npm run dev               # http://localhost:3000
 ```
 
@@ -103,7 +103,7 @@ Outros fornecedores (Vonage, Infobip, Africa's Talking, operadora local) impleme
 | --- | --- |
 | `EMAIL_PROVIDER` | `console` (dev, imprime no terminal) ou `resend` |
 | `RESEND_API_KEY` | chave da API Resend |
-| `EMAIL_FROM` | remetente, ex.: `Lipliip <no-reply@liplip.online>` (domínio verificado na Resend) |
+| `EMAIL_FROM` | remetente, ex.: `Liplip <no-reply@liplip.online>` (domínio verificado na Resend) |
 
 Sem fornecedor configurado em produção, a página "Esqueceu-se da palavra-passe?" informa que o envio de emails não está disponível.
 
@@ -130,4 +130,4 @@ tests/                      testes unitários
 - Pagamentos integrados na lista de presentes (Stripe, MB WAY, Multicaixa Express) com recibo automático.
 - Multi-idioma do convite (PT/EN/FR) escolhido por convidado.
 - Sub-eventos (jantar de ensaio, brunch) com listas de convidados diferentes.
-- Planos pagos: marca de água nos convites gratuitos, domínio personalizado, remoção do "criado com Lipliip".
+- Planos pagos: marca de água nos convites gratuitos, domínio personalizado, remoção do "criado com Liplip".

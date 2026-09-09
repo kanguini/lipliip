@@ -9,7 +9,7 @@ export function ForgotForm({ emailConfigured }: { emailConfigured: boolean }) {
   return (
     <main className="flex min-h-screen items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
-        <Link href="/" className="font-display block text-center text-3xl font-semibold text-brand-700">Lipliip</Link>
+        <Link href="/" className="wordmark block text-center text-4xl" aria-label="Liplip">liplip<span>.</span></Link>
         <div className="card mt-6">
           <h1 className="text-xl font-semibold">Recuperar palavra-passe</h1>
           {!emailConfigured ? (

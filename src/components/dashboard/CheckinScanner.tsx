@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Camera } from "lucide-react";
 
 type Detector = { detect(source: HTMLVideoElement): Promise<{ rawValue: string }[]> };
 declare global {
@@ -74,7 +75,7 @@ export function CheckinScanner({ onCode }: { onCode: (code: string) => void }) {
           <button type="button" className="btn-secondary btn-sm" onClick={() => setActive(false)}>Parar câmara</button>
         </>
       ) : (
-        <button type="button" className="btn-secondary" onClick={() => setActive(true)}>📷 Ler QR com a câmara</button>
+        <button type="button" className="btn-secondary" onClick={() => setActive(true)}><Camera className="h-4 w-4" aria-hidden />Ler QR com a câmara</button>
       )}
       {error && <p className="text-sm text-red-700">{error}</p>}
     </div>

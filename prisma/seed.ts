@@ -1,6 +1,6 @@
 /**
  * Dados de demonstração: `npm run db:seed`
- * Conta: demo@lipliip.pt / demo12345
+ * Conta: demo@liplip.online / demo12345
  */
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -12,7 +12,7 @@ const code = () => Array.from({ length: 6 }, () => ALPHABET[randomInt(ALPHABET.l
 const token = () => randomBytes(24).toString("base64url");
 
 async function main() {
-  const email = "demo@lipliip.pt";
+  const email = "demo@liplip.online";
   await db.user.deleteMany({ where: { email } });
   const user = await db.user.create({ data: { name: "Ana Demo", email, passwordHash: await bcrypt.hash("demo12345", 10) } });
 
@@ -73,7 +73,7 @@ async function main() {
     },
   });
 
-  console.log("Seed concluído. Conta demo: demo@lipliip.pt / demo12345");
+  console.log("Seed concluído. Conta demo: demo@liplip.online / demo12345");
   console.log("Links de convite do casamento:");
   for (const g of wedding.guests) console.log(`  ${g.name}: http://localhost:3000/c/${g.token}`);
 }

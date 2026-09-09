@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check, Copy } from "lucide-react";
 
 export function CopyButton({ text, label = "Copiar link", className = "btn-secondary btn-sm" }: { text: string; label?: string; className?: string }) {
   const [copied, setCopied] = useState(false);
@@ -18,7 +19,7 @@ export function CopyButton({ text, label = "Copiar link", className = "btn-secon
         }
       }}
     >
-      {copied ? "Copiado ✓" : label}
+      {copied ? <><Check className="h-3.5 w-3.5" aria-hidden />Copiado</> : <><Copy className="h-3.5 w-3.5" aria-hidden />{label}</>}
     </button>
   );
 }

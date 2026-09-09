@@ -135,7 +135,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
       <InfoSection hashtag={event.hashtag} extraInfo={event.extraInfo} />
       <CheckinSection qrDataUrl={qrDataUrl} code={guest.checkinCode} checkedInAt={guest.checkedInAt} tz={event.timezone} />
       <p className="pb-6 text-center text-xs opacity-50">
-        Convite pessoal de {guest.name} · intransmissível · criado com Lipliip
+        Convite pessoal de {guest.name} · intransmissível · criado com Liplip
       </p>
     </Invite>
   );

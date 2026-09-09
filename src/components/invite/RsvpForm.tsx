@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { rsvpAction, type ActionResult } from "@/app/c/[token]/actions";
+import { Check, Music, X } from "lucide-react";
 
 type Props = {
   token: string;
@@ -38,8 +39,8 @@ export function RsvpForm({ token, maxCompanions, allowChildren, current, deadlin
         <form action={formAction} className="mt-4 space-y-4">
           <div className="grid grid-cols-2 gap-2">
             {[
-              ["ACCEPTED", "Sim, vou! 🎉"],
-              ["DECLINED", "Não posso ir 😔"],
+              ["ACCEPTED", "Sim, vou!"],
+              ["DECLINED", "Não posso ir"],
             ].map(([v, l]) => (
               <label
                 key={v}
@@ -50,7 +51,7 @@ export function RsvpForm({ token, maxCompanions, allowChildren, current, deadlin
                 }}
               >
                 <input type="radio" name="status" value={v} className="sr-only" checked={status === v} onChange={() => setStatus(v)} />
-                {l}
+                <span className="inline-flex items-center justify-center gap-1.5">{v === "ACCEPTED" ? <Check className="h-4 w-4" aria-hidden /> : <X className="h-4 w-4" aria-hidden />}{l}</span>
               </label>
             ))}
           </div>
@@ -71,7 +72,7 @@ export function RsvpForm({ token, maxCompanions, allowChildren, current, deadlin
               )}
               {songRequests && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium">Que música não pode faltar na festa? 🎶</label>
+                  <label className="mb-1 flex items-center gap-1.5 text-sm font-medium"><Music className="invite-accent h-4 w-4" aria-hidden />Que música não pode faltar na festa?</label>
                   <input name="songRequest" className="invite-input" placeholder="Artista - Música" defaultValue={current.songRequest ?? ""} />
                 </div>
               )}

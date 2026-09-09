@@ -7,6 +7,7 @@ import { inviteShareMessage, inviteUrl } from "@/lib/urls";
 import { addGuestAction, importGuestsAction, markSentAction, sendSmsInviteAction, toggleSuspendAction } from "@/app/dashboard/actions";
 import { FlashFromSearch, RsvpBadge } from "@/components/ui";
 import { CopyButton } from "@/components/dashboard/CopyButton";
+import { Bell, Check, ShieldCheck, Ticket, Plus } from "lucide-react";
 
 export default async function GuestsPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string; q?: string; status?: string }> }) {
   const { id } = await params;
@@ -18,15 +19,16 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
   const returnTo = `/dashboard/events/${id}/guests`;
   const pendingSent = guests.filter((g) => g.rsvpStatus === "PENDING" && g.sentAt);
   const reminderText = (g: (typeof guests)[number]) =>
-    `Olá ${g.name.split(" ")[0]}! Ainda não recebemos a tua confirmação para "${event.title}"${event.rsvpDeadline ? ` (prazo: ${formatEventDate(event.rsvpDeadline, false, event.timezone)})` : ""}. Podes confirmar no teu convite: ${inviteUrl(g.token)} 🙏`;
+    `Olá ${g.name.split(" ")[0]}! Ainda não recebemos a tua confirmação para "${event.title}"${event.rsvpDeadline ? ` (prazo: ${formatEventDate(event.rsvpDeadline, false, event.timezone)})` : ""}. Podes confirmar no teu convite: ${inviteUrl(g.token)}`;
 
   return (
     <>
       <FlashFromSearch {...sp} />
       <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
         <div className="space-y-6">
-          <form action={addGuestAction.bind(null, id)} className="card space-y-3">
-            <h2 className="font-semibold">Adicionar convidado</h2>
+          <details className="card" open={guests.length === 0}>
+            <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-brand-800"><span>Adicionar convidado</span><span className="icon-circle h-8 w-8 bg-brand-100 text-brand-700"><Plus className="h-4 w-4" aria-hidden /></span></summary>
+            <form action={addGuestAction.bind(null, id)} className="mt-4 space-y-3">
             <div>
               <label className="label">Nome</label>
               <input name="name" className="input" required placeholder="Ana Silva" />
@@ -59,13 +61,16 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
             </div>
             <button className="btn-primary w-full">Adicionar</button>
           </form>
+          </details>
 
-          <form action={importGuestsAction.bind(null, id)} className="card space-y-3">
-            <h2 className="font-semibold">Importar lista</h2>
+          <details className="card" open={false}>
+            <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-brand-800"><span>Importar lista</span><span className="icon-circle h-8 w-8 bg-brand-100 text-brand-700"><Plus className="h-4 w-4" aria-hidden /></span></summary>
+            <form action={importGuestsAction.bind(null, id)} className="mt-4 space-y-3">
             <p className="text-xs text-stone-500">Cole uma linha por convidado: <code>Nome; Telefone; Acompanhantes; Grupo</code>. Pode copiar diretamente do Excel.</p>
             <textarea name="text" className="input font-mono text-xs" rows={6} placeholder={"Ana Silva; 912345678; 1; Família\nRui Costa; +244923456789; 0; Trabalho"} required />
             <button className="btn-secondary w-full">Importar</button>
           </form>
+          </details>
         </div>
 
         <div className="card">
@@ -106,8 +111,8 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
                           {g.rsvpStatus === "ACCEPTED" && g.maxCompanions > 0 && <span>+{g.companions} de {g.maxCompanions}</span>}
                           <span>{g.sentAt ? `enviado (${g.sentVia ?? "?"})` : "não enviado"}</span>
                           <span>· {g.firstOpenedAt ? `aberto ${g.openCount}×` : "não aberto"}</span>
-                          {g.verifiedAt && <span>· ✓ telemóvel validado</span>}
-                          {g.checkedInAt && <span>· 🎟 entrou</span>}
+                          {g.verifiedAt && <span className="inline-flex items-center gap-1">· <ShieldCheck className="h-3 w-3 text-emerald-700" aria-hidden />telemóvel validado</span>}
+                          {g.checkedInAt && <span className="inline-flex items-center gap-1">· <Ticket className="h-3 w-3 text-brand-600" aria-hidden />entrou</span>}
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-1">
@@ -116,7 +121,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
                         <CopyButton text={url} />
                         <form action={toggleSuspendAction.bind(null, g.id, returnTo)}><button className="btn-ghost btn-sm" title={g.suspendedAt ? "Reativar convite" : "Suspender convite"}>{g.suspendedAt ? "Reativar" : "Suspender"}</button></form>
                         {!g.sentAt && (
-                          <form action={markSentAction.bind(null, g.id, "manual", returnTo)}><button className="btn-ghost btn-sm" title="Marcar como enviado">✓ enviado</button></form>
+                          <form action={markSentAction.bind(null, g.id, "manual", returnTo)}><button className="btn-ghost btn-sm" title="Marcar como enviado"><Check className="h-3.5 w-3.5" aria-hidden />enviado</button></form>
                         )}
                       </div>
                     </div>
@@ -127,7 +132,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
           )}
           {pendingSent.length > 0 && (
             <details className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
-              <summary className="cursor-pointer text-sm font-semibold text-amber-900">🔔 Lembretes: {pendingSent.length} convidado(s) receberam o convite e ainda não responderam</summary>
+              <summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-amber-900"><Bell className="h-4 w-4" aria-hidden />Lembretes: {pendingSent.length} convidado(s) receberam o convite e ainda não responderam</summary>
               <ul className="mt-3 space-y-2 text-sm">
                 {pendingSent.map((g) => (
                   <li key={g.id} className="flex items-center justify-between gap-2">

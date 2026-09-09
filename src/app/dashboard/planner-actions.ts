@@ -199,7 +199,7 @@ export async function addMemberAction(eventId: string, fd: FormData) {
   const email = str(fd, "email", 120).toLowerCase();
   const role = str(fd, "role", 10) === "STAFF" ? "STAFF" : "EDITOR";
   const target = await db.user.findUnique({ where: { email } });
-  if (!target) flash(path, "error", `Não existe nenhuma conta com o email ${email}. Peça à pessoa para criar conta em ${process.env.APP_URL ?? "Lipliip"} e tente de novo.`);
+  if (!target) flash(path, "error", `Não existe nenhuma conta com o email ${email}. Peça à pessoa para criar conta em ${process.env.APP_URL ?? "Liplip"} e tente de novo.`);
   if (target.id === user.id) flash(path, "error", "Já é o dono deste evento.");
   await db.eventMember.upsert({
     where: { eventId_userId: { eventId, userId: target.id } },

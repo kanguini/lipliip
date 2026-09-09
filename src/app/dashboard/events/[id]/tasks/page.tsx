@@ -4,6 +4,7 @@ import { formatEventDate } from "@/lib/format";
 import { calendarDaysUntil } from "@/lib/timezone";
 import { addTaskAction, deleteTaskAction, generateChecklistAction, toggleTaskAction } from "@/app/dashboard/planner-actions";
 import { FlashFromSearch, StatCard } from "@/components/ui";
+import { Check, UserRound, X, Plus } from "lucide-react";
 
 export default async function TasksPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string; show?: string }> }) {
   const { id } = await params;
@@ -27,8 +28,9 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_2fr]">
         <div className="space-y-6">
-          <form action={addTaskAction.bind(null, id)} className="card space-y-3">
-            <h2 className="font-semibold">Nova tarefa</h2>
+          <details className="card" open={tasks.length === 0}>
+            <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-brand-800"><span>Nova tarefa</span><span className="icon-circle h-8 w-8 bg-brand-100 text-brand-700"><Plus className="h-4 w-4" aria-hidden /></span></summary>
+            <form action={addTaskAction.bind(null, id)} className="mt-4 space-y-3">
             <div><label className="label">Tarefa</label><input name="title" className="input" required placeholder="Ex.: Prova do vestido" /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><label className="label">Prazo</label><input name="dueAt" type="date" className="input" /></div>
@@ -37,6 +39,7 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
             <div><label className="label">Quem trata</label><input name="assignee" className="input" placeholder="Ana, João, cerimonialista…" /></div>
             <button className="btn-primary w-full">Adicionar</button>
           </form>
+          </details>
           <form action={generateChecklistAction.bind(null, id)} className="card">
             <h2 className="font-semibold">Checklist sugerida</h2>
             <p className="mt-1 text-xs text-[#8c7b87]">Acrescenta as tarefas típicas de um {event.type === "WEDDING" ? "casamento" : event.type === "ENGAGEMENT" ? "noivado" : event.type === "BIRTHDAY" ? "aniversário" : "evento"} que ainda não tenha, com prazos calculados a partir da data.</p>
@@ -53,7 +56,7 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
             </div>
           </div>
           {list.length === 0 ? (
-            <p className="mt-6 text-center text-sm text-[#8c7b87]">{sp.show === "done" ? "Ainda não há tarefas concluídas." : "Nada por fazer. 🎉"}</p>
+            <p className="mt-6 text-center text-sm text-[#8c7b87]">{sp.show === "done" ? "Ainda não há tarefas concluídas." : "Nada por fazer."}</p>
           ) : (
             <ul className="mt-4 divide-y divide-brand-100">
               {list.map((t) => {
@@ -62,13 +65,13 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
                 return (
                   <li key={t.id} className="flex items-start gap-3 py-3">
                     <form action={toggleTaskAction.bind(null, id, t.id)}>
-                      <button className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded border ${t.completedAt ? "border-brand-600 bg-brand-600 text-white" : "border-brand-300 hover:border-brand-500"}`} aria-label={t.completedAt ? "Marcar por fazer" : "Marcar feita"}>{t.completedAt ? "✓" : ""}</button>
+                      <button className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded border ${t.completedAt ? "border-brand-600 bg-brand-600 text-white" : "border-brand-300 hover:border-brand-500"}`} aria-label={t.completedAt ? "Marcar por fazer" : "Marcar feita"}>{t.completedAt ? <Check className="h-3.5 w-3.5" aria-hidden /> : null}</button>
                     </form>
                     <div className="min-w-0 flex-1">
                       <p className={`text-sm ${t.completedAt ? "text-[#a1939c] line-through" : "font-medium"}`}>{t.title}</p>
                       <p className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-[#8c7b87]">
                         {t.category && <span>{t.category}</span>}
-                        {t.assignee && <span>👤 {t.assignee}</span>}
+                        {t.assignee && <span className="inline-flex items-center gap-1"><UserRound className="h-3 w-3" aria-hidden />{t.assignee}</span>}
                         {t.dueAt && (
                           <span className={late ? "font-semibold text-red-700" : ""}>
                             {formatEventDate(t.dueAt, false, event.timezone)}
@@ -78,7 +81,7 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
                       </p>
                       {t.description && <p className="mt-1 text-xs text-[#8c7b87]">{t.description}</p>}
                     </div>
-                    <form action={deleteTaskAction.bind(null, id, t.id)}><button className="text-xs text-[#a1939c] hover:text-red-700" title="Remover">✕</button></form>
+                    <form action={deleteTaskAction.bind(null, id, t.id)}><button className="text-[#a1939c] hover:text-red-700" title="Remover" aria-label="Remover tarefa"><X className="h-4 w-4" aria-hidden /></button></form>
                   </li>
                 );
               })}

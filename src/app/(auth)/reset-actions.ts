@@ -30,7 +30,7 @@ export async function requestResetAction(_prev: ResetState, fd: FormData): Promi
     const link = `${appUrl()}/reset?token=${token}`;
     const res = await getEmailProvider().send(
       user.email,
-      "Recuperar palavra-passe · Lipliip",
+      "Recuperar palavra-passe · Liplip",
       `Olá ${user.name},\n\nPara definir uma nova palavra-passe abra este link (válido ${RESET_TTL_MIN} minutos):\n${link}\n\nSe não pediu isto, ignore este email.`,
     );
     if (!res.ok) console.error("Falha no envio de email de recuperação:", res.error);

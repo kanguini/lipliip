@@ -2,7 +2,7 @@
   "name": "lipliip",
   "version": "0.1.0",
   "private": true,
-  "description": "Plataforma de convites digitais para casamentos, noivados e anivers\u00e1rios",
+  "description": "Plataforma de convites digitais para casamentos, noivados e aniversários",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
@@ -25,6 +25,7 @@
     "@types/react-dom": "^19.2.7",
     "bcryptjs": "^3.0.3",
     "libphonenumber-js": "^1.13.12",
+    "lucide-react": "^1.43.0",
     "next": "^15.5.25",
     "postcss": "^8.5.28",
     "prisma": "^6.19.3",

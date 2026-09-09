@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { cancelReservationAction, reserveGiftAction } from "@/app/c/[token]/actions";
 import { formatMoney } from "@/lib/format";
+import { ArrowUpRight, Gift, HeartHandshake } from "lucide-react";
 
 export type GiftView = {
   id: string;
@@ -66,8 +67,8 @@ export function GiftList({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={g.imageUrl} alt="" className="h-20 w-20 flex-none rounded-lg object-cover" />
               ) : (
-                <div className="flex h-20 w-20 flex-none items-center justify-center rounded-lg text-3xl" style={{ background: "color-mix(in srgb, var(--inv-accent) 12%, transparent)" }}>
-                  {g.kind === "CASH" ? "💝" : "🎁"}
+                <div className="invite-accent flex h-20 w-20 flex-none items-center justify-center rounded-lg" style={{ background: "color-mix(in srgb, var(--inv-accent) 12%, transparent)" }}>
+                  {g.kind === "CASH" ? <HeartHandshake className="h-8 w-8" strokeWidth={1.5} aria-hidden /> : <Gift className="h-8 w-8" strokeWidth={1.5} aria-hidden />}
                 </div>
               )}
               <div className="min-w-0 flex-1">
@@ -77,7 +78,7 @@ export function GiftList({
                 </div>
                 {g.description && <p className="mt-0.5 text-sm opacity-80">{g.description}</p>}
                 {g.storeUrl && (
-                  <a href={g.storeUrl} target="_blank" rel="noreferrer" className="invite-accent text-xs underline">Ver na loja ↗</a>
+                  <a href={g.storeUrl} target="_blank" rel="noreferrer" className="invite-accent inline-flex items-center gap-0.5 text-xs underline">Ver na loja<ArrowUpRight className="h-3 w-3" aria-hidden /></a>
                 )}
                 {g.kind !== "CASH" && g.quantity > 1 && (
                   <p className="mt-1 text-xs opacity-60">{Math.max(available, 0)} de {g.quantity} disponíveis</p>

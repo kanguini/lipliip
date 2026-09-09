@@ -1,6 +1,7 @@
 import { formatDateTimeShort, formatEventDate, formatTime } from "@/lib/format";
 import type { PartyMember, ProgramItem, StoryItem } from "@/lib/event-types";
 import { Countdown } from "./Countdown";
+import { CalendarPlus, MapPin } from "lucide-react";
 import type { TemplateEvent } from "@/components/templates/types";
 
 export function DetailsSection({ event, calendarUrl, googleUrl, daysLeft }: { event: TemplateEvent; calendarUrl?: string; googleUrl?: string; daysLeft?: number }) {
@@ -33,8 +34,8 @@ export function DetailsSection({ event, calendarUrl, googleUrl, daysLeft }: { ev
         )}
       </div>
       <div className="mt-5 flex flex-wrap gap-2">
-        <a href={mapsUrl} target="_blank" rel="noreferrer" className="invite-btn-outline btn-sm">📍 Ver no mapa</a>
-        {calendarUrl && <a href={calendarUrl} className="invite-btn-outline btn-sm">📅 Adicionar ao calendário</a>}
+        <a href={mapsUrl} target="_blank" rel="noreferrer" className="invite-btn-outline btn-sm"><MapPin className="h-4 w-4" aria-hidden />Ver no mapa</a>
+        {calendarUrl && <a href={calendarUrl} className="invite-btn-outline btn-sm"><CalendarPlus className="h-4 w-4" aria-hidden />Adicionar ao calendário</a>}
         {googleUrl && <a href={googleUrl} target="_blank" rel="noreferrer" className="invite-btn-outline btn-sm">Google Calendar</a>}
         <a href="#rsvp" className="invite-btn btn-sm">Confirmar presença</a>
       </div>
