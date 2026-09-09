@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { requireEventAccess } from "@/lib/access";
+import { popSecret } from "@/lib/one-time";
 import { appUrl } from "@/lib/urls";
 import { matchesGuestQuery } from "@/lib/checkin";
 import { checkinAction, toggleCheckinAction } from "@/app/dashboard/actions";
@@ -21,8 +22,8 @@ export default async function CheckinPage({ params, searchParams }: { params: Pr
   const arrived = guests.filter((g) => g.checkedInAt);
   const expected = accepted.reduce((s, g) => s + 1 + g.companions, 0);
   const receptionUrl = event.checkinToken ? `${appUrl()}/r/${event.checkinToken}` : null;
-  // O PIN só é mostrado logo a seguir à criação (vem no redirecionamento); depois não volta a ser visível.
-  const freshPin = receptionUrl && sp.pin && /^\d{4}$/.test(sp.pin) ? sp.pin : null;
+  // O PIN só é mostrado logo a seguir à criação (identificador de uso único; o PIN nunca vai no URL).
+  const freshPin = receptionUrl ? popSecret(sp.pin) : null;
   const whatsappText = receptionUrl ? `Receção de "${event.title}": abre ${receptionUrl} e introduz o PIN que te vou enviar à parte.` : "";
 
   return (

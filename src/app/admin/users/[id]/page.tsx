@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { isAdmin, requireAdmin } from "@/lib/admin";
 import { formatDateTimeShort, formatEventDate, formatMoney } from "@/lib/format";
+import { popSecret } from "@/lib/one-time";
 import { appUrl } from "@/lib/urls";
 import { eventTypeLabel } from "@/lib/event-types";
 import { ORDER_STATUS_LABEL, ORDER_STATUS_STYLE } from "@/lib/activation";
@@ -29,7 +30,9 @@ export default async function AdminUserPage({ params, searchParams }: { params: 
   if (!user) notFound();
   const self = user.id === me.id;
   const returnTo = `/admin/users/${user.id}`;
-  const resetLink = sp.reset ? `${appUrl()}/reset?token=${encodeURIComponent(sp.reset)}` : null;
+  const resetToken = popSecret(sp.reset);
+  const resetLink = resetToken ? `${appUrl()}/reset?token=${encodeURIComponent(resetToken)}` : null;
+  const resetGone = !!sp.reset && !resetLink;
 
   return (
     <>

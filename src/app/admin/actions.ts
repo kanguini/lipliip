@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin";
+import { stashSecret } from "@/lib/one-time";
 import { sha256 } from "@/lib/tokens";
 import { TEMPLATES } from "@/lib/templates";
 import { flash, str, opt, bool, parseMoney } from "@/lib/form";
@@ -91,7 +92,8 @@ export async function generateResetLinkAction(userId: string, _fd?: FormData) {
   if (!target) flash("/admin/users", "error", "Utilizador não encontrado.");
   const token = randomBytes(32).toString("base64url");
   await db.passwordReset.create({ data: { userId: id, tokenHash: sha256(token), expiresAt: new Date(Date.now() + RESET_TTL_MIN * 60_000) } });
-  redirect(`/admin/users/${id}?reset=${encodeURIComponent(token)}`);
+  // O token nunca vai no URL: guarda-se em memória e a página troca o identificador pelo link, uma única vez.
+  redirect(`/admin/users/${id}?reset=${stashSecret(token)}`);
 }
 
 // ---------- Eventos ----------

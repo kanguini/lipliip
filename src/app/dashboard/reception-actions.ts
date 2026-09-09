@@ -18,6 +18,7 @@ import {
   verifyReceptionPin,
 } from "@/lib/checkin";
 import { getReceptionEvent, requireReceptionAccess } from "@/lib/reception";
+import { stashSecret } from "@/lib/one-time";
 
 /**
  * Ferramentas do dia do evento: link de receção sem conta (link + PIN), check-in a partir dessa página
@@ -42,7 +43,8 @@ export async function createReceptionLinkAction(eventId: string) {
   }
   if (event.checkinToken) revalidatePath(`/r/${event.checkinToken}`);
   revalidatePath(path);
-  flash(`${path}?pin=${pin}`, "ok", `Link de receção ${event.checkinToken ? "renovado" : "criado"}. PIN: ${pin}. Guarde-o: não voltará a ser mostrado.`);
+  // O PIN nunca vai no URL nem na mensagem: a página troca o identificador pelo PIN, uma única vez.
+  flash(`${path}?pin=${stashSecret(pin)}`, "ok", `Link de receção ${event.checkinToken ? "renovado" : "criado"}. O PIN é mostrado abaixo uma única vez.`);
 }
 
 export async function revokeReceptionLinkAction(eventId: string) {

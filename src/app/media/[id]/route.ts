@@ -13,6 +13,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   if (!/^[a-z0-9]{10,40}$/i.test(id)) return new NextResponse("Not found", { status: 404 });
   const media = await db.media.findUnique({ where: { id } });
   if (!media) return new NextResponse("Not found", { status: 404 });
+  // Fotografias escondidas pelos anfitriões deixam de ser servidas (o registo EventPhoto continua a existir).
+  const hidden = await db.eventPhoto.findFirst({ where: { mediaId: id, hiddenAt: { not: null } }, select: { id: true } });
+  if (hidden) return new NextResponse("Not found", { status: 404 });
   if (media.kind === "DOCUMENT") {
     // Comprovativos: só o administrador ou o dono do pedido.
     const { getCurrentUser } = await import("@/lib/auth");

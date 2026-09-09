@@ -31,21 +31,35 @@ export async function submitActivationProofAction(eventId: string, fd: FormData)
     flash(path, "error", (e as Error).message || "Não foi possível guardar o comprovativo.");
   }
 
-  const pending = await db.order.findFirst({ where: { eventId, status: "PENDING" }, orderBy: { createdAt: "desc" } });
-  if (pending) {
-    await db.order.update({ where: { id: pending.id }, data: { proofMediaId: media.id, note: note ?? pending.note, amount: plan.price, currency: plan.currency } });
-    flash(path, "ok", `Comprovativo atualizado. Referência ${pending.reference}. Vamos confirmar o pagamento em breve.`);
-  }
-
-  // Referência única: repete se colidir com outra já existente (muito improvável).
-  for (let attempt = 0; ; attempt++) {
+  // Uma transação serializável garante um único pedido PENDING por evento, mesmo com submissões simultâneas.
+  let outcome: { reference: string; updated: boolean } | null = null;
+  for (let attempt = 0; attempt < 5 && !outcome; attempt++) {
     const reference = generateOrderReference();
     try {
-      await db.order.create({ data: { userId: user.id, eventId, amount: plan.price, currency: plan.currency, reference, status: "PENDING", proofMediaId: media.id, note } });
-      flash(path, "ok", `Comprovativo recebido. Referência ${reference}. Vamos confirmar o pagamento e ativar o evento em breve.`);
+      outcome = await db.$transaction(
+        async (tx) => {
+          const pending = await tx.order.findFirst({ where: { eventId, status: "PENDING" }, orderBy: { createdAt: "desc" } });
+          if (pending) {
+            await tx.order.update({ where: { id: pending.id }, data: { proofMediaId: media.id, note: note ?? pending.note, amount: plan.price, currency: plan.currency } });
+            return { reference: pending.reference, updated: true };
+          }
+          await tx.order.create({ data: { userId: user.id, eventId, amount: plan.price, currency: plan.currency, reference, status: "PENDING", proofMediaId: media.id, note } });
+          return { reference, updated: false };
+        },
+        { isolationLevel: "Serializable" },
+      );
     } catch (e) {
-      const err = e as { code?: string; meta?: { target?: string[] } };
-      if (err.code !== "P2002" || !err.meta?.target?.includes("reference") || attempt >= 4) throw e;
+      // P2034 = conflito de serialização (outra submissão ao mesmo tempo); P2002 = colisão de referência.
+      const code = (e as { code?: string }).code;
+      if ((code !== "P2034" && code !== "P2002") || attempt >= 4) throw e;
     }
   }
+  if (!outcome) flash(path, "error", "Não foi possível registar o pedido. Tente de novo.");
+  flash(
+    path,
+    "ok",
+    outcome.updated
+      ? `Comprovativo atualizado. Referência ${outcome.reference}. Vamos confirmar o pagamento em breve.`
+      : `Comprovativo recebido. Referência ${outcome.reference}. Vamos confirmar o pagamento e ativar o evento em breve.`,
+  );
 }
