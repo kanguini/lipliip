@@ -77,7 +77,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   if (counted.count > 0) await logAccess(guest.id, "VIEW");
 
   const epcPayload = event.contributionIban ? buildEpcPayload({ iban: event.contributionIban, name: event.hostNames, remittance: `Presente ${event.title}`.slice(0, 140) }) : null;
-  const [gifts, guestbook, qrDataUrl, epcQr, livePhotos, myRequests] = await Promise.all([
+  const [gifts, guestbook, qrDataUrl, epcQr, livePhotos, myRequests, albumPhotos] = await Promise.all([
     event.giftsEnabled
       ? db.giftItem.findMany({ where: { eventId: event.id }, include: { reservations: true }, orderBy: [{ kind: "desc" }, { createdAt: "asc" }] })
       : Promise.resolve([]),
@@ -90,7 +90,9 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
       ? db.eventPhoto.findMany({ where: { eventId: event.id, kind: "LIVE", hiddenAt: null }, include: { guest: { select: { name: true } } }, orderBy: { createdAt: "desc" }, take: 60 })
       : Promise.resolve([]),
     event.requestsEnabled ? db.guestRequest.findMany({ where: { guestId: guest.id }, orderBy: { createdAt: "desc" }, take: 20 }) : Promise.resolve([]),
+    db.eventPhoto.findMany({ where: { eventId: event.id, kind: "ALBUM", hiddenAt: null }, select: { mediaId: true }, orderBy: { createdAt: "asc" }, take: 60 }),
   ]);
+  const albumPhotoUrls = albumPhotos.map((p) => `/media/${p.mediaId}`);
 
   const giftViews: GiftView[] = gifts.map((g) => {
     const mine = g.reservations.find((r) => r.guestId === guest.id);
@@ -119,7 +121,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
       <DetailsSection event={event} calendarUrl={`/c/${token}/calendar.ics`} googleUrl={googleUrl} daysLeft={daysLeft} />
       <StorySection items={parseStory(event.storyJson)} title={storyTitle} />
       <ProgramSection items={parseProgram(event.programJson)} />
-      <GallerySection images={parseGallery(event.galleryJson)} />
+      <GallerySection images={[...parseGallery(event.galleryJson), ...albumPhotoUrls]} />
       <PartySection members={parseParty(event.partyJson)} title={partyTitle} />
       <MenuSection menu={parseMenu(event.menuJson)} />
       <RsvpForm
@@ -146,12 +148,13 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
       )}
       <InfoSection hashtag={event.hashtag} extraInfo={event.extraInfo} />
       {event.requestsEnabled && (
-        <RequestsPanel token={token} guestName={guest.name} requests={myRequests.map((r) => ({ id: r.id, kind: r.kind, text: r.text, status: r.status, createdAt: r.createdAt }))} eventDate={event.date} />
+        <RequestsPanel token={token} guestName={guest.name} requests={myRequests.map((r) => ({ id: r.id, kind: r.kind, text: r.text, status: r.status, createdAt: r.createdAt }))} eventDate={event.date} tz={event.timezone} />
       )}
       {event.liveGalleryEnabled && (
         <LiveGallery
           token={token}
           eventDate={event.date}
+          tz={event.timezone}
           photos={livePhotos.map((p) => ({ id: p.id, url: `/media/${p.mediaId}`, caption: p.caption, by: p.guest?.name ?? null, mine: p.guestId === guest.id, createdAt: p.createdAt }))}
         />
       )}
