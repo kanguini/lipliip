@@ -4,7 +4,6 @@ import { requireEventAccess } from "@/lib/access";
 import { formatMoney } from "@/lib/format";
 import { BUDGET_CATEGORIES, VENDOR_STATUS } from "@/lib/checklists";
 import { addVendorAction, deleteVendorAction, updateVendorAction } from "@/app/dashboard/planner-actions";
-import Link from "next/link";
 import { planForEvent } from "@/lib/platform";
 import { Alert, FlashFromSearch } from "@/components/ui";
 import { ArrowUpRight, Plus } from "lucide-react";
