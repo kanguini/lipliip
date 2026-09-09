@@ -14,7 +14,7 @@ import { getSmsProvider, isSmsConfigured } from "@/lib/sms";
 import { rateLimit, rateLimitRefund } from "@/lib/rate-limit";
 import { flash, str, opt, bool, parseMoney } from "@/lib/form";
 import { inviteShareMessage, inviteUrl } from "@/lib/urls";
-import { formatTime } from "@/lib/format";
+import { performCheckin } from "@/lib/checkin";
 import { TEMPLATES } from "@/lib/templates";
 import { httpUrlOrNull } from "@/lib/validation";
 import { accessibleEventWhere, editableEventWhere, requireEventAccess } from "@/lib/access";
@@ -372,19 +372,9 @@ export async function sendSmsInviteAction(guestId: string, returnTo?: string | n
 export async function checkinAction(eventId: string, fd: FormData) {
   const { event } = await requireEventAccess(eventId, { allowStaff: true });
   const path = `/dashboard/events/${eventId}/checkin`;
-  const code = str(fd, "code", 12).toUpperCase().replace(/[^A-Z0-9]/g, "");
-  const guest = await db.guest.findFirst({ where: { eventId, checkinCode: code } });
-  if (!guest) flash(path, "error", `Código ${code || "(vazio)"} não encontrado.`);
-  if (guest.suspendedAt) flash(path, "error", `O convite de ${guest.name} está suspenso. Confirme com os anfitriões antes de deixar entrar.`);
-  // Atualização condicional: se dois dispositivos lerem o mesmo QR ao mesmo tempo, só um regista a entrada.
-  const { count } = await db.guest.updateMany({ where: { id: guest.id, checkedInAt: null }, data: { checkedInAt: new Date() } });
-  if (count === 0) {
-    const when = guest.checkedInAt ?? new Date();
-    flash(path, "error", `Atenção: ${guest.name} já fez check-in às ${formatTime(when, event.timezone)}. Possível entrada duplicada.`);
-  }
-  await db.accessLog.create({ data: { guestId: guest.id, outcome: "CHECKIN" } });
-  const extra = guest.rsvpStatus === "ACCEPTED" ? `${guest.companions ? ` +${guest.companions} acompanhante(s)` : ""}${guest.tableNumber ? ` · mesa ${guest.tableNumber}` : ""}` : " (não tinha confirmado presença)";
-  flash(path, "ok", `Entrada registada: ${guest.name}${extra}`);
+  // Lógica partilhada com a página de receção sem conta (ver lib/checkin.ts).
+  const result = await performCheckin(eventId, str(fd, "code", 20), event.timezone);
+  flash(path, result.ok ? "ok" : "error", result.message);
 }
 
 export async function toggleCheckinAction(guestId: string) {

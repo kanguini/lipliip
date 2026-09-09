@@ -10,6 +10,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { pickDeviceSlot } from "@/lib/device-slots";
 import { calendarDaysUntil } from "@/lib/timezone";
 import { parseMoney } from "@/lib/form";
+import { checkUpload, saveImage } from "@/lib/media";
 
 const OTP_TTL_MIN = 10;
 const OTP_MAX_PER_WINDOW = 3;
@@ -260,6 +261,106 @@ export async function guestbookAction(token: string, formData: FormData): Promis
   const message = clean(formData.get("message"), 600);
   if (message.length < 2) return fail("Escreva uma mensagem.");
   await db.guestbookEntry.create({ data: { eventId: event.id, guestId: guest.id, message } });
+  revalidatePath(`/c/${token}`);
+  return { ok: true };
+}
+
+// ---------- Pedidos (comida, bebida, música, outro) ----------
+
+const REQUEST_KINDS = new Set(["FOOD", "DRINK", "MUSIC", "OTHER"]);
+const MAX_OPEN_REQUESTS = 30;
+
+export async function createGuestRequestAction(token: string, formData: FormData): Promise<ActionResult> {
+  let ctx;
+  try {
+    ctx = await requireGuestAccess(token);
+  } catch (e) {
+    return fail((e as Error).message);
+  }
+  const { guest, event } = ctx;
+  if (!event.requestsEnabled) return fail("Os pedidos estão desativados neste evento.");
+  if (!rateLimit(`guest-request:${guest.id}`, 10, 60 * 60_000).ok) return fail("Já fez vários pedidos na última hora. Aguarde um pouco.");
+  const kindRaw = clean(formData.get("kind"), 10).toUpperCase();
+  const kind = REQUEST_KINDS.has(kindRaw) ? kindRaw : "OTHER";
+  const text = clean(formData.get("text"), 200);
+  if (text.length < 2) return fail("Escreva o seu pedido.");
+  const open = await db.guestRequest.count({ where: { guestId: guest.id, status: "NEW" } });
+  if (open >= MAX_OPEN_REQUESTS) return fail("Tem demasiados pedidos por atender. Aguarde que a equipa os trate.");
+  await db.guestRequest.create({ data: { eventId: event.id, guestId: guest.id, kind, text } });
+  revalidatePath(`/c/${token}`);
+  return { ok: true };
+}
+
+export async function deleteGuestRequestAction(token: string, requestId: string): Promise<ActionResult> {
+  let ctx;
+  try {
+    ctx = await requireGuestAccess(token);
+  } catch (e) {
+    return fail((e as Error).message);
+  }
+  // Só os pedidos ainda não atendidos do próprio convidado podem ser apagados.
+  await db.guestRequest.deleteMany({ where: { id: requestId, guestId: ctx.guest.id, status: "NEW" } });
+  revalidatePath(`/c/${token}`);
+  return { ok: true };
+}
+
+// ---------- Momentos (galeria do dia) ----------
+
+const MAX_LIVE_PHOTOS_PER_GUEST = 40;
+const MAX_LIVE_PHOTOS_PER_SUBMIT = 10;
+
+export type UploadResult = { ok: boolean; added: number; error?: string };
+
+export async function uploadGuestPhotosAction(token: string, formData: FormData): Promise<UploadResult> {
+  let ctx;
+  try {
+    ctx = await requireGuestAccess(token);
+  } catch (e) {
+    return { ok: false, added: 0, error: (e as Error).message };
+  }
+  const { guest, event } = ctx;
+  if (!event.liveGalleryEnabled) return { ok: false, added: 0, error: "A galeria do dia está desativada." };
+  const files = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
+  if (files.length === 0) return { ok: false, added: 0, error: "Escolha pelo menos uma fotografia." };
+  if (files.length > MAX_LIVE_PHOTOS_PER_SUBMIT) return { ok: false, added: 0, error: `Envie no máximo ${MAX_LIVE_PHOTOS_PER_SUBMIT} fotografias de cada vez.` };
+  if (!rateLimit(`guest-photos:${guest.id}`, 30, 10 * 60_000).ok) return { ok: false, added: 0, error: "Já enviou muitas fotografias. Aguarde alguns minutos." };
+  const existing = await db.eventPhoto.count({ where: { guestId: guest.id, eventId: event.id } });
+  const room = MAX_LIVE_PHOTOS_PER_GUEST - existing;
+  if (room <= 0) return { ok: false, added: 0, error: `Já partilhou ${MAX_LIVE_PHOTOS_PER_GUEST} fotografias, o máximo por convidado.` };
+  let added = 0;
+  let firstError: string | undefined;
+  for (const file of files.slice(0, room)) {
+    const check = checkUpload(file, "image");
+    if (!check.ok) {
+      firstError ??= check.error;
+      continue;
+    }
+    try {
+      const media = await saveImage(Buffer.from(await check.file.arrayBuffer()), { eventId: event.id, maxSide: 1600 });
+      await db.eventPhoto.create({ data: { eventId: event.id, guestId: guest.id, mediaId: media.id, kind: "LIVE" } });
+      added++;
+    } catch {
+      firstError ??= "Não foi possível processar uma das fotografias.";
+    }
+  }
+  revalidatePath(`/c/${token}`);
+  if (added === 0) return { ok: false, added: 0, error: firstError ?? "Não foi possível enviar as fotografias." };
+  const skipped = files.length - added;
+  const why = firstError ? `: ${firstError}` : files.length > room ? ` (limite de ${MAX_LIVE_PHOTOS_PER_GUEST} por convidado)` : "";
+  return { ok: true, added, error: skipped > 0 ? `${skipped} fotografia(s) não enviada(s)${why}.` : undefined };
+}
+
+export async function deleteGuestPhotoAction(token: string, photoId: string): Promise<ActionResult> {
+  let ctx;
+  try {
+    ctx = await requireGuestAccess(token);
+  } catch (e) {
+    return fail((e as Error).message);
+  }
+  const photo = await db.eventPhoto.findFirst({ where: { id: photoId, guestId: ctx.guest.id, eventId: ctx.event.id }, select: { mediaId: true } });
+  if (!photo) return fail("Fotografia não encontrada.");
+  // Apagar o ficheiro remove a fotografia em cascata.
+  await db.media.deleteMany({ where: { id: photo.mediaId } });
   revalidatePath(`/c/${token}`);
   return { ok: true };
 }
