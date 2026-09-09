@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 export default async function TablesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   await requireOwnedEvent(id);
-  const guests = await db.guest.findMany({ where: { eventId: id, rsvpStatus: { not: "DECLINED" } }, orderBy: [{ tableNumber: "asc" }, { name: "asc" }] });
+  const guests = await db.guest.findMany({ where: { eventId: id, rsvpStatus: { not: "DECLINED" }, suspendedAt: null }, orderBy: [{ tableNumber: "asc" }, { name: "asc" }] });
   const tables = new Map<string, typeof guests>();
   for (const g of guests) {
     const key = g.tableNumber ?? "";

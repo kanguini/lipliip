@@ -120,7 +120,7 @@ export default async function BudgetPage({ params, searchParams }: { params: Pro
                             <input name="amount" className="input w-24 py-1 text-xs" inputMode="decimal" placeholder="Valor" required />
                             <input name="dueAt" type="date" className="input w-36 py-1 text-xs" />
                             <label className="flex items-center gap-1"><input type="checkbox" name="paid" /> já pago</label>
-                            <button className="btn-secondary btn-sm">Registar</button>
+                            <SubmitButton className="btn-secondary btn-sm" pendingText="A registar…">Registar</SubmitButton>
                           </form>
                         </details>
                         <form action={deleteBudgetItemAction.bind(null, id, i.id)} className="mt-1 text-right"><ConfirmButton className="text-xs text-[#a1939c] hover:text-red-700" message={`Remover "${i.name}"${i.payments.length ? ` e os seus ${i.payments.length} pagamento(s)` : ""}?`}>remover item</ConfirmButton></form>

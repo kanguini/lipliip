@@ -95,7 +95,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
     };
   });
 
-  const deadlinePassed = !!event.rsvpDeadline && event.rsvpDeadline < new Date();
+  const deadlinePassed = !!event.rsvpDeadline && calendarDaysUntil(event.rsvpDeadline, event.timezone) < 0;
   const storyTitle = event.type === "BIRTHDAY" ? "A nossa história" : event.type === "WEDDING" || event.type === "ENGAGEMENT" ? "A nossa história" : "História";
   const partyTitle = event.type === "WEDDING" ? "Padrinhos e madrinhas" : "Pessoas especiais";
   const googleUrl = googleCalendarUrl({ title: event.title, start: event.date, end: eventEnd(event.date, event.endTime, event.timezone), location: [event.venueName, event.venueAddress].filter(Boolean).join(", "), details: event.message ?? undefined });

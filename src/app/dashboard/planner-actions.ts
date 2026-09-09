@@ -66,6 +66,7 @@ export async function addVendorAction(eventId: string, fd: FormData) {
   const path = `/dashboard/events/${eventId}/vendors`;
   const name = str(fd, "name", 120);
   if (name.length < 2) flash(path, "error", "Indique o nome do fornecedor.");
+  if (str(fd, "price", 24) && num(fd, "price") == null) flash(path, "error", "Valor inválido. Use por exemplo 2500 ou 1.250,00.");
   await db.vendor.create({
     data: {
       eventId,
@@ -107,6 +108,9 @@ export async function updateVendorAction(eventId: string, vendorId: string, fd: 
       // Ao contratar, cria (ou atualiza) a linha do orçamento com o valor fechado.
       if (item) await tx.budgetItem.update({ where: { id: item.id }, data: { contracted: data.price } });
       else await tx.budgetItem.create({ data: { eventId, category: vendor.category, name: vendor.name, estimated: data.price, contracted: data.price, vendorId } });
+    } else if (item && data.status === "HIRED" && data.price == null && item.contracted != null) {
+      // Contratado mas sem valor: a linha deixa de ter valor fechado (fica só a estimativa).
+      await tx.budgetItem.update({ where: { id: item.id }, data: { contracted: null } });
     } else if (item && vendor.status === "HIRED" && data.status !== "HIRED") {
       // Deixou de estar contratado: a linha criada automaticamente ao contratar (mesmo nome, sem pagamentos nem notas)
       // desaparece; uma linha criada à mão ou com pagamentos fica só como estimativa.
@@ -142,6 +146,7 @@ export async function addBudgetItemAction(eventId: string, fd: FormData) {
   const path = `/dashboard/events/${eventId}/budget`;
   const name = str(fd, "name", 120);
   if (name.length < 2) flash(path, "error", "Indique o item.");
+  if ((str(fd, "estimated", 24) && num(fd, "estimated") == null) || (str(fd, "contracted", 24) && num(fd, "contracted") == null)) flash(path, "error", "Valor inválido. Use por exemplo 2500 ou 1.250,00.");
   const vendorId = opt(fd, "vendorId", 40);
   await db.budgetItem.create({
     data: {

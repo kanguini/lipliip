@@ -122,7 +122,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
                       </div>
                       <div className="flex flex-wrap gap-1">
                         <a href={wa} target="_blank" rel="noreferrer" className="btn-secondary btn-sm">WhatsApp</a>
-                        {smsReady && <form action={sendSmsInviteAction.bind(null, g.id, returnTo)}><button className="btn-secondary btn-sm">SMS</button></form>}
+                        {smsReady && <form action={sendSmsInviteAction.bind(null, g.id, returnTo)}><SubmitButton className="btn-secondary btn-sm" pendingText="A enviar…">SMS</SubmitButton></form>}
                         <CopyButton text={url} />
                         <form action={toggleSuspendAction.bind(null, g.id, returnTo)}>{g.suspendedAt ? <button className="btn-ghost btn-sm" title="Reativar convite">Reativar</button> : <ConfirmButton className="btn-ghost btn-sm" message={`Suspender o convite de ${g.name}? O acesso é cortado e as reservas de presentes são libertadas.`}>Suspender</ConfirmButton>}</form>
                         {!g.sentAt && (

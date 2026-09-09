@@ -25,14 +25,21 @@ class TwilioSmsProvider implements SmsProvider {
       To: isWhatsApp ? `whatsapp:${to}` : to,
       Body: body,
     });
-    const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${this.sid}/Messages.json`, {
-      method: "POST",
-      headers: {
-        Authorization: "Basic " + Buffer.from(`${this.sid}:${this.token}`).toString("base64"),
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: params,
-    });
+    let res: Response;
+    try {
+      res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${this.sid}/Messages.json`, {
+        method: "POST",
+        headers: {
+          Authorization: "Basic " + Buffer.from(`${this.sid}:${this.token}`).toString("base64"),
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params,
+        // Sem resposta em 10 s, o pedido é abortado para o utilizador não ficar preso em "A enviar…".
+        signal: AbortSignal.timeout(10_000),
+      });
+    } catch (e) {
+      return { ok: false, error: `Twilio: ${(e as Error).name === "TimeoutError" ? "sem resposta em 10 s" : (e as Error).message}` };
+    }
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       return { ok: false, error: `Twilio ${res.status}: ${text.slice(0, 200)}` };
@@ -50,7 +57,8 @@ export function getSmsProvider(): SmsProvider {
   if (process.env.SMS_PROVIDER === "twilio") {
     const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM } = process.env;
     if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_FROM) {
-      throw new Error("SMS_PROVIDER=twilio requer TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN e TWILIO_FROM");
+      // Configuração incompleta: devolve um fornecedor que falha de forma controlada em vez de rebentar a página.
+      return { async send() { return { ok: false, error: "SMS_PROVIDER=twilio requer TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN e TWILIO_FROM" }; } };
     }
     return new TwilioSmsProvider(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM);
   }

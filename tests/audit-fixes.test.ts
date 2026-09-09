@@ -75,7 +75,9 @@ describe("luminance", () => {
   it("distingue cores claras e escuras", () => {
     expect(luminance("#ffffff")).toBeCloseTo(1, 2);
     expect(luminance("#000000")).toBe(0);
-    expect(luminance("#ffe066") > 0.4).toBe(true);
-    expect(luminance("#541b38") < 0.4).toBe(true);
+    // Limiar 0,18: acima, texto escuro; abaixo, branco (contraste AA sobre a cor de destaque).
+    expect(luminance("#ffe066") > 0.18).toBe(true);
+    expect(luminance("#b08d57") > 0.18).toBe(true); // clássico: dourado → texto escuro
+    expect(luminance("#541b38") < 0.18).toBe(true); // ameixa → texto branco
   });
 });
