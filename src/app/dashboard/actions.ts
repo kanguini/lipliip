@@ -20,6 +20,8 @@ import { httpUrlOrNull } from "@/lib/validation";
 import { accessibleEventWhere, editableEventWhere, requireEventAccess } from "@/lib/access";
 import { buildChecklist } from "@/lib/checklists";
 import { COUNTRY_TIMEZONE, isValidTimezone, localInputToDate } from "@/lib/timezone";
+import { planForEvent } from "@/lib/platform";
+import { getTemplateState } from "@/lib/templates-settings";
 
 function dateOrNull(v: string, tz: string) {
   if (!v) return null;
@@ -117,9 +119,16 @@ export async function updateEventAction(eventId: string, fd: FormData) {
 }
 
 export async function updateDesignAction(eventId: string, fd: FormData) {
-  await requireOwnedEvent(eventId);
+  const { event } = await requireOwnedEvent(eventId);
+  const path = `/dashboard/events/${eventId}/design`;
   const templateId = str(fd, "templateId", 40);
-  if (!TEMPLATES.some((t) => t.id === templateId)) flash(`/dashboard/events/${eventId}/design`, "error", "Template inválido");
+  if (!TEMPLATES.some((t) => t.id === templateId)) flash(path, "error", "Template inválido");
+  // Mudar para um template desativado ou Premium (sem o evento ativado) não é permitido; manter o atual é.
+  if (templateId !== event.templateId) {
+    const [state, plan] = await Promise.all([getTemplateState(templateId), planForEvent(event)]);
+    if (!state || !state.enabled) flash(path, "error", "Este template já não está disponível. Escolha outro.");
+    if (state.premium && !plan.active) flash(path, "error", `O template "${state.name}" é Premium e só pode ser usado depois de ativar o evento. Ative-o em Definições > Ativação.`);
+  }
   const accent = str(fd, "accentColor", 9);
   await db.event.update({
     where: { id: eventId },
@@ -199,6 +208,18 @@ async function createGuest(eventId: string, input: { name: string; phone: string
   }
 }
 
+/** Limite do plano gratuito: conta só os convites não suspensos. `remaining` é Infinity quando o evento está ativado. */
+async function guestLimitFor(event: { activatedAt: Date | null }, eventId: string) {
+  const plan = await planForEvent(event);
+  if (!Number.isFinite(plan.guestLimit)) return { limit: plan.guestLimit, used: 0, remaining: Number.POSITIVE_INFINITY };
+  const used = await db.guest.count({ where: { eventId, suspendedAt: null } });
+  return { limit: plan.guestLimit, used, remaining: Math.max(0, plan.guestLimit - used) };
+}
+
+function freeLimitMessage(limit: number) {
+  return `Plano gratuito: até ${limit} convidados. Ative o evento para adicionar mais (separador Definições > Ativação).`;
+}
+
 export async function addGuestAction(eventId: string, fd: FormData) {
   const { event } = await requireOwnedEvent(eventId);
   const path = `/dashboard/events/${eventId}/guests`;
@@ -208,6 +229,8 @@ export async function addGuestAction(eventId: string, fd: FormData) {
   if (!phone) flash(path, "error", "Telefone inválido. Use o formato internacional (+351 ...) ou o número nacional.");
   const duplicate = await db.guest.findFirst({ where: { eventId, phone } });
   if (duplicate) flash(path, "error", `Já existe um convidado com este telefone: ${duplicate.name}.`);
+  const limit = await guestLimitFor(event, eventId);
+  if (limit.remaining <= 0) flash(path, "error", freeLimitMessage(limit.limit));
   try {
     await createGuest(eventId, {
       name,
@@ -228,10 +251,16 @@ export async function importGuestsAction(eventId: string, fd: FormData) {
   const { event } = await requireOwnedEvent(eventId);
   const path = `/dashboard/events/${eventId}/guests`;
   const { rows, errors } = parseGuestImport(str(fd, "text", 200_000));
-  const existing = new Set((await db.guest.findMany({ where: { eventId }, select: { phone: true } })).map((g) => g.phone));
+  const [existingRows, limit] = await Promise.all([db.guest.findMany({ where: { eventId }, select: { phone: true } }), guestLimitFor(event, eventId)]);
+  const existing = new Set(existingRows.map((g) => g.phone));
   let created = 0;
+  let overLimit = 0;
   const problems = errors.map((e) => `linha ${e.line}: ${e.message}`);
   for (const row of rows) {
+    if (created >= limit.remaining) {
+      overLimit++;
+      continue;
+    }
     const phone = normalizePhone(row.phone, event.country);
     if (!phone) {
       problems.push(`linha ${row.line}: telefone inválido (${row.phone})`);
@@ -250,8 +279,11 @@ export async function importGuestsAction(eventId: string, fd: FormData) {
       else throw e;
     }
   }
-  const summary = `${created} convidado(s) importado(s).` + (problems.length ? ` Ignorados: ${problems.slice(0, 8).join("; ")}${problems.length > 8 ? "…" : ""}` : "");
-  flash(path, problems.length && !created ? "error" : "ok", summary);
+  const summary =
+    `${created} convidado(s) importado(s).` +
+    (problems.length ? ` Ignorados: ${problems.slice(0, 8).join("; ")}${problems.length > 8 ? "…" : ""}` : "") +
+    (overLimit ? ` ${overLimit} linha(s) não importada(s): ${freeLimitMessage(limit.limit)}` : "");
+  flash(path, (problems.length || overLimit) && !created ? "error" : "ok", summary);
 }
 
 async function requireOwnedGuest(guestId: string) {

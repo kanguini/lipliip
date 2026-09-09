@@ -3,7 +3,9 @@ import { requireEventAccess } from "@/lib/access";
 import { formatEventDate } from "@/lib/format";
 import { calendarDaysUntil } from "@/lib/timezone";
 import { addTaskAction, deleteTaskAction, generateChecklistAction, toggleTaskAction } from "@/app/dashboard/planner-actions";
-import { FlashFromSearch, StatCard } from "@/components/ui";
+import Link from "next/link";
+import { planForEvent } from "@/lib/platform";
+import { Alert, FlashFromSearch, StatCard } from "@/components/ui";
 import { Check, UserRound, X, Plus } from "lucide-react";
 import { SubmitButton } from "@/components/dashboard/SubmitButton";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
@@ -12,7 +14,7 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
   const { id } = await params;
   const sp = await searchParams;
   const { event } = await requireEventAccess(id);
-  const tasks = await db.task.findMany({ where: { eventId: id }, orderBy: [{ dueAt: "asc" }, { sortOrder: "asc" }] });
+  const [tasks, plan] = await Promise.all([db.task.findMany({ where: { eventId: id }, orderBy: [{ dueAt: "asc" }, { sortOrder: "asc" }] }), planForEvent(event)]);
   const done = tasks.filter((t) => t.completedAt);
   const open = tasks.filter((t) => !t.completedAt);
   const overdue = open.filter((t) => t.dueAt && calendarDaysUntil(t.dueAt, event.timezone) < 0);
@@ -23,6 +25,9 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
   return (
     <>
       <FlashFromSearch {...sp} />
+      {!plan.canPlan && (
+        <div className="mb-6"><Alert kind="info">O planeamento (tarefas, orçamento e fornecedores) fica disponível depois de <Link href={`/dashboard/events/${id}/activate`} className="font-semibold underline">ativar o evento</Link>. Até lá pode consultar o que já existe.</Alert></div>
+      )}
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Progresso" value={`${progress}%`} tone="good" />
         <StatCard label="Por fazer" value={open.length} />
@@ -30,6 +35,8 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_2fr]">
         <div className="space-y-6">
+          {plan.canPlan && (
+          <>
           <details className="card" open={tasks.length === 0}>
             <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-brand-800"><span>Nova tarefa</span><span className="icon-circle h-8 w-8 bg-brand-100 text-brand-700"><Plus className="h-4 w-4" aria-hidden /></span></summary>
             <form action={addTaskAction.bind(null, id)} className="mt-4 space-y-3">
@@ -47,6 +54,8 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
             <p className="mt-1 text-xs text-[#8c7b87]">Acrescenta as tarefas típicas de um {event.type === "WEDDING" ? "casamento" : event.type === "ENGAGEMENT" ? "noivado" : event.type === "BIRTHDAY" ? "aniversário" : "evento"} que ainda não tenha, com prazos calculados a partir da data.</p>
             <button className="btn-secondary mt-3 w-full">Completar checklist</button>
           </form>
+          </>
+          )}
         </div>
         <div className="card">
           <div className="flex flex-wrap items-center justify-between gap-2">

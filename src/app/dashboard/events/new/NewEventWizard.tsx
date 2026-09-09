@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { EVENT_TYPES, type EventType } from "@/lib/event-types";
-import { DEFAULT_TEMPLATE_ID, templatesForType } from "@/lib/templates";
+import { DEFAULT_TEMPLATE_ID, templatesForType, type TemplateMeta } from "@/lib/templates";
 import { SUPPORTED_COUNTRIES } from "@/lib/phone";
 import { createEventAction } from "@/app/dashboard/actions";
 import { TemplateCard } from "@/components/dashboard/TemplatePicker";
@@ -21,14 +21,17 @@ function dateLabel(value: string) {
 
 const STEPS = ["A ocasião", "O modelo", "O essencial"];
 
-export function NewEventWizard({ initialType, initialTemplate }: { initialType?: string; initialTemplate?: string }) {
+type WizardTemplate = TemplateMeta & { premium?: boolean };
+
+/** `templates`: lista já filtrada pela administração (templates ativos, com o selo premium); sem ela usa o catálogo completo. */
+export function NewEventWizard({ initialType, initialTemplate, templates: catalog }: { initialType?: string; initialTemplate?: string; templates?: WizardTemplate[] }) {
   const validType = (initialType && initialType in EVENT_TYPES ? initialType : "WEDDING") as EventType;
   const [type, setType] = useState<EventType>(validType);
   const [templateId, setTemplateId] = useState(initialTemplate || DEFAULT_TEMPLATE_ID);
   const [step, setStep] = useState(initialTemplate ? 3 : 1);
   const [draft, setDraft] = useState<Draft>({ hostNames: "", date: "", venueName: "", message: "" });
-  const templates = templatesForType(type);
-  const effectiveTemplate = templates.some((t) => t.id === templateId) ? templateId : templates[0].id;
+  const templates: WizardTemplate[] = catalog ? catalog.filter((t) => t.types.includes(type)) : templatesForType(type);
+  const effectiveTemplate = templates.some((t) => t.id === templateId) ? templateId : (templates[0]?.id ?? templatesForType(type)[0].id);
   const kind = EVENT_TYPES[type];
 
   function onInput(e: React.FormEvent<HTMLFormElement>) {
