@@ -3,6 +3,9 @@ import { getCurrentUser } from "@/lib/auth";
 import { TEMPLATES } from "@/lib/templates";
 import { InvitationArt } from "@/components/templates/InvitationArt";
 import { EVENT_TYPES, type EventType } from "@/lib/event-types";
+import { SUPPLIER_CATEGORIES } from "@/lib/suppliers";
+import { SiteFooter, SiteHeader } from "@/components/site/SiteHeader";
+import { SupplierCategoryIcon } from "@/components/site/SupplierCategoryIcon";
 import { ArrowUpRight, BarChart3, BookOpen, CheckCircle2, Gift, Lock, Mail, MapPin, Music, Palette, Send, Ticket, type LucideIcon } from "lucide-react";
 
 const FEATURES: { title: string; text: string; icon: LucideIcon }[] = [
@@ -67,23 +70,7 @@ export default async function HomePage() {
   const user = await getCurrentUser();
   return (
     <main>
-      <header className="bg-white/70 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href="/" className="wordmark text-3xl" aria-label="Liplip">
-            liplip<span>.</span>
-          </Link>
-          <nav className="flex items-center gap-3">
-            {user ? (
-              <Link href="/dashboard" className="btn-primary">Ir para o painel</Link>
-            ) : (
-              <>
-                <Link href="/login" className="btn-ghost">Entrar</Link>
-                <Link href="/register" className="btn-primary">Criar conta grátis</Link>
-              </>
-            )}
-          </nav>
-        </div>
-      </header>
+      <SiteHeader loggedIn={!!user} />
 
       <section className="relative mx-auto grid max-w-6xl items-center gap-12 overflow-hidden px-6 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
         <span className="blob -left-24 top-10 h-72 w-72 bg-joy-sun/40" aria-hidden />
@@ -202,10 +189,36 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <footer className="py-12 text-center text-sm text-muted">
-        <span className="wordmark text-2xl">liplip<span>.</span></span>
-        <p className="mt-2">Os momentos passam. Os laços ficam.</p>
-      </footer>
+      <section id="fornecedores" className="py-16">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-brand-700 px-8 py-12 text-white sm:px-12 lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-10">
+            <span className="blob -right-16 -top-16 h-56 w-56 bg-joy-coral/40" aria-hidden />
+            <span className="blob -bottom-20 left-1/3 h-48 w-48 bg-joy-sun/30" aria-hidden />
+            <div className="relative">
+              <p className="eyebrow text-joy-sun">Diretório de fornecedores</p>
+              <h2 className="display-title mt-3 text-4xl text-white sm:text-5xl">Encontre fornecedores para o seu <em className="text-joy-sun">evento</em><span className="plum">.</span></h2>
+              <p className="mt-4 max-w-xl text-white/80">
+                Salões e espaços, buffet, decoração, música, fotografia, bolos e muito mais, em todas as províncias de Angola. Veja os contactos e peça orçamentos sem sair do Liplip.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link href="/fornecedores" className="btn bg-white text-brand-700 shadow-[0_6px_18px_rgba(0,0,0,0.18)] hover:bg-brand-50">Explorar o diretório <ArrowUpRight className="h-4 w-4" aria-hidden /></Link>
+              </div>
+            </div>
+            <ul className="relative mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:mt-0">
+              {SUPPLIER_CATEGORIES.slice(0, 6).map((c) => (
+                <li key={c.id}>
+                  <Link href={`/fornecedores?category=${c.id}`} className="flex items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 text-sm font-medium transition hover:bg-white/20">
+                    <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-white/15"><SupplierCategoryIcon category={c.id} className="h-4 w-4" /></span>
+                    <span className="leading-tight">{c.label}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <SiteFooter />
     </main>
   );
 }
