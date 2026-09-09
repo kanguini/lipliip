@@ -17,3 +17,4 @@ server.log
 
 # Worktrees temporários dos agentes
 .claude/worktrees/
+ui-*.png
