@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { EVENT_TYPES, type EventType } from "@/lib/event-types";
 import { DEFAULT_TEMPLATE_ID, templatesForType, type TemplateMeta } from "@/lib/templates";
-import { SUPPORTED_COUNTRIES } from "@/lib/phone";
+import { DEFAULT_COUNTRY, SUPPORTED_COUNTRIES } from "@/lib/phone";
+import { DEFAULT_CURRENCY } from "@/lib/format";
 import { createEventAction } from "@/app/dashboard/actions";
 import { TemplateCard } from "@/components/dashboard/TemplatePicker";
 import { InvitationArt } from "@/components/templates/InvitationArt";
@@ -113,9 +114,11 @@ export function NewEventWizard({ initialType, initialTemplate, templates: catalo
               <textarea id="message" name="message" className="input" rows={3} placeholder="Com muita alegria convidamos-te para celebrar connosco…" />
             </div>
             <div>
-              <label className="label" htmlFor="country">País dos telefones dos convidados</label>
-              <select id="country" name="country" className="input" defaultValue="PT">{SUPPORTED_COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}</select>
+              <label className="label" htmlFor="country">País por omissão dos telefones</label>
+              <select id="country" name="country" className="input" defaultValue={DEFAULT_COUNTRY}>{SUPPORTED_COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}</select>
+              <p className="hint">Números de outros países: escreva com o indicativo, ex.: +351 912 345 678</p>
             </div>
+            <input type="hidden" name="currency" value={DEFAULT_CURRENCY} />
             <div className="flex items-center justify-between pt-2">
               <button type="button" className="btn-ghost" onClick={() => setStep(2)}><ArrowLeft className="h-4 w-4" aria-hidden />Voltar</button>
               <SubmitButton pendingText="A criar…">Criar convite <ArrowRight className="h-4 w-4" aria-hidden /></SubmitButton>

@@ -12,6 +12,9 @@ export type TemplateEvent = {
   venueName: string;
   venueAddress: string | null;
   mapsUrl: string | null;
+  /** Coordenadas escolhidas no mapa (opcionais; os exemplos dos templates não as têm). */
+  venueLat?: number | null;
+  venueLng?: number | null;
   dressCode: string | null;
   coverImageUrl: string | null;
   accentColor: string | null;

@@ -4,6 +4,8 @@ import { requireEventAccess } from "@/lib/access";
 import { parseProgram } from "@/lib/event-types";
 import { Invite } from "@/components/templates";
 import { DetailsSection, ProgramSection } from "@/components/invite/Sections";
+import { MenuSection } from "@/components/invite/MenuSection";
+import { parseMenu } from "@/lib/menu";
 import { formatMoney } from "@/lib/format";
 
 /** Pré-visualização do convite tal como um convidado o vê (sem as partes interativas). */
@@ -23,6 +25,7 @@ export default async function EventPreviewPage({ params }: { params: Promise<{ i
       <Invite event={event} guestName="Nome do Convidado">
         <DetailsSection event={event} />
         <ProgramSection items={parseProgram(event.programJson)} />
+        <MenuSection menu={parseMenu(event.menuJson)} />
         <div className="invite-card text-sm opacity-80">
           <p className="font-semibold">Confirmar presença</p>
           <p>Aqui o convidado diz se vai, quantos acompanhantes leva e restrições alimentares.</p>
