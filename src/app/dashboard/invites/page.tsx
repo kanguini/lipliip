@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
-import { TEMPLATES } from "@/lib/templates";
+import { getAvailableTemplates } from "@/lib/templates-settings";
+import { PremiumPill } from "@/components/dashboard/TemplatePicker";
 import { EVENT_TYPES, type EventType } from "@/lib/event-types";
 import { InvitationArt } from "@/components/templates/InvitationArt";
 import { ArrowRight } from "lucide-react";
@@ -12,7 +13,7 @@ const TYPES = ["", ...Object.keys(EVENT_TYPES)] as const;
 export default async function InvitesPage({ searchParams }: { searchParams: Promise<{ type?: string }> }) {
   await requireUser();
   const { type = "" } = await searchParams;
-  const list = TEMPLATES.filter((t) => !type || t.types.includes(type));
+  const list = await getAvailableTemplates(type || undefined);
 
   return (
     <>
@@ -39,7 +40,8 @@ export default async function InvitesPage({ searchParams }: { searchParams: Prom
                 const kind = (type || t.types[0]) as EventType;
                 return (
                   <div key={t.id} className="group">
-                    <Link href={`/dashboard/events/new?template=${t.id}&type=${kind}`} className="block overflow-hidden rounded-3xl shadow-[0_2px_24px_rgba(84,27,56,0.08)] transition group-hover:-translate-y-1 group-hover:shadow-[0_12px_32px_rgba(84,27,56,0.16)]">
+                    <Link href={`/dashboard/events/new?template=${t.id}&type=${kind}`} className="relative block overflow-hidden rounded-3xl shadow-[0_2px_24px_rgba(84,27,56,0.08)] transition group-hover:-translate-y-1 group-hover:shadow-[0_12px_32px_rgba(84,27,56,0.16)]">
+                      {t.premium && <PremiumPill className="absolute left-3 top-3 z-10 shadow-sm" />}
                       {t.collection === "2026" ? (
                         <InvitationArt templateId={t.id} kicker={EVENT_TYPES[kind].label} names={t.sample.names} dateLabel="12 de dezembro de 2026" placeLabel="O seu local · 16:00" caption={t.sample.caption} className="rounded-none" />
                       ) : (
@@ -53,7 +55,7 @@ export default async function InvitesPage({ searchParams }: { searchParams: Prom
                     <div className="mt-3 flex items-center justify-between gap-3 px-1">
                       <div>
                         <p className="font-semibold">{t.name}</p>
-                        <p className="text-xs text-muted">{t.tag}</p>
+                        <p className="text-xs text-muted">{t.tag}{t.premium ? " · Premium: disponível ao ativar o evento" : ""}</p>
                       </div>
                       <div className="flex gap-1">
                         <Link href={`/preview/${t.id}`} target="_blank" className="btn-ghost btn-sm">Ver</Link>

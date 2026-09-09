@@ -3,7 +3,9 @@ import { requireEventAccess } from "@/lib/access";
 import { formatMoney } from "@/lib/format";
 import { BUDGET_CATEGORIES, VENDOR_STATUS } from "@/lib/checklists";
 import { addVendorAction, deleteVendorAction, updateVendorAction } from "@/app/dashboard/planner-actions";
-import { FlashFromSearch } from "@/components/ui";
+import Link from "next/link";
+import { planForEvent } from "@/lib/platform";
+import { Alert, FlashFromSearch } from "@/components/ui";
 import { ArrowUpRight, Plus } from "lucide-react";
 import { SubmitButton } from "@/components/dashboard/SubmitButton";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
@@ -19,14 +21,18 @@ export default async function VendorsPage({ params, searchParams }: { params: Pr
   const { id } = await params;
   const sp = await searchParams;
   const { event } = await requireEventAccess(id);
-  const vendors = await db.vendor.findMany({ where: { eventId: id }, orderBy: [{ category: "asc" }, { createdAt: "asc" }] });
+  const [vendors, plan] = await Promise.all([db.vendor.findMany({ where: { eventId: id }, orderBy: [{ category: "asc" }, { createdAt: "asc" }] }), planForEvent(event)]);
   const byCategory = new Map<string, typeof vendors>();
   for (const v of vendors) byCategory.set(v.category, [...(byCategory.get(v.category) ?? []), v]);
 
   return (
     <>
       <FlashFromSearch {...sp} />
-      <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
+      {!plan.canPlan && (
+        <div className="mb-6"><Alert kind="info">O planeamento (tarefas, orçamento e fornecedores) fica disponível depois de <Link href={`/dashboard/events/${id}/activate`} className="font-semibold underline">ativar o evento</Link>. Até lá pode consultar o que já existe.</Alert></div>
+      )}
+      <div className={`grid gap-6 ${plan.canPlan ? "lg:grid-cols-[1fr_2fr]" : ""}`}>
+        {plan.canPlan && (
         <details className="card" open={vendors.length === 0}>
           <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-brand-800"><span>Novo fornecedor</span><span className="icon-circle h-8 w-8 bg-brand-100 text-brand-700"><Plus className="h-4 w-4" aria-hidden /></span></summary>
           <form action={addVendorAction.bind(null, id)} className="mt-4 space-y-3">
@@ -46,6 +52,7 @@ export default async function VendorsPage({ params, searchParams }: { params: Pr
           <SubmitButton className="btn-primary w-full" pendingText="A adicionar…">Adicionar</SubmitButton>
         </form>
         </details>
+        )}
 
         <div className="space-y-4">
           {vendors.length === 0 && <p className="card text-sm text-[#8c7b87]">Registe aqui as propostas que recebe. Ao marcar um fornecedor como contratado, o valor entra automaticamente no orçamento.</p>}

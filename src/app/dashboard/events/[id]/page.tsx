@@ -7,18 +7,30 @@ import { isSmsConfigured } from "@/lib/sms";
 import { EVENT_TYPES, type EventType } from "@/lib/event-types";
 import { FlashFromSearch } from "@/components/ui";
 import { InvitationArt } from "@/components/templates/InvitationArt";
-import { ArrowRight, Check, Circle, ListChecks, Mail, Music, Salad, Users, Wallet } from "lucide-react";
+import { planForEvent } from "@/lib/platform";
+import { activationState } from "@/lib/activation";
+import { ArrowRight, BadgeCheck, Check, Circle, ListChecks, Mail, Music, Salad, Users, Wallet } from "lucide-react";
 
 export default async function EventOverviewPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { id } = await params;
   const sp = await searchParams;
   const { event } = await requireOwnedEvent(id);
-  const [guests, gifts, tasks, budgetItems] = await Promise.all([
+  const [guests, gifts, tasks, budgetItems, plan, lastOrder] = await Promise.all([
     db.guest.findMany({ where: { eventId: id }, orderBy: { respondedAt: "desc" } }),
     db.giftItem.count({ where: { eventId: id } }),
     db.task.findMany({ where: { eventId: id }, orderBy: { dueAt: "asc" } }),
     db.budgetItem.findMany({ where: { eventId: id }, include: { payments: true } }),
+    planForEvent(event),
+    db.order.findFirst({ where: { eventId: id }, orderBy: { createdAt: "desc" }, select: { status: true, reference: true, createdAt: true, adminNote: true } }),
   ]);
+  const activation = activationState(plan, lastOrder);
+  const activationCopy = {
+    NOT_REQUIRED: { label: "Não é necessária", detail: "tudo desbloqueado", tone: "bg-joy-sage/40" },
+    ACTIVE: { label: "Ativado", detail: event.activatedAt ? `desde ${formatEventDate(event.activatedAt, false, event.timezone)}` : "tudo desbloqueado", tone: "bg-joy-sage/40" },
+    PENDING: { label: "Em análise", detail: lastOrder ? `comprovativo ${lastOrder.reference} enviado ${formatEventDate(lastOrder.createdAt, false, event.timezone)}` : "comprovativo enviado", tone: "bg-joy-sun/40" },
+    REJECTED: { label: "Rejeitado", detail: lastOrder?.adminNote ? lastOrder.adminNote : "envie um novo comprovativo", tone: "bg-joy-coral/30" },
+    NOT_REQUESTED: { label: "Por ativar", detail: `${formatMoney(plan.price, plan.currency)} · até ${Number.isFinite(plan.guestLimit) ? plan.guestLimit : "∞"} convidados grátis`, tone: "bg-joy-lilac/40" },
+  }[activation];
   // Convites suspensos não contam para as estatísticas (tal como na lista de eventos).
   const active = guests.filter((g) => !g.suspendedAt);
   const accepted = active.filter((g) => g.rsvpStatus === "ACCEPTED");
@@ -38,6 +50,7 @@ export default async function EventOverviewPage({ params, searchParams }: { para
     { done: !!event.message, label: "Escrever a mensagem de abertura", href: `/dashboard/events/${id}/settings` },
     { done: !!event.coverImageUrl || !!event.accentColor, label: "Escolher foto de capa e cor", href: `/dashboard/events/${id}/design` },
     { done: guests.length > 0, label: "Adicionar os convidados", href: `/dashboard/events/${id}/guests` },
+    ...(activation === "NOT_REQUIRED" ? [] : [{ done: plan.active, label: activation === "PENDING" ? "Ativar evento (comprovativo em análise)" : "Ativar evento", href: `/dashboard/events/${id}/activate` }]),
     { done: sent.length > 0, label: "Enviar os links pessoais", href: `/dashboard/events/${id}/guests` },
     { done: gifts > 0 || !event.giftsEnabled, label: "Criar a lista de presentes", href: `/dashboard/events/${id}/gifts` },
   ];
@@ -84,7 +97,13 @@ export default async function EventOverviewPage({ params, searchParams }: { para
         </div>
       </section>
 
-      <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <Link href={`/dashboard/events/${id}/activate`} className="card transition hover:-translate-y-0.5">
+          <span className={`icon-circle ${activationCopy.tone} text-brand-700`}><BadgeCheck className="h-5 w-5" strokeWidth={1.75} aria-hidden /></span>
+          <p className="font-display mt-4 text-2xl leading-tight">{activationCopy.label}</p>
+          <p className="text-sm text-muted">Ativação · {activationCopy.detail}</p>
+          {!plan.active && activation !== "PENDING" && <p className="mt-1 text-xs text-brand-500">Ativar evento</p>}
+        </Link>
         <Link href={`/dashboard/events/${id}/guests`} className="card transition hover:-translate-y-0.5">
           <span className="icon-circle bg-joy-sky/40 text-brand-700"><Users className="h-5 w-5" strokeWidth={1.75} aria-hidden /></span>
           <p className="font-display mt-4 text-3xl">{accepted.length}<span className="text-base text-muted"> / {active.length}</span></p>

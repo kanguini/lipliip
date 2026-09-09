@@ -6,8 +6,9 @@ import { formatEventDate } from "@/lib/format";
 import { inviteShareMessage, inviteUrl } from "@/lib/urls";
 import { addGuestAction, importGuestsAction, markSentAction, sendSmsInviteAction, toggleSuspendAction } from "@/app/dashboard/actions";
 import { FlashFromSearch, RsvpBadge } from "@/components/ui";
+import { planForEvent } from "@/lib/platform";
 import { CopyButton } from "@/components/dashboard/CopyButton";
-import { Bell, Check, ShieldCheck, Ticket, Plus } from "lucide-react";
+import { Bell, Check, Lock, ShieldCheck, Ticket, Plus } from "lucide-react";
 import { SubmitButton } from "@/components/dashboard/SubmitButton";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 import { isSmsConfigured } from "@/lib/sms";
@@ -16,7 +17,11 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
   const { id } = await params;
   const sp = await searchParams;
   const { event } = await requireOwnedEvent(id);
-  const guests = await db.guest.findMany({ where: { eventId: id }, orderBy: [{ groupName: "asc" }, { name: "asc" }] });
+  const [guests, plan] = await Promise.all([db.guest.findMany({ where: { eventId: id }, orderBy: [{ groupName: "asc" }, { name: "asc" }] }), planForEvent(event)]);
+  const activeCount = guests.filter((g) => !g.suspendedAt).length;
+  const limited = Number.isFinite(plan.guestLimit);
+  const limitReached = limited && activeCount >= plan.guestLimit;
+  const activateHref = `/dashboard/events/${id}/activate`;
   const q = (sp.q ?? "").toLowerCase();
   const filtered = guests.filter((g) => (!q || g.name.toLowerCase().includes(q) || g.phone.includes(q) || (g.groupName ?? "").toLowerCase().includes(q)) && (!sp.status || g.rsvpStatus === sp.status));
   const filterQs = new URLSearchParams({ ...(sp.q ? { q: sp.q } : {}), ...(sp.status ? { status: sp.status } : {}) }).toString();
@@ -29,6 +34,21 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
   return (
     <>
       <FlashFromSearch {...sp} />
+      {(limited || !plan.canShare) && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-joy-sun/30 p-5 text-sm text-brand-900">
+          <div className="flex items-start gap-3">
+            <span className="icon-circle h-9 w-9 bg-white/70 text-brand-700"><Lock className="h-4 w-4" strokeWidth={1.75} aria-hidden /></span>
+            <div>
+              <p className="font-semibold">{limited ? `Plano gratuito: até ${plan.guestLimit} convidados (${activeCount} de ${plan.guestLimit} usados).` : "Evento ainda não ativado."}</p>
+              <p className="mt-0.5">
+                {!plan.canShare && limited ? "Ative o evento para enviar os convites e adicionar mais convidados." : !plan.canShare ? "Ative o evento para enviar os convites." : "Ative o evento para adicionar mais convidados."}
+                {limitReached ? " Já atingiu o limite." : ""}
+              </p>
+            </div>
+          </div>
+          <Link href={activateHref} className="btn-primary btn-sm">Ativar evento</Link>
+        </div>
+      )}
       <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
         <div className="space-y-6">
           <details className="card" open={guests.length === 0}>
@@ -121,11 +141,17 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        <a href={wa} target="_blank" rel="noreferrer" className="btn-secondary btn-sm">WhatsApp</a>
-                        {smsReady && <form action={sendSmsInviteAction.bind(null, g.id, returnTo)}><SubmitButton className="btn-secondary btn-sm" pendingText="A enviar…">SMS</SubmitButton></form>}
-                        <CopyButton text={url} />
+                        {plan.canShare ? (
+                          <>
+                            <a href={wa} target="_blank" rel="noreferrer" className="btn-secondary btn-sm">WhatsApp</a>
+                            {smsReady && <form action={sendSmsInviteAction.bind(null, g.id, returnTo)}><SubmitButton className="btn-secondary btn-sm" pendingText="A enviar…">SMS</SubmitButton></form>}
+                            <CopyButton text={url} />
+                          </>
+                        ) : (
+                          <Link href={activateHref} className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-3 py-1.5 text-xs text-brand-700"><Lock className="h-3 w-3" aria-hidden />Ative o evento para enviar os convites</Link>
+                        )}
                         <form action={toggleSuspendAction.bind(null, g.id, returnTo)}>{g.suspendedAt ? <button className="btn-ghost btn-sm" title="Reativar convite">Reativar</button> : <ConfirmButton className="btn-ghost btn-sm" message={`Suspender o convite de ${g.name}? O acesso é cortado e as reservas de presentes são libertadas.`}>Suspender</ConfirmButton>}</form>
-                        {!g.sentAt && (
+                        {!g.sentAt && plan.canShare && (
                           <form action={markSentAction.bind(null, g.id, "manual", returnTo)}><button className="btn-ghost btn-sm" title="Marcar como enviado"><Check className="h-3.5 w-3.5" aria-hidden />enviado</button></form>
                         )}
                       </div>
@@ -135,7 +161,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
               })}
             </ul>
           )}
-          {pendingSent.length > 0 && (
+          {pendingSent.length > 0 && plan.canShare && (
             <details className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
               <summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-amber-900"><Bell className="h-4 w-4" aria-hidden />Lembretes: {pendingSent.length} convidado(s) receberam o convite e ainda não responderam</summary>
               <ul className="mt-3 space-y-2 text-sm">
@@ -149,7 +175,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
             </details>
           )}
           <p className="mt-4 text-xs text-stone-500">
-            Dica: o botão WhatsApp abre a conversa com a mensagem e o link pessoal já escritos. Depois de enviar, marque como enviado. O link só abre depois de o convidado validar o telemóvel.{!smsReady && " O envio direto por SMS fica disponível quando configurar um fornecedor de SMS."}
+            {!plan.canShare && "Os convidados só conseguem abrir o convite depois de o evento ser ativado. "}Dica: o botão WhatsApp abre a conversa com a mensagem e o link pessoal já escritos. Depois de enviar, marque como enviado. O link só abre depois de o convidado validar o telemóvel.{!smsReady && " O envio direto por SMS fica disponível quando configurar um fornecedor de SMS."}
           </p>
         </div>
       </div>
