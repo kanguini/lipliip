@@ -13,19 +13,25 @@ CREATE INDEX "EventMember_userId_idx" ON "EventMember"("userId");
 -- CreateIndex
 CREATE INDEX "Payment_budgetItemId_idx" ON "Payment"("budgetItemId");
 
--- Duplicados criados por condições de corrida antes do índice único: remove apenas cópias posteriores
--- que nunca foram usadas (não enviadas, sem resposta, sem abertura, sem check-in). Se restarem duplicados com dados,
--- o índice abaixo falha de propósito para serem resolvidos à mão em vez de perder dados.
+-- Duplicados criados por condições de corrida antes do índice único: remove apenas cópias que nunca foram
+-- usadas (não enviadas, sem resposta, sem abertura, sem check-in) quando existe outra cópia usada, ou, entre
+-- cópias todas por usar, mantém a mais antiga. Se restarem duplicados ambos com dados, o índice abaixo falha
+-- de propósito para serem resolvidos à mão em vez de perder dados (ver README, "Migrações").
 DELETE FROM "Guest" g
-USING "Guest" first
-WHERE first."eventId" = g."eventId"
-  AND first."phone" = g."phone"
-  AND first."id" <> g."id"
-  AND (first."createdAt", first."id") < (g."createdAt", g."id")
-  AND g."rsvpStatus" = 'PENDING'
+WHERE g."rsvpStatus" = 'PENDING'
   AND g."sentAt" IS NULL
   AND g."firstOpenedAt" IS NULL
-  AND g."checkedInAt" IS NULL;
+  AND g."checkedInAt" IS NULL
+  AND EXISTS (
+    SELECT 1 FROM "Guest" o
+    WHERE o."eventId" = g."eventId"
+      AND o."phone" = g."phone"
+      AND o."id" <> g."id"
+      AND (
+        NOT (o."rsvpStatus" = 'PENDING' AND o."sentAt" IS NULL AND o."firstOpenedAt" IS NULL AND o."checkedInAt" IS NULL)
+        OR (o."createdAt", o."id") < (g."createdAt", g."id")
+      )
+  );
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Guest_eventId_phone_key" ON "Guest"("eventId", "phone");

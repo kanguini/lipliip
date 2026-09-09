@@ -13,6 +13,13 @@ try {
   const [{ has_events, has_migrations }] = await db.$queryRawUnsafe(
     `SELECT to_regclass('"Event"') IS NOT NULL AS has_events, to_regclass('_prisma_migrations') IS NOT NULL AS has_migrations`,
   );
+  if (has_events) {
+    // Aviso antecipado: duplicados de telefone com dados fazem falhar a migração 0002 (índice único).
+    const dups = await db.$queryRawUnsafe(
+      `SELECT "eventId", "phone", count(*)::int AS n FROM "Guest" GROUP BY 1, 2 HAVING count(*) > 1 LIMIT 20`,
+    );
+    if (dups.length > 0) console.warn("Atenção: convidados com o mesmo telefone no mesmo evento (a migração 0002 só remove cópias nunca usadas):", dups);
+  }
   if (has_events && !has_migrations) {
     console.log("Base de dados existente sem histórico de migrações: a marcar a migração inicial como aplicada.");
     try {
