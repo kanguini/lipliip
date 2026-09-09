@@ -10,28 +10,17 @@ import { generateCheckinCode, generateInviteToken } from "@/lib/tokens";
 import { parseGuestImport } from "@/lib/csv";
 import { SUPPORTED_COUNTRIES } from "@/lib/phone";
 import { parseGalleryText, parsePartyText, parseProgramText, parseStoryText } from "@/lib/event-types";
-import { getSmsProvider } from "@/lib/sms";
+import { getSmsProvider, isSmsConfigured } from "@/lib/sms";
+import { rateLimit } from "@/lib/rate-limit";
+import { flash, str, opt, bool, parseMoney } from "@/lib/form";
 import { inviteShareMessage, inviteUrl } from "@/lib/urls";
 import { formatTime } from "@/lib/format";
 import { TEMPLATES } from "@/lib/templates";
 import { httpUrlOrNull } from "@/lib/validation";
-import { accessibleEventWhere, requireEventAccess } from "@/lib/access";
+import { accessibleEventWhere, editableEventWhere, requireEventAccess } from "@/lib/access";
 import { buildChecklist } from "@/lib/checklists";
 import { COUNTRY_TIMEZONE, isValidTimezone, localInputToDate } from "@/lib/timezone";
 
-function flash(path: string, kind: "ok" | "error", message: string): never {
-  redirect(`${path}?${kind}=${encodeURIComponent(message)}`);
-}
-
-function str(fd: FormData, key: string, max = 500) {
-  return String(fd.get(key) ?? "").trim().slice(0, max);
-}
-function opt(fd: FormData, key: string, max = 500) {
-  return str(fd, key, max) || null;
-}
-function bool(fd: FormData, key: string) {
-  return fd.get(key) === "on" || fd.get(key) === "true";
-}
 function dateOrNull(v: string, tz: string) {
   if (!v) return null;
   return localInputToDate(v, tz);
@@ -97,23 +86,34 @@ function eventDataFromForm(fd: FormData) {
 export async function createEventAction(fd: FormData) {
   const user = await requireUser();
   const result = eventDataFromForm(fd);
-  if (result.error !== undefined) flash("/dashboard/events/new", "error", result.error);
-  const event = await db.event.create({ data: { ...result.data, ownerId: user.id } });
-  // Checklist inicial com prazos calculados a partir da data do evento.
-  await db.task.createMany({ data: buildChecklist(event.type, event.date).map((t) => ({ ...t, eventId: event.id })) });
+  if (result.error !== undefined) flash(`/dashboard/events/new?type=${encodeURIComponent(str(fd, "type", 20))}&template=${encodeURIComponent(str(fd, "templateId", 40))}`, "error", result.error);
+  // Evento e checklist inicial (prazos calculados a partir da data) numa única escrita.
+  const event = await db.event.create({
+    data: { ...result.data, ownerId: user.id, tasks: { createMany: { data: buildChecklist(result.data.type, result.data.date) } } },
+  });
   redirect(`/dashboard/events/${event.id}?ok=${encodeURIComponent("Evento criado! Já tem uma checklist de tarefas com prazos. Depois, adicione os convidados.")}`);
 }
 
 export async function updateEventAction(eventId: string, fd: FormData) {
-  await requireOwnedEvent(eventId);
+  const { event } = await requireOwnedEvent(eventId);
   const path = `/dashboard/events/${eventId}/settings`;
   const result = eventDataFromForm(fd);
   if (result.error !== undefined) flash(path, "error", result.error);
   // O design (template, cor, capa) só é alterado no separador Design.
-  const { templateId: _t, accentColor: _a, coverImageUrl: _c, ...data } = result.data;
-  await db.event.update({ where: { id: eventId }, data });
+  const data = { ...result.data };
+  delete (data as Partial<typeof data>).templateId;
+  delete (data as Partial<typeof data>).accentColor;
+  delete (data as Partial<typeof data>).coverImageUrl;
+  const deltaMs = data.date.getTime() - event.date.getTime();
+  await db.$transaction(async (tx) => {
+    await tx.event.update({ where: { id: eventId }, data });
+    // Se a data mudou, as tarefas por fazer acompanham (mantêm a mesma antecedência).
+    if (deltaMs !== 0) {
+      await tx.$executeRaw`UPDATE "Task" SET "dueAt" = "dueAt" + (${deltaMs}::bigint * interval '1 millisecond') WHERE "eventId" = ${eventId} AND "completedAt" IS NULL AND "dueAt" IS NOT NULL`;
+    }
+  });
   revalidatePath(`/dashboard/events/${eventId}`);
-  flash(path, "ok", "Alterações guardadas.");
+  flash(path, "ok", deltaMs !== 0 ? "Alterações guardadas. Os prazos das tarefas por fazer foram ajustados à nova data." : "Alterações guardadas.");
 }
 
 export async function updateDesignAction(eventId: string, fd: FormData) {
@@ -134,7 +134,7 @@ export async function updateContentAction(eventId: string, fd: FormData) {
   const path = `/dashboard/events/${eventId}/content`;
   const musicRaw = str(fd, "musicUrl", 500);
   const musicUrl = httpUrlOrNull(musicRaw);
-  if (musicRaw && !musicUrl) flash(path, "error", "O link da música tem de ser um URL http(s) válido.");
+  const musicWarning = musicRaw && !musicUrl ? " O link da música foi ignorado: tem de começar por http:// ou https://." : "";
   await db.event.update({
     where: { id: eventId },
     data: {
@@ -149,7 +149,7 @@ export async function updateContentAction(eventId: string, fd: FormData) {
     },
   });
   revalidatePath(`/dashboard/events/${eventId}`);
-  flash(path, "ok", "Conteúdo guardado.");
+  flash(path, musicWarning ? "error" : "ok", `Conteúdo guardado.${musicWarning}`);
 }
 
 export async function assignTableAction(eventId: string, fd: FormData) {
@@ -170,6 +170,8 @@ export async function deleteEventAction(eventId: string) {
 
 const MAX_COMPANIONS = 20;
 
+class DuplicatePhoneError extends Error {}
+
 async function createGuest(eventId: string, input: { name: string; phone: string; maxCompanions: number; groupName?: string | null; email?: string | null; tableNumber?: string | null }) {
   // Repete se, por azar, o código de check-in ou o token colidirem com outro já existente.
   for (let attempt = 0; ; attempt++) {
@@ -188,7 +190,9 @@ async function createGuest(eventId: string, input: { name: string; phone: string
         },
       });
     } catch (e) {
-      if ((e as { code?: string }).code !== "P2002" || attempt >= 4) throw e;
+      const err = e as { code?: string; meta?: { target?: string[] } };
+      if (err.code === "P2002" && err.meta?.target?.includes("phone")) throw new DuplicatePhoneError();
+      if (err.code !== "P2002" || attempt >= 4) throw e;
     }
   }
 }
@@ -202,14 +206,19 @@ export async function addGuestAction(eventId: string, fd: FormData) {
   if (!phone) flash(path, "error", "Telefone inválido. Use o formato internacional (+351 ...) ou o número nacional.");
   const duplicate = await db.guest.findFirst({ where: { eventId, phone } });
   if (duplicate) flash(path, "error", `Já existe um convidado com este telefone: ${duplicate.name}.`);
-  await createGuest(eventId, {
-    name,
-    phone,
-    maxCompanions: Math.max(0, Number.parseInt(str(fd, "maxCompanions", 3), 10) || 0),
-    groupName: opt(fd, "groupName", 60),
-    email: opt(fd, "email", 120),
-    tableNumber: opt(fd, "tableNumber", 20),
-  });
+  try {
+    await createGuest(eventId, {
+      name,
+      phone,
+      maxCompanions: Math.max(0, Number.parseInt(str(fd, "maxCompanions", 3), 10) || 0),
+      groupName: opt(fd, "groupName", 60),
+      email: opt(fd, "email", 120),
+      tableNumber: opt(fd, "tableNumber", 20),
+    });
+  } catch (e) {
+    if (e instanceof DuplicatePhoneError) flash(path, "error", "Já existe um convidado com este telefone.");
+    throw e;
+  }
   flash(path, "ok", `${name} adicionado(a).`);
 }
 
@@ -231,8 +240,13 @@ export async function importGuestsAction(eventId: string, fd: FormData) {
       continue;
     }
     existing.add(phone);
-    await createGuest(eventId, { name: row.name, phone, maxCompanions: row.maxCompanions, groupName: row.groupName, email: row.email });
-    created++;
+    try {
+      await createGuest(eventId, { name: row.name, phone, maxCompanions: row.maxCompanions, groupName: row.groupName, email: row.email });
+      created++;
+    } catch (e) {
+      if (e instanceof DuplicatePhoneError) problems.push(`linha ${row.line}: telefone repetido (${row.name})`);
+      else throw e;
+    }
   }
   const summary = `${created} convidado(s) importado(s).` + (problems.length ? ` Ignorados: ${problems.slice(0, 8).join("; ")}${problems.length > 8 ? "…" : ""}` : "");
   flash(path, problems.length && !created ? "error" : "ok", summary);
@@ -240,7 +254,7 @@ export async function importGuestsAction(eventId: string, fd: FormData) {
 
 async function requireOwnedGuest(guestId: string) {
   const user = await requireUser();
-  const guest = await db.guest.findFirst({ where: { id: guestId, event: accessibleEventWhere(user.id) }, include: { event: true } });
+  const guest = await db.guest.findFirst({ where: { id: guestId, event: editableEventWhere(user.id) }, include: { event: true } });
   if (!guest) redirect("/dashboard");
   return guest;
 }
@@ -287,6 +301,7 @@ export async function regenerateTokenAction(guestId: string) {
   const guest = await requireOwnedGuest(guestId);
   await db.$transaction([
     db.guestDevice.deleteMany({ where: { guestId } }),
+    db.otpCode.updateMany({ where: { guestId, consumedAt: null }, data: { consumedAt: new Date() } }),
     db.guest.update({ where: { id: guestId }, data: { token: generateInviteToken(), checkinCode: generateCheckinCode(), sentAt: null, sentVia: null, verifiedAt: null } }),
   ]);
   flash(`/dashboard/events/${guest.eventId}/guests/${guestId}`, "ok", "Novo link gerado. O link anterior foi revogado.");
@@ -300,18 +315,22 @@ export async function toggleSuspendAction(guestId: string, returnTo: string | nu
   } else {
     await db.$transaction([
       db.guestDevice.deleteMany({ where: { guestId } }),
+      db.otpCode.updateMany({ where: { guestId, consumedAt: null }, data: { consumedAt: new Date() } }),
       db.giftReservation.deleteMany({ where: { guestId } }),
       db.guest.update({ where: { id: guestId }, data: { suspendedAt: new Date() } }),
     ]);
   }
   revalidatePath(`/dashboard/events/${guest.eventId}/guests`);
-  redirect(returnTo ?? `/dashboard/events/${guest.eventId}/guests/${guestId}?ok=${encodeURIComponent(guest.suspendedAt ? "Convite reativado." : "Convite suspenso.")}`);
+  flash(returnTo ?? `/dashboard/events/${guest.eventId}/guests/${guestId}`, "ok", guest.suspendedAt ? `Convite de ${guest.name} reativado.` : `Convite de ${guest.name} suspenso.`);
 }
 
 /** Remove os dispositivos autorizados: o convidado terá de validar o telemóvel de novo. */
 export async function resetDevicesAction(guestId: string) {
   const guest = await requireOwnedGuest(guestId);
-  await db.guestDevice.deleteMany({ where: { guestId } });
+  await db.$transaction([
+    db.guestDevice.deleteMany({ where: { guestId } }),
+    db.otpCode.updateMany({ where: { guestId, consumedAt: null }, data: { consumedAt: new Date() } }),
+  ]);
   flash(`/dashboard/events/${guest.eventId}/guests/${guestId}`, "ok", "Dispositivos removidos.");
 }
 
@@ -319,14 +338,23 @@ export async function markSentAction(guestId: string, via: string, returnTo?: st
   const guest = await requireOwnedGuest(guestId);
   await db.guest.update({ where: { id: guestId }, data: { sentAt: new Date(), sentVia: via.slice(0, 20) } });
   revalidatePath(`/dashboard/events/${guest.eventId}/guests`);
-  if (returnTo) redirect(returnTo);
+  if (returnTo) flash(returnTo, "ok", `${guest.name}: marcado como enviado.`);
 }
 
-export async function sendSmsInviteAction(guestId: string) {
+export async function sendSmsInviteAction(guestId: string, returnTo?: string | null, _fd?: FormData) {
   const guest = await requireOwnedGuest(guestId);
-  const path = `/dashboard/events/${guest.eventId}/guests`;
+  const path = returnTo ?? `/dashboard/events/${guest.eventId}/guests`;
+  if (!isSmsConfigured()) flash(path, "error", "O envio de SMS não está configurado. Use o WhatsApp ou copie o link.");
+  const user = await requireUser();
+  if (!rateLimit(`sms-guest:${guestId}`, 1, 10 * 60_000).ok) flash(path, "error", `Já foi enviado um SMS a ${guest.name} há menos de 10 minutos.`);
+  if (!rateLimit(`sms-user:${user.id}`, 200, 24 * 60 * 60_000).ok) flash(path, "error", "Limite diário de SMS atingido para a sua conta. Use o WhatsApp para os restantes convidados.");
   const body = inviteShareMessage({ guestName: guest.name, hostNames: guest.event.hostNames, eventTitle: guest.event.title, url: inviteUrl(guest.token) });
-  const res = await getSmsProvider().send(guest.phone, body);
+  let res: { ok: boolean; error?: string };
+  try {
+    res = await getSmsProvider().send(guest.phone, body);
+  } catch (e) {
+    res = { ok: false, error: (e as Error).message };
+  }
   if (!res.ok) {
     console.error("Falha ao enviar SMS de convite:", res.error);
     flash(path, "error", "Não foi possível enviar o SMS. Verifique a configuração do fornecedor de SMS.");
@@ -341,6 +369,7 @@ export async function checkinAction(eventId: string, fd: FormData) {
   const code = str(fd, "code", 12).toUpperCase().replace(/[^A-Z0-9]/g, "");
   const guest = await db.guest.findFirst({ where: { eventId, checkinCode: code } });
   if (!guest) flash(path, "error", `Código ${code || "(vazio)"} não encontrado.`);
+  if (guest.suspendedAt) flash(path, "error", `O convite de ${guest.name} está suspenso. Confirme com os anfitriões antes de deixar entrar.`);
   // Atualização condicional: se dois dispositivos lerem o mesmo QR ao mesmo tempo, só um regista a entrada.
   const { count } = await db.guest.updateMany({ where: { id: guest.id, checkedInAt: null }, data: { checkedInAt: new Date() } });
   if (count === 0) {
@@ -368,14 +397,15 @@ export async function addGiftAction(eventId: string, fd: FormData) {
   const name = str(fd, "name", 120);
   if (name.length < 2) flash(path, "error", "Indique o nome do presente.");
   const kind = str(fd, "kind", 10) === "CASH" ? "CASH" : "PRODUCT";
-  const price = Number.parseFloat(str(fd, "price", 12).replace(",", "."));
+  const price = parseMoney(str(fd, "price", 20));
+  if (str(fd, "price", 20) && price == null) flash(path, "error", "Preço inválido. Use por exemplo 89,90 ou 1250.");
   await db.giftItem.create({
     data: {
       eventId,
       kind,
       name,
       description: opt(fd, "description", 300),
-      price: Number.isFinite(price) && price > 0 ? price : null,
+      price: price && price > 0 ? price : null,
       imageUrl: httpUrlOrNull(str(fd, "imageUrl", 500)),
       storeUrl: httpUrlOrNull(str(fd, "storeUrl", 500)),
       quantity: kind === "CASH" ? 1 : Math.max(1, Number.parseInt(str(fd, "quantity", 4), 10) || 1),
@@ -386,7 +416,7 @@ export async function addGiftAction(eventId: string, fd: FormData) {
 
 export async function deleteGiftAction(giftId: string) {
   const user = await requireUser();
-  const gift = await db.giftItem.findFirst({ where: { id: giftId, event: accessibleEventWhere(user.id) } });
+  const gift = await db.giftItem.findFirst({ where: { id: giftId, event: editableEventWhere(user.id) } });
   if (!gift) redirect("/dashboard");
   await db.giftItem.delete({ where: { id: giftId } });
   flash(`/dashboard/events/${gift.eventId}/gifts`, "ok", "Presente removido.");
@@ -396,7 +426,7 @@ export async function deleteGiftAction(giftId: string) {
 
 export async function deleteGuestbookEntryAction(entryId: string) {
   const user = await requireUser();
-  const entry = await db.guestbookEntry.findFirst({ where: { id: entryId, event: accessibleEventWhere(user.id) } });
+  const entry = await db.guestbookEntry.findFirst({ where: { id: entryId, event: editableEventWhere(user.id) } });
   if (!entry) redirect("/dashboard");
   await db.guestbookEntry.delete({ where: { id: entryId } });
   flash(`/dashboard/events/${entry.eventId}/guestbook`, "ok", "Mensagem removida.");

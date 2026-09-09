@@ -32,6 +32,3 @@ export function formatMoney(value: number, currency = "EUR"): string {
   }
 }
 
-export function daysUntil(date: Date): number {
-  return Math.ceil((date.getTime() - Date.now()) / 86_400_000);
-}

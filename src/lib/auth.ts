@@ -3,7 +3,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { db } from "./db";
-import { generateSessionToken } from "./tokens";
+import { generateSessionToken, sha256 } from "./tokens";
 
 const SESSION_COOKIE = "lp_session";
 const SESSION_DAYS = 30;
@@ -19,7 +19,11 @@ export async function verifyPassword(password: string, hash: string) {
 export async function createSession(userId: string) {
   const token = generateSessionToken();
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 86_400_000);
-  await db.session.create({ data: { token, userId, expiresAt } });
+  // Só o hash fica na base de dados; o cookie leva o token original.
+  await db.$transaction([
+    db.session.deleteMany({ where: { userId, expiresAt: { lt: new Date() } } }),
+    db.session.create({ data: { token: sha256(token), userId, expiresAt } }),
+  ]);
   const store = await cookies();
   store.set(SESSION_COOKIE, token, {
     httpOnly: true,
@@ -33,7 +37,7 @@ export async function createSession(userId: string) {
 export async function destroySession() {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
-  if (token) await db.session.deleteMany({ where: { token } });
+  if (token) await db.session.deleteMany({ where: { token: sha256(token) } });
   store.delete(SESSION_COOKIE);
 }
 
@@ -41,7 +45,7 @@ export const getCurrentUser = cache(async () => {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
   if (!token) return null;
-  const session = await db.session.findUnique({ where: { token }, include: { user: true } });
+  const session = await db.session.findUnique({ where: { token: sha256(token) }, include: { user: true } });
   if (!session || session.expiresAt < new Date()) return null;
   return session.user;
 });
@@ -52,7 +56,7 @@ export async function requireUser() {
   return user;
 }
 
-/** Garante que o utilizador é dono ou editor do evento (ver lib/access.ts para papéis). */
+/** Alias mantido para as páginas: dono ou editor do evento (ver lib/access.ts). */
 export async function requireOwnedEvent(eventId: string) {
   const { requireEventAccess } = await import("./access");
   return requireEventAccess(eventId);

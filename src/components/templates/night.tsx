@@ -10,7 +10,7 @@ export function NightTemplate({ event, guestName, children }: TemplateProps) {
       <div className="mx-auto max-w-2xl px-5 py-12 text-center">
         <Greeting guestName={guestName} />
         <div className="invite-accent mt-8 text-xs font-semibold uppercase tracking-[0.4em]">✦ {eventKicker(event)} ✦</div>
-        <h1 className="invite-accent mt-5 text-6xl leading-tight sm:text-7xl">{event.hostNames}</h1>
+        <h1 className="invite-accent mt-5 text-5xl leading-tight [overflow-wrap:anywhere] text-balance sm:text-7xl">{event.hostNames}</h1>
         <div className="invite-divider" />
         {event.message && <p className="mx-auto max-w-md leading-relaxed opacity-90">{event.message}</p>}
         <CoverImage src={event.coverImageUrl} alt={event.title} className="mx-auto mt-8 h-80 w-full rounded-2xl ring-1 ring-white/10" />

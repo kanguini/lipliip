@@ -2,6 +2,8 @@ import { db } from "@/lib/db";
 import { requireEventAccess } from "@/lib/access";
 import { addMemberAction, leaveEventAction, removeMemberAction } from "@/app/dashboard/planner-actions";
 import { FlashFromSearch } from "@/components/ui";
+import { SubmitButton } from "@/components/dashboard/SubmitButton";
+import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 
 export default async function TeamPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { id } = await params;
@@ -28,13 +30,13 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                 <option value="STAFF">Receção: só faz check-in no dia</option>
               </select>
             </div>
-            <button className="btn-primary w-full">Adicionar</button>
+            <SubmitButton className="btn-primary w-full" pendingText="A adicionar…">Adicionar</SubmitButton>
           </form>
         ) : (
           <form action={leaveEventAction.bind(null, id)} className="card">
             <h2 className="font-semibold">O seu acesso</h2>
             <p className="mt-1 text-sm text-[#8c7b87]">É {role === "EDITOR" ? "editor" : "receção"} deste evento. Só o dono pode gerir a equipa.</p>
-            <button className="btn-danger btn-sm mt-3">Sair do evento</button>
+            <ConfirmButton className="btn-danger btn-sm mt-3" message="Sair deste evento? Deixará de o ver na sua lista.">Sair do evento</ConfirmButton>
           </form>
         )}
         <div className="card">
@@ -49,13 +51,13 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                 <span><strong>{m.user.name}</strong> <span className="text-xs text-[#8c7b87]">{m.user.email}</span>{m.userId === user.id && <span className="text-xs text-brand-700"> (você)</span>}</span>
                 <span className="flex items-center gap-2">
                   <span className="badge bg-[#eeeaee] text-[#6d5e69]">{m.role === "STAFF" ? "Receção" : "Editor"}</span>
-                  {role === "OWNER" && <form action={removeMemberAction.bind(null, id, m.id)}><button className="text-xs text-[#a1939c] hover:text-red-700">remover</button></form>}
+                  {role === "OWNER" && <form action={removeMemberAction.bind(null, id, m.id)}><ConfirmButton className="text-xs text-[#a1939c] hover:text-red-700" message={`Retirar o acesso de ${m.user.name} a este evento?`}>remover</ConfirmButton></form>}
                 </span>
               </li>
             ))}
           </ul>
           <p className="mt-4 rounded-lg bg-brand-50 p-3 text-xs text-[#8c7b87]">
-            Cerimonialistas: crie a sua conta, peça aos clientes que o adicionem como editor (ou crie o evento e adicione-os a eles). Todos os eventos em que participa aparecem em "As suas celebrações".
+            Cerimonialistas: crie a sua conta, peça aos clientes que o adicionem como editor (ou crie o evento e adicione-os a eles). Todos os eventos em que participa aparecem em &ldquo;As suas celebrações&rdquo;.
           </p>
         </div>
       </div>

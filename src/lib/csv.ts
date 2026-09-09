@@ -1,3 +1,15 @@
+import { csvSafe } from "./validation";
+
+/** Célula CSV entrecomada quando necessário e protegida contra fórmulas. */
+export function csvCell(v: string | number | null | undefined): string {
+  const s = csvSafe(v == null ? "" : String(v));
+  return /[";\n\r\t']/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+/** O Excel converteria "+351912..." em número; a fórmula de texto mantém o sinal + e os zeros. */
+export function csvPhoneCell(e164: string): string {
+  return `"=""${e164.replace(/[^\d+]/g, "")}"""`;
+}
+
 export type ImportedGuestRow = {
   line: number;
   name: string;

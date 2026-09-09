@@ -3,6 +3,7 @@ import { requireOwnedEvent } from "@/lib/auth";
 import { formatDateTimeShort } from "@/lib/format";
 import { deleteGuestbookEntryAction } from "@/app/dashboard/actions";
 import { FlashFromSearch } from "@/components/ui";
+import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 
 export default async function GuestbookPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { id } = await params;
@@ -24,7 +25,7 @@ export default async function GuestbookPage({ params, searchParams }: { params: 
                   <p className="italic">“{e.message}”</p>
                   <p className="mt-1 text-xs text-stone-500">— {e.guest.name}, {formatDateTimeShort(e.createdAt, event.timezone)}</p>
                 </div>
-                <form action={deleteGuestbookEntryAction.bind(null, e.id)}><button className="btn-ghost btn-sm">Remover</button></form>
+                <form action={deleteGuestbookEntryAction.bind(null, e.id)}><ConfirmButton className="btn-ghost btn-sm" message={`Remover a mensagem de ${e.guest.name}? Não é possível recuperar.`}>Remover</ConfirmButton></form>
               </li>
             ))}
           </ul>

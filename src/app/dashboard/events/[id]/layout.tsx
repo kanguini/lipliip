@@ -19,7 +19,7 @@ export default async function EventLayout({ children, params }: { children: Reac
         </div>
         <Link href={`/dashboard/events/${event.id}/preview`} className="btn-secondary btn-sm"><Eye className="h-4 w-4" aria-hidden />Ver convite</Link>
       </div>
-      {role === "STAFF" ? <p className="border-b border-brand-200/70 pb-2 text-sm text-[#8c7b87]">Acesso de receção: check-in no dia do evento.</p> : <EventTabs eventId={event.id} />}
+      {role === "STAFF" ? <p className="pb-2 text-sm text-muted">Acesso de receção: <Link href={`/dashboard/events/${event.id}/checkin`} className="underline">check-in no dia do evento</Link>.</p> : <EventTabs eventId={event.id} />}
       <div className="mt-6">{children}</div>
     </>
   );

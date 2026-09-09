@@ -9,6 +9,7 @@ import { TemplateCard } from "@/components/dashboard/TemplatePicker";
 import { InvitationArt } from "@/components/templates/InvitationArt";
 import { EventIcon } from "@/components/ui/EventIcon";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { SubmitButton } from "@/components/dashboard/SubmitButton";
 
 type Draft = { hostNames: string; date: string; venueName: string; message: string };
 
@@ -91,30 +92,30 @@ export function NewEventWizard({ initialType, initialTemplate }: { initialType?:
             <h2 className="display-title text-3xl">Só o <em>essencial</em>.</h2>
             <p className="-mt-3 text-sm text-muted">Programa, lista de presentes e o resto ficam para depois, quando quiser.</p>
             <div>
-              <label className="label">{kind.hostLabel}</label>
-              <input name="hostNames" className="input" required placeholder={kind.hostPlaceholder} autoFocus />
+              <label className="label" htmlFor="hostNames">{kind.hostLabel}</label>
+              <input id="hostNames" name="hostNames" className="input" required minLength={1} maxLength={120} placeholder={kind.hostPlaceholder} autoFocus />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="label">Data e hora</label>
-                <input name="date" type="datetime-local" className="input" required />
+                <label className="label" htmlFor="date">Data e hora</label>
+                <input id="date" name="date" type="datetime-local" className="input" required />
               </div>
               <div>
-                <label className="label">Local</label>
-                <input name="venueName" className="input" required placeholder="Quinta da Serra, Sintra" />
+                <label className="label" htmlFor="venueName">Local</label>
+                <input id="venueName" name="venueName" className="input" required minLength={2} maxLength={120} placeholder="Quinta da Serra, Sintra" />
               </div>
             </div>
             <div>
-              <label className="label">Mensagem de abertura <span className="font-normal text-muted">(opcional)</span></label>
-              <textarea name="message" className="input" rows={3} placeholder="Com muita alegria convidamos-te para celebrar connosco…" />
+              <label className="label" htmlFor="message">Mensagem de abertura <span className="font-normal text-muted">(opcional)</span></label>
+              <textarea id="message" name="message" className="input" rows={3} placeholder="Com muita alegria convidamos-te para celebrar connosco…" />
             </div>
             <div>
-              <label className="label">País dos telefones dos convidados</label>
-              <select name="country" className="input" defaultValue="PT">{SUPPORTED_COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}</select>
+              <label className="label" htmlFor="country">País dos telefones dos convidados</label>
+              <select id="country" name="country" className="input" defaultValue="PT">{SUPPORTED_COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}</select>
             </div>
             <div className="flex items-center justify-between pt-2">
               <button type="button" className="btn-ghost" onClick={() => setStep(2)}><ArrowLeft className="h-4 w-4" aria-hidden />Voltar</button>
-              <button className="btn-primary">Criar convite <ArrowRight className="h-4 w-4" aria-hidden /></button>
+              <SubmitButton pendingText="A criar…">Criar convite <ArrowRight className="h-4 w-4" aria-hidden /></SubmitButton>
             </div>
           </div>
           <aside className="lg:sticky lg:top-6 lg:self-start">

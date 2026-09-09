@@ -33,7 +33,8 @@ export default async function EventOverviewPage({ params, searchParams }: { para
 
   // Próximos passos, por ordem natural
   const steps = [
-    { done: !!event.message, label: "Personalizar o convite (mensagem, foto, cor)", href: `/dashboard/events/${id}/design` },
+    { done: !!event.message, label: "Escrever a mensagem de abertura", href: `/dashboard/events/${id}/settings` },
+    { done: !!event.coverImageUrl || !!event.accentColor, label: "Escolher foto de capa e cor", href: `/dashboard/events/${id}/design` },
     { done: guests.length > 0, label: "Adicionar os convidados", href: `/dashboard/events/${id}/guests` },
     { done: sent.length > 0, label: "Enviar os links pessoais", href: `/dashboard/events/${id}/guests` },
     { done: gifts > 0 || !event.giftsEnabled, label: "Criar a lista de presentes", href: `/dashboard/events/${id}/gifts` },

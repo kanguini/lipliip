@@ -4,6 +4,7 @@ import { templatesForType, getTemplate } from "@/lib/templates";
 import { updateDesignAction } from "@/app/dashboard/actions";
 import { FlashFromSearch } from "@/components/ui";
 import { TemplateCard } from "@/components/dashboard/TemplatePicker";
+import { SubmitButton } from "@/components/dashboard/SubmitButton";
 
 export default async function DesignPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { id } = await params;
@@ -52,7 +53,7 @@ export default async function DesignPage({ params, searchParams }: { params: Pro
         </div>
 
         <div className="flex gap-2">
-          <button className="btn-primary">Guardar design</button>
+          <SubmitButton>Guardar design</SubmitButton>
           <Link href={`/dashboard/events/${id}/preview`} className="btn-secondary">Ver convite</Link>
         </div>
       </form>

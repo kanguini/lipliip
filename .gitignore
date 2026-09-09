@@ -9,3 +9,8 @@ coverage
 next-env.d.ts
 prisma/*.db
 prisma/*.db-journal
+
+# Ficheiros gerados localmente
+*.tsbuildinfo
+shot-*.png
+server.log

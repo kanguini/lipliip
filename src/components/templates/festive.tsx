@@ -23,7 +23,7 @@ export function FestiveTemplate({ event, guestName, children }: TemplateProps) {
       <div className="relative mx-auto max-w-2xl px-5 py-10 text-center">
         <Greeting guestName={guestName} />
         <p className="invite-accent mt-6 text-lg font-bold uppercase tracking-widest">{eventKicker(event)}</p>
-        <h1 className="mt-3 text-6xl font-bold leading-none sm:text-7xl">{event.hostNames}</h1>
+        <h1 className="mt-3 text-5xl font-bold leading-none [overflow-wrap:anywhere] text-balance sm:text-7xl">{event.hostNames}</h1>
         {event.message && <p className="mx-auto mt-6 max-w-md text-lg leading-relaxed">{event.message}</p>}
         <CoverImage src={event.coverImageUrl} alt={event.title} className="mx-auto mt-8 h-72 w-full rotate-[-2deg] rounded-3xl shadow-xl" />
         <div className="invite-card mt-10 rotate-[1deg]" style={{ background: "#fff" }}>

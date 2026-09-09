@@ -27,5 +27,5 @@ export async function changePasswordAction(fd: FormData) {
     // Termina todas as sessões por segurança.
     db.session.deleteMany({ where: { userId: user.id } }),
   ]);
-  redirect("/login?ok=" + encodeURIComponent("Palavra-passe alterada. Entre de novo."));
+  redirect("/login?ok=password_changed");
 }

@@ -19,7 +19,7 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
           </div>
           <div>
             <label className="label">{t.hostLabel}</label>
-            <input name="hostNames" className="input" required defaultValue={event?.hostNames ?? ""} placeholder={t.hostPlaceholder} />
+            <input name="hostNames" className="input" required minLength={1} maxLength={120} defaultValue={event?.hostNames ?? ""} placeholder={t.hostPlaceholder} />
           </div>
           <div>
             <label className="label">Data e hora de início</label>
@@ -48,7 +48,7 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="label">Nome do local</label>
-            <input name="venueName" className="input" required defaultValue={event?.venueName ?? ""} placeholder="Quinta da Serra" />
+            <input name="venueName" className="input" required minLength={2} maxLength={120} defaultValue={event?.venueName ?? ""} placeholder="Quinta da Serra" />
           </div>
           <div>
             <label className="label">Morada</label>

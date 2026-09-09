@@ -1,26 +1,20 @@
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { accessibleEventWhere } from "@/lib/access";
+import { editableEventWhere } from "@/lib/access";
 import { RSVP_LABELS } from "@/lib/event-types";
-import { csvSafe } from "@/lib/validation";
+import { csvCell as cell, csvPhoneCell as phoneCell } from "@/lib/csv";
 
 export const dynamic = "force-dynamic";
 
-function cell(v: string | number | null | undefined) {
-  const s = csvSafe(v == null ? "" : String(v));
-  return /[";\n']/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
-/** O Excel converteria "+351912..." em número; a fórmula de texto mantém o sinal + e os zeros. */
-function phoneCell(e164: string) {
-  return `"=""${e164}"""`;
-}
+
 
 /** Exporta a lista de convidados em CSV (separador ;, abre diretamente no Excel em PT). */
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const user = await getCurrentUser();
   if (!user) return new Response("Unauthorized", { status: 401 });
-  const event = await db.event.findFirst({ where: { id, ...accessibleEventWhere(user.id) } });
+  const event = await db.event.findFirst({ where: { id, ...editableEventWhere(user.id) } });
+  // A receção (STAFF) não exporta dados pessoais.
   if (!event) return new Response("Not found", { status: 404 });
   const guests = await db.guest.findMany({ where: { eventId: id }, orderBy: [{ groupName: "asc" }, { name: "asc" }] });
 

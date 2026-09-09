@@ -7,13 +7,14 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start -p ${PORT:-3000}",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test": "vitest run",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate",
-    "start:railway": "prisma db push --skip-generate && next start -p ${PORT:-3000}"
+    "start:railway": "node scripts/migrate.mjs && next start -p ${PORT:-3000}",
+    "db:migrate": "node scripts/migrate.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -37,6 +38,8 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.25",
     "tsx": "^4.23.13",
     "vitest": "^5.0.0"
   },

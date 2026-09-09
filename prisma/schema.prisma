@@ -11,12 +11,12 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(cuid())
+  id           String          @id @default(cuid())
   name         String
-  email        String    @unique
+  email        String          @unique
   phone        String?
   passwordHash String
-  createdAt    DateTime  @default(now())
+  createdAt    DateTime        @default(now())
   events       Event[]
   sessions     Session[]
   resets       PasswordReset[]
@@ -30,6 +30,8 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model PasswordReset {
@@ -43,9 +45,9 @@ model PasswordReset {
 }
 
 model Event {
-  id                   String   @id @default(cuid())
+  id                   String    @id @default(cuid())
   ownerId              String
-  owner                User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner                User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   type                 String // WEDDING | ENGAGEMENT | BIRTHDAY | OTHER
   templateId           String
   title                String // ex: "Casamento de Ana & João"
@@ -59,15 +61,15 @@ model Event {
   dressCode            String?
   coverImageUrl        String?
   accentColor          String? // sobrepõe a cor principal do template
-  country              String   @default("PT") // país por omissão para normalizar telefones
-  timezone             String   @default("Europe/Lisbon") // fuso horário do evento
-  currency             String   @default("EUR")
+  country              String    @default("PT") // país por omissão para normalizar telefones
+  timezone             String    @default("Europe/Lisbon") // fuso horário do evento
+  currency             String    @default("EUR")
   rsvpDeadline         DateTime?
-  allowChildren        Boolean  @default(true)
-  verificationRequired Boolean  @default(true) // exige OTP por SMS para abrir o convite
-  maxDevicesPerGuest   Int      @default(2)
-  guestbookEnabled     Boolean  @default(true)
-  giftsEnabled         Boolean  @default(true)
+  allowChildren        Boolean   @default(true)
+  verificationRequired Boolean   @default(true) // exige OTP por SMS para abrir o convite
+  maxDevicesPerGuest   Int       @default(2)
+  guestbookEnabled     Boolean   @default(true)
+  giftsEnabled         Boolean   @default(true)
   programJson          String? // JSON: [{time, title, description}]
   musicUrl             String? // MP3/áudio de fundo do convite
   galleryJson          String? // JSON: [url, url, ...]
@@ -75,13 +77,13 @@ model Event {
   partyJson            String? // JSON: [{name, role, imageUrl}] padrinhos, madrinhas, damas...
   hashtag              String? // ex: #AnaEJoao2027
   extraInfo            String? // informações úteis: alojamento, transporte, estacionamento
-  envelopeEnabled      Boolean  @default(true) // animação de abertura do envelope
-  songRequestsEnabled  Boolean  @default(true) // convidados podem sugerir músicas
+  envelopeEnabled      Boolean   @default(true) // animação de abertura do envelope
+  songRequestsEnabled  Boolean   @default(true) // convidados podem sugerir músicas
   contributionIban     String?
   contributionMbway    String?
   contributionNote     String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   guests    Guest[]
   gifts     GiftItem[]
@@ -90,6 +92,8 @@ model Event {
   tasks     Task[]
   budget    BudgetItem[]
   vendors   Vendor[]
+
+  @@index([ownerId])
 }
 
 /// Quem pode trabalhar num evento além do dono: co-organizadores, cerimonialistas, equipa de receção.
@@ -103,6 +107,7 @@ model EventMember {
   createdAt DateTime @default(now())
 
   @@unique([eventId, userId])
+  @@index([userId])
 }
 
 model Task {
@@ -166,6 +171,8 @@ model Payment {
   dueAt        DateTime?
   paidAt       DateTime?
   createdAt    DateTime   @default(now())
+
+  @@index([budgetItemId])
 }
 
 model Guest {
@@ -194,6 +201,7 @@ model Guest {
   sentVia        String?
   checkedInAt    DateTime?
   suspendedAt    DateTime? // convite suspenso pelo organizador (sem acesso, reservas libertadas)
+  lastViewedAt   DateTime? // última abertura contabilizada (uma por 30 min)
   createdAt      DateTime  @default(now())
 
   devices      GuestDevice[]
@@ -202,6 +210,7 @@ model Guest {
   reservations GiftReservation[]
   guestbook    GuestbookEntry[]
 
+  @@unique([eventId, phone])
   @@index([eventId])
 }
 
@@ -213,6 +222,8 @@ model GuestDevice {
   userAgent   String?
   createdAt   DateTime @default(now())
   lastSeenAt  DateTime @default(now())
+
+  @@index([guestId])
 }
 
 model OtpCode {
@@ -269,6 +280,7 @@ model GiftReservation {
   createdAt DateTime @default(now())
 
   @@unique([giftId, guestId])
+  @@index([guestId])
 }
 
 model GuestbookEntry {
@@ -281,4 +293,5 @@ model GuestbookEntry {
   createdAt DateTime @default(now())
 
   @@index([eventId])
+  @@index([guestId])
 }

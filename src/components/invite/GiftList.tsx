@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { cancelReservationAction, reserveGiftAction } from "@/app/c/[token]/actions";
 import { formatMoney } from "@/lib/format";
 import { ArrowUpRight, Gift, HeartHandshake } from "lucide-react";
@@ -29,7 +30,8 @@ export function GiftList({
   currency: string;
   contribution: { iban: string | null; mbway: string | null; note: string | null; qrDataUrl?: string | null };
 }) {
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const [error, setError] = useState<{ giftId: string; message: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -37,15 +39,17 @@ export function GiftList({
     setError(null);
     startTransition(async () => {
       const res = await reserveGiftAction(token, giftId, fd);
-      if (!res.ok) setError(res.error ?? "Erro");
-      else setOpenId(null);
+      if (!res.ok) {
+        setError({ giftId, message: res.error ?? "Erro" });
+        router.refresh(); // mostra o estado atual (ex.: já reservado por outra pessoa)
+      } else setOpenId(null);
     });
   }
   function cancel(giftId: string) {
     setError(null);
     startTransition(async () => {
       const res = await cancelReservationAction(token, giftId);
-      if (!res.ok) setError(res.error ?? "Erro");
+      if (!res.ok) setError({ giftId, message: res.error ?? "Erro" });
     });
   }
 
@@ -55,7 +59,6 @@ export function GiftList({
     <section className="invite-card" id="presentes">
       <h2 className="text-2xl">Lista de presentes</h2>
       <p className="mt-1 text-sm opacity-70">A sua presença é o melhor presente. Se quiser mimar-nos, escolha algo da lista: ao reservar, mais ninguém o vê disponível.</p>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
 
       <ul className="mt-4 space-y-3">
         {gifts.map((g) => {
@@ -84,6 +87,7 @@ export function GiftList({
                   <p className="mt-1 text-xs opacity-60">{Math.max(available, 0)} de {g.quantity} disponíveis</p>
                 )}
 
+                {error?.giftId === g.id && <p className="invite-error mt-1 text-sm" role="alert" aria-live="polite">{error.message}</p>}
                 <div className="mt-2">
                   {g.mine ? (
                     <div className="flex flex-wrap items-center gap-2 text-sm">

@@ -5,6 +5,7 @@ import { addGiftAction, deleteGiftAction } from "@/app/dashboard/actions";
 import { FlashFromSearch } from "@/components/ui";
 import { Gift, HeartHandshake, Plus } from "lucide-react";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
+import { SubmitButton } from "@/components/dashboard/SubmitButton";
 
 export default async function GiftsPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { id } = await params;
@@ -36,7 +37,7 @@ export default async function GiftsPage({ params, searchParams }: { params: Prom
           </div>
           <div><label className="label">Link da loja</label><input name="storeUrl" type="url" className="input" placeholder="https://…" /></div>
           <div><label className="label">Imagem (URL)</label><input name="imageUrl" type="url" className="input" placeholder="https://…/foto.jpg" /></div>
-          <button className="btn-primary w-full">Adicionar</button>
+          <SubmitButton className="btn-primary w-full" pendingText="A adicionar…">Adicionar</SubmitButton>
         </form>
         </details>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { requestOtpAction, verifyOtpAction } from "@/app/c/[token]/actions";
 
@@ -10,15 +10,24 @@ export function OtpGate({ token, guestName, hostNames, maskedPhone }: { token: s
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [devCode, setDevCode] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
   const [pending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
 
   function sendCode() {
     setError(null);
+    setCode("");
     startTransition(async () => {
       const res = await requestOtpAction(token);
       if (!res.ok) return setError(res.error ?? "Erro");
       setDevCode(res.devCode ?? null);
       setStep("verify");
+      setCooldown(30);
     });
   }
 
@@ -68,12 +77,13 @@ export function OtpGate({ token, guestName, hostNames, maskedPhone }: { token: s
             <button className="invite-btn w-full" disabled={pending || code.length !== 6}>
               {pending ? "A validar…" : "Abrir convite"}
             </button>
-            <button type="button" className="text-xs underline opacity-70" onClick={sendCode} disabled={pending}>
-              Não recebi o código, enviar de novo
+            <button type="button" className="text-xs underline opacity-70 disabled:no-underline disabled:opacity-50" onClick={sendCode} disabled={pending || cooldown > 0}>
+              {cooldown > 0 ? `Pode pedir novo código dentro de ${cooldown} s` : "Não recebi o código, enviar de novo"}
             </button>
+            <p className="text-xs opacity-60">O SMS pode demorar até um minuto. Qualquer código recebido nos últimos 10 minutos é válido.</p>
           </form>
         )}
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-3 text-sm invite-error">{error}</p>}
       </div>
       <p className="mt-6 text-center text-xs opacity-60">
         Recebeu este link de outra pessoa? Os convites não podem ser transferidos. Fale com os anfitriões.

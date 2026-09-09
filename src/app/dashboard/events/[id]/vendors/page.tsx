@@ -5,6 +5,8 @@ import { BUDGET_CATEGORIES, VENDOR_STATUS } from "@/lib/checklists";
 import { addVendorAction, deleteVendorAction, updateVendorAction } from "@/app/dashboard/planner-actions";
 import { FlashFromSearch } from "@/components/ui";
 import { ArrowUpRight, Plus } from "lucide-react";
+import { SubmitButton } from "@/components/dashboard/SubmitButton";
+import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 
 const STATUS_STYLE: Record<string, string> = {
   CONTACTING: "bg-[#f8f0de] text-[#8b6b2d]",
@@ -41,7 +43,7 @@ export default async function VendorsPage({ params, searchParams }: { params: Pr
           </div>
           <div><label className="label">Valor da proposta ({event.currency})</label><input name="price" className="input" inputMode="decimal" placeholder="2500" /></div>
           <div><label className="label">Notas</label><textarea name="notes" className="input" rows={2} placeholder="O que inclui, condições, impressão…" /></div>
-          <button className="btn-primary w-full">Adicionar</button>
+          <SubmitButton className="btn-primary w-full" pendingText="A adicionar…">Adicionar</SubmitButton>
         </form>
         </details>
 
@@ -70,7 +72,7 @@ export default async function VendorsPage({ params, searchParams }: { params: Pr
                         <input name="price" className="input w-28 py-1 text-xs" inputMode="decimal" defaultValue={v.price ?? ""} placeholder="Valor" />
                         <button className="btn-secondary btn-sm">Guardar</button>
                       </form>
-                      <form action={deleteVendorAction.bind(null, id, v.id)}><button className="btn-ghost btn-sm text-red-700">Remover</button></form>
+                      <form action={deleteVendorAction.bind(null, id, v.id)}><ConfirmButton className="btn-ghost btn-sm text-red-700" message={`Remover o fornecedor ${v.name}? As linhas de orçamento criadas por ele sem pagamentos também são removidas.`}>Remover</ConfirmButton></form>
                     </div>
                   </li>
                 ))}

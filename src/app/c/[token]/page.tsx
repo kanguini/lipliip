@@ -60,14 +60,12 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   }
 
   // Regista a abertura do convite (para o organizador ver quem já abriu), no máximo uma vez por 30 minutos.
-  const lastView = await db.accessLog.findFirst({ where: { guestId: guest.id, outcome: "VIEW" }, orderBy: { createdAt: "desc" }, select: { createdAt: true } });
-  if (!lastView || Date.now() - lastView.createdAt.getTime() > 30 * 60_000) {
-    await db.guest.update({
-      where: { id: guest.id },
-      data: { openCount: { increment: 1 }, firstOpenedAt: guest.firstOpenedAt ?? new Date() },
-    });
-    await logAccess(guest.id, "VIEW");
-  }
+  const cutoff = new Date(Date.now() - 30 * 60_000);
+  const counted = await db.guest.updateMany({
+    where: { id: guest.id, OR: [{ lastViewedAt: null }, { lastViewedAt: { lt: cutoff } }] },
+    data: { openCount: { increment: 1 }, firstOpenedAt: guest.firstOpenedAt ?? new Date(), lastViewedAt: new Date() },
+  });
+  if (counted.count > 0) await logAccess(guest.id, "VIEW");
 
   const epcPayload = event.contributionIban ? buildEpcPayload({ iban: event.contributionIban, name: event.hostNames, remittance: `Presente ${event.title}`.slice(0, 140) }) : null;
   const [gifts, guestbook, qrDataUrl, epcQr] = await Promise.all([
@@ -142,7 +140,15 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
 
   // O leitor de música fica fora do envelope para não ser desmontado quando o convite se revela.
   const music = event.musicUrl ? <MusicPlayer src={event.musicUrl} autoplay={event.envelopeEnabled} /> : null;
-  if (!event.envelopeEnabled) return (<>{music}{body}</>);
+  // Sem envelope, o botão de música precisa na mesma das variáveis de cor do template.
+  if (!event.envelopeEnabled) {
+    return (
+      <TemplateFrame templateId={event.templateId} accentColor={event.accentColor}>
+        {music}
+        {body}
+      </TemplateFrame>
+    );
+  }
   return (
     <TemplateFrame templateId={event.templateId} accentColor={event.accentColor}>
       {music}

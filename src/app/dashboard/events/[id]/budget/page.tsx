@@ -6,6 +6,8 @@ import { BUDGET_CATEGORIES } from "@/lib/checklists";
 import { addBudgetItemAction, addPaymentAction, deleteBudgetItemAction, deletePaymentAction, togglePaymentAction, updateBudgetItemAction } from "@/app/dashboard/planner-actions";
 import { FlashFromSearch, StatCard } from "@/components/ui";
 import { Check, X, Plus } from "lucide-react";
+import { SubmitButton } from "@/components/dashboard/SubmitButton";
+import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 
 export default async function BudgetPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { id } = await params;
@@ -50,7 +52,7 @@ export default async function BudgetPage({ params, searchParams }: { params: Pro
               <div><label className="label">Estimado ({cur})</label><input name="estimated" className="input" inputMode="decimal" placeholder="3000" /></div>
               <div><label className="label">Contratado ({cur})</label><input name="contracted" className="input" inputMode="decimal" placeholder="quando fechar" /></div>
             </div>
-            <button className="btn-primary w-full">Adicionar</button>
+            <SubmitButton className="btn-primary w-full" pendingText="A adicionar…">Adicionar</SubmitButton>
           </form>
           </details>
           {upcoming.length > 0 && (
@@ -106,7 +108,7 @@ export default async function BudgetPage({ params, searchParams }: { params: Pro
                               <li key={p.id} className="flex items-center gap-2">
                                 <form action={togglePaymentAction.bind(null, id, p.id)}><button className={`flex h-4 w-4 items-center justify-center rounded border text-[10px] ${p.paidAt ? "border-emerald-600 bg-emerald-600 text-white" : "border-brand-300"}`} aria-label="Marcar pago">{p.paidAt ? <Check className="h-3 w-3" aria-hidden /> : null}</button></form>
                                 <span className={p.paidAt ? "text-[#a1939c] line-through" : ""}>{p.label ?? "Pagamento"} · {formatMoney(p.amount, cur)}{p.dueAt ? ` · ${formatEventDate(p.dueAt, false, event.timezone)}` : ""}</span>
-                                <form action={deletePaymentAction.bind(null, id, p.id)}><button className="text-[#a1939c] hover:text-red-700" title="Remover" aria-label="Remover pagamento"><X className="h-3 w-3" aria-hidden /></button></form>
+                                <form action={deletePaymentAction.bind(null, id, p.id)}><ConfirmButton className="text-[#a1939c] hover:text-red-700" message={`Remover o pagamento de ${formatMoney(p.amount, cur)}?`}><X className="h-3 w-3" aria-label="Remover pagamento" /></ConfirmButton></form>
                               </li>
                             ))}
                           </ul>
@@ -121,7 +123,7 @@ export default async function BudgetPage({ params, searchParams }: { params: Pro
                             <button className="btn-secondary btn-sm">Registar</button>
                           </form>
                         </details>
-                        <form action={deleteBudgetItemAction.bind(null, id, i.id)} className="mt-1 text-right"><button className="text-[10px] text-[#a1939c] hover:text-red-700">remover item</button></form>
+                        <form action={deleteBudgetItemAction.bind(null, id, i.id)} className="mt-1 text-right"><ConfirmButton className="text-xs text-[#a1939c] hover:text-red-700" message={`Remover "${i.name}"${i.payments.length ? ` e os seus ${i.payments.length} pagamento(s)` : ""}?`}>remover item</ConfirmButton></form>
                       </li>
                     );
                   })}

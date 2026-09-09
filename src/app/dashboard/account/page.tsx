@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/auth";
 import { FlashFromSearch, PageHeader } from "@/components/ui";
 import { changePasswordAction, updateProfileAction } from "./actions";
+import { SubmitButton } from "@/components/dashboard/SubmitButton";
 
 export const metadata = { title: "A minha conta" };
 
@@ -16,7 +17,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
           <h2 className="font-semibold">Perfil</h2>
           <div><label className="label">Nome</label><input name="name" className="input" defaultValue={user.name} required /></div>
           <div><label className="label">Telemóvel (opcional)</label><input name="phone" className="input" defaultValue={user.phone ?? ""} /></div>
-          <button className="btn-primary">Guardar</button>
+          <SubmitButton>Guardar</SubmitButton>
         </form>
         <form action={changePasswordAction} className="card space-y-3">
           <h2 className="font-semibold">Alterar palavra-passe</h2>

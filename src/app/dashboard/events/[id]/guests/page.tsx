@@ -8,6 +8,9 @@ import { addGuestAction, importGuestsAction, markSentAction, sendSmsInviteAction
 import { FlashFromSearch, RsvpBadge } from "@/components/ui";
 import { CopyButton } from "@/components/dashboard/CopyButton";
 import { Bell, Check, ShieldCheck, Ticket, Plus } from "lucide-react";
+import { SubmitButton } from "@/components/dashboard/SubmitButton";
+import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
+import { isSmsConfigured } from "@/lib/sms";
 
 export default async function GuestsPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string; q?: string; status?: string }> }) {
   const { id } = await params;
@@ -16,7 +19,9 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
   const guests = await db.guest.findMany({ where: { eventId: id }, orderBy: [{ groupName: "asc" }, { name: "asc" }] });
   const q = (sp.q ?? "").toLowerCase();
   const filtered = guests.filter((g) => (!q || g.name.toLowerCase().includes(q) || g.phone.includes(q) || (g.groupName ?? "").toLowerCase().includes(q)) && (!sp.status || g.rsvpStatus === sp.status));
-  const returnTo = `/dashboard/events/${id}/guests`;
+  const filterQs = new URLSearchParams({ ...(sp.q ? { q: sp.q } : {}), ...(sp.status ? { status: sp.status } : {}) }).toString();
+  const returnTo = `/dashboard/events/${id}/guests${filterQs ? `?${filterQs}` : ""}`;
+  const smsReady = isSmsConfigured();
   const pendingSent = guests.filter((g) => g.rsvpStatus === "PENDING" && g.sentAt);
   const reminderText = (g: (typeof guests)[number]) =>
     `Olá ${g.name.split(" ")[0]}! Ainda não recebemos a tua confirmação para "${event.title}"${event.rsvpDeadline ? ` (prazo: ${formatEventDate(event.rsvpDeadline, false, event.timezone)})` : ""}. Podes confirmar no teu convite: ${inviteUrl(g.token)}`;
@@ -59,7 +64,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
                 <input name="email" type="email" className="input" />
               </div>
             </div>
-            <button className="btn-primary w-full">Adicionar</button>
+            <SubmitButton className="btn-primary w-full" pendingText="A adicionar…">Adicionar</SubmitButton>
           </form>
           </details>
 
@@ -68,7 +73,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
             <form action={importGuestsAction.bind(null, id)} className="mt-4 space-y-3">
             <p className="text-xs text-stone-500">Cole uma linha por convidado: <code>Nome; Telefone; Acompanhantes; Grupo</code>. Pode copiar diretamente do Excel.</p>
             <textarea name="text" className="input font-mono text-xs" rows={6} placeholder={"Ana Silva; 912345678; 1; Família\nRui Costa; +244923456789; 0; Trabalho"} required />
-            <button className="btn-secondary w-full">Importar</button>
+            <SubmitButton className="btn-secondary w-full" pendingText="A importar…">Importar</SubmitButton>
           </form>
           </details>
         </div>
@@ -117,9 +122,9 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
                       </div>
                       <div className="flex flex-wrap gap-1">
                         <a href={wa} target="_blank" rel="noreferrer" className="btn-secondary btn-sm">WhatsApp</a>
-                        <form action={sendSmsInviteAction.bind(null, g.id)}><button className="btn-secondary btn-sm">SMS</button></form>
+                        {smsReady && <form action={sendSmsInviteAction.bind(null, g.id, returnTo)}><button className="btn-secondary btn-sm">SMS</button></form>}
                         <CopyButton text={url} />
-                        <form action={toggleSuspendAction.bind(null, g.id, returnTo)}><button className="btn-ghost btn-sm" title={g.suspendedAt ? "Reativar convite" : "Suspender convite"}>{g.suspendedAt ? "Reativar" : "Suspender"}</button></form>
+                        <form action={toggleSuspendAction.bind(null, g.id, returnTo)}>{g.suspendedAt ? <button className="btn-ghost btn-sm" title="Reativar convite">Reativar</button> : <ConfirmButton className="btn-ghost btn-sm" message={`Suspender o convite de ${g.name}? O acesso é cortado e as reservas de presentes são libertadas.`}>Suspender</ConfirmButton>}</form>
                         {!g.sentAt && (
                           <form action={markSentAction.bind(null, g.id, "manual", returnTo)}><button className="btn-ghost btn-sm" title="Marcar como enviado"><Check className="h-3.5 w-3.5" aria-hidden />enviado</button></form>
                         )}
@@ -144,7 +149,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
             </details>
           )}
           <p className="mt-4 text-xs text-stone-500">
-            Dica: o botão WhatsApp abre a conversa com a mensagem e o link pessoal já escritos. Depois de enviar, marque como enviado. O link só abre depois de o convidado validar o telemóvel.
+            Dica: o botão WhatsApp abre a conversa com a mensagem e o link pessoal já escritos. Depois de enviar, marque como enviado. O link só abre depois de o convidado validar o telemóvel.{!smsReady && " O envio direto por SMS fica disponível quando configurar um fornecedor de SMS."}
           </p>
         </div>
       </div>

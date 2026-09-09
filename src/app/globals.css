@@ -147,6 +147,9 @@ fieldset.card > legend {
   border-color: var(--inv-accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--inv-accent) 25%, transparent);
 }
+.invite-error {
+  color: var(--inv-error, #b91c1c);
+}
 .invite-divider {
   width: 64px;
   height: 2px;
@@ -253,7 +256,7 @@ fieldset.card > legend {
 }
 .art-eyebrow {
   text-transform: uppercase;
-  font-size: clamp(0.62rem, 3cqw, 0.8rem);
+  font-size: clamp(0.72rem, 3cqw, 0.85rem);
   letter-spacing: 0.22em;
   line-height: 1.4;
   margin-bottom: 13%;
@@ -286,11 +289,11 @@ fieldset.card > legend {
 }
 .art-date {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(0.66rem, 3.8cqw, 1rem);
+  font-size: clamp(0.9rem, 3.8cqw, 1.05rem);
   line-height: 1.5;
 }
 .art-place {
-  font-size: clamp(0.58rem, 2.8cqw, 0.8rem);
+  font-size: clamp(0.8rem, 2.8cqw, 0.9rem);
   margin-top: 5px;
   line-height: 1.5;
   max-width: 100%;
@@ -325,7 +328,7 @@ fieldset.card > legend {
 /* Azul */
 .art-azul { background: #dce8f1; color: #213e61; }
 .art-azul .art-content { margin: 7%; padding: 9% 5%; border: 1px solid #647c9469; height: calc(100% - 14%); }
-.art-azul .art-eyebrow { font-size: 2.8cqw; margin-bottom: 14%; }
+.art-azul .art-eyebrow { font-size: clamp(0.7rem, 2.8cqw, 0.85rem); margin-bottom: 14%; }
 .art-azul .art-names { font-size: 10.5cqw; }
 .art-azul .art-caption { font-style: normal; padding-top: 7%; }
 /* Festa */
@@ -350,7 +353,11 @@ fieldset.card > legend {
 .art-encontro .art-names em { font-family: 'Playfair Display', Georgia, serif; font-size: 0.65em; }
 /* Foto de capa por cima de qualquer cartaz */
 .art-has-cover { color: #fff; }
-.art-has-cover .art-content { background: linear-gradient(0deg, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.15) 60%); border-color: #ffffff55; }
+.art-has-cover .art-content {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.25) 40%, rgba(0, 0, 0, 0.65));
+  border-color: #ffffff55;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+}
 /* Miniatura (cartões do painel) */
 .art-small { border-radius: 4px; }
 .art-small .art-content { justify-content: center; }

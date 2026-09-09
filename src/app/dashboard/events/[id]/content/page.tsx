@@ -2,6 +2,7 @@ import { requireOwnedEvent } from "@/lib/auth";
 import { parseGallery, parseParty, parseStory, partyToText, storyToText } from "@/lib/event-types";
 import { updateContentAction } from "@/app/dashboard/actions";
 import { FlashFromSearch } from "@/components/ui";
+import { SubmitButton } from "@/components/dashboard/SubmitButton";
 
 export default async function ContentPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { id } = await params;
@@ -17,7 +18,7 @@ export default async function ContentPage({ params, searchParams }: { params: Pr
           <legend className="px-1 text-sm font-semibold text-stone-700">Experiência</legend>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="envelopeEnabled" defaultChecked={event.envelopeEnabled} />
-            Mostrar o envelope de abertura ("Abrir convite") antes do convite
+            Mostrar o envelope de abertura (&ldquo;Abrir convite&rdquo;) antes do convite
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="songRequestsEnabled" defaultChecked={event.songRequestsEnabled} />
@@ -25,7 +26,7 @@ export default async function ContentPage({ params, searchParams }: { params: Pr
           </label>
           <div>
             <label className="label">Música de fundo (link para MP3)</label>
-            <input name="musicUrl" type="url" className="input" defaultValue={event.musicUrl ?? ""} placeholder="https://…/musica.mp3" />
+            <input name="musicUrl" type="url" pattern="https?://.*" title="Tem de começar por http:// ou https://" className="input" defaultValue={event.musicUrl ?? ""} placeholder="https://…/musica.mp3" />
             <p className="hint">Aparece um botão flutuante para tocar/pausar. Use um ficheiro alojado (Dropbox com ?raw=1, Google Drive público, o seu site). Links do Spotify ou YouTube não funcionam como áudio.</p>
           </div>
           <div>
@@ -64,7 +65,7 @@ export default async function ContentPage({ params, searchParams }: { params: Pr
           <p className="hint">Alojamento, transporte, estacionamento, contactos. Separe parágrafos com uma linha em branco.</p>
         </fieldset>
 
-        <button className="btn-primary">Guardar conteúdo</button>
+        <SubmitButton>Guardar conteúdo</SubmitButton>
       </form>
     </>
   );

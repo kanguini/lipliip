@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { requireOwnedEvent } from "@/lib/auth";
+import { requireEventAccess } from "@/lib/access";
 import { parseProgram } from "@/lib/event-types";
 import { Invite } from "@/components/templates";
 import { DetailsSection, ProgramSection } from "@/components/invite/Sections";
@@ -9,12 +9,12 @@ import { formatMoney } from "@/lib/format";
 /** Pré-visualização do convite tal como um convidado o vê (sem as partes interativas). */
 export default async function EventPreviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { event } = await requireOwnedEvent(id);
+  const { event } = await requireEventAccess(id, { allowStaff: true });
   const gifts = await db.giftItem.findMany({ where: { eventId: id }, orderBy: { createdAt: "asc" } });
   return (
-    <div className="-mx-6 -my-8">
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-stone-200 bg-white/90 px-4 py-2 text-sm backdrop-blur">
-        <span>Pré-visualização · é assim que os convidados veem o convite</span>
+    <div className="-mx-5 -my-8 lg:-mx-10 lg:-my-10">
+      <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 bg-white/90 px-4 py-2 text-sm backdrop-blur">
+        <span><span className="hidden sm:inline">Pré-visualização · </span>é assim que os convidados veem o convite</span>
         <div className="flex gap-2">
           <Link href={`/dashboard/events/${id}/design`} className="btn-secondary btn-sm">Mudar design</Link>
           <Link href={`/dashboard/events/${id}`} className="btn-primary btn-sm">Voltar ao painel</Link>

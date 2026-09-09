@@ -25,7 +25,7 @@ export function InvitationArt({ templateId, kicker, names, dateLabel, placeLabel
   const cover = coverImageUrl || (templateId === "rubi" ? "/images/rubi.jpg" : null);
 
   return (
-    <div className={`invitation-art art-${t.id} ${small ? "art-small" : ""} ${cover && templateId !== "rubi" ? "art-has-cover" : ""} ${className}`} style={style}>
+    <div className={`invitation-art art-${t.id} ${small ? "art-small" : ""} ${coverImageUrl ? "art-has-cover" : ""} ${className}`} style={style}>
       {cover && (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={cover} alt="" className="floral-art" />

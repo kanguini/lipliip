@@ -2,13 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireOwnedEvent } from "@/lib/auth";
-import { formatDateTimeShort } from "@/lib/format";
+import { formatDateTimeShort, formatMoney } from "@/lib/format";
 import { inviteUrl } from "@/lib/urls";
 import { deleteGuestAction, regenerateTokenAction, resetDevicesAction, toggleSuspendAction, updateGuestAction } from "@/app/dashboard/actions";
 import { FlashFromSearch, RsvpBadge } from "@/components/ui";
 import { CopyButton } from "@/components/dashboard/CopyButton";
 import { ChevronLeft, Music, TriangleAlert } from "lucide-react";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
+import { SubmitButton } from "@/components/dashboard/SubmitButton";
 
 const OUTCOME_LABEL: Record<string, string> = {
   VIEW: "Abriu o convite",
@@ -60,7 +61,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
               <div><label className="label">Mesa</label><input name="tableNumber" className="input" defaultValue={guest.tableNumber ?? ""} /></div>
               <div><label className="label">Email</label><input name="email" type="email" className="input" defaultValue={guest.email ?? ""} /></div>
             </div>
-            <button className="btn-primary">Guardar</button>
+            <SubmitButton>Guardar</SubmitButton>
           </form>
 
           <div className="card space-y-3">
@@ -78,7 +79,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
               <div className="text-sm">
                 <p className="font-medium">Presentes reservados</p>
                 <ul className="list-inside list-disc text-stone-700">
-                  {guest.reservations.map((r) => <li key={r.id}>{r.gift.name}{r.amount ? ` (${r.amount} ${r.gift.kind === "CASH" ? "" : ""})` : r.quantity > 1 ? ` ×${r.quantity}` : ""}{r.note ? ` — ${r.note}` : ""}</li>)}
+                  {guest.reservations.map((r) => <li key={r.id}>{r.gift.name}{r.amount != null ? ` (${formatMoney(r.amount, event.currency)})` : r.quantity > 1 ? ` ×${r.quantity}` : ""}{r.note ? ` — ${r.note}` : ""}</li>)}
                 </ul>
               </div>
             )}
@@ -92,7 +93,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
             <div className="flex flex-wrap gap-2">
               <CopyButton text={url} />
               <form action={resetDevicesAction.bind(null, guest.id)}><button className="btn-secondary btn-sm">Remover dispositivos</button></form>
-              <form action={toggleSuspendAction.bind(null, guest.id, null)}><button className="btn-secondary btn-sm">{guest.suspendedAt ? "Reativar convite" : "Suspender convite"}</button></form>
+              <form action={toggleSuspendAction.bind(null, guest.id, null)}>{guest.suspendedAt ? <button className="btn-secondary btn-sm">Reativar convite</button> : <ConfirmButton className="btn-secondary btn-sm" message={`Suspender o convite de ${guest.name}? O acesso é cortado e as reservas de presentes são libertadas.`}>Suspender convite</ConfirmButton>}</form>
               <form action={regenerateTokenAction.bind(null, guest.id)}><ConfirmButton message="O link atual deixa de funcionar e terá de enviar o novo link ao convidado. Continuar?">Revogar e gerar novo link</ConfirmButton></form>
             </div>
             <p className="text-xs text-stone-500">

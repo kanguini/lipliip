@@ -3,6 +3,7 @@ import { deleteEventAction, updateEventAction } from "@/app/dashboard/actions";
 import { EventDetailsFields } from "@/components/dashboard/EventForm";
 import { FlashFromSearch } from "@/components/ui";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
+import { SubmitButton } from "@/components/dashboard/SubmitButton";
 
 export default async function SettingsPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { id } = await params;
@@ -17,7 +18,7 @@ export default async function SettingsPage({ params, searchParams }: { params: P
         <input type="hidden" name="coverImageUrl" value={event.coverImageUrl ?? ""} />
         <input type="hidden" name="accentColor" value={event.accentColor ?? ""} />
         <EventDetailsFields event={event} type={event.type} />
-        <button className="btn-primary">Guardar alterações</button>
+        <SubmitButton>Guardar alterações</SubmitButton>
       </form>
       <div className="card mt-10 border-red-200">
         <h2 className="font-semibold text-red-800">Zona de perigo</h2>

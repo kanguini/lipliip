@@ -8,7 +8,7 @@ export function GuestbookForm({ token }: { token: string }) {
   return (
     <form action={formAction} className="mt-4 space-y-2">
       <textarea name="message" className="invite-input" rows={3} placeholder="Deixe uma mensagem carinhosa para os anfitriões…" required minLength={2} maxLength={600} />
-      {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state.error && <p className="text-sm invite-error">{state.error}</p>}
       {state.ok && <p className="text-sm font-medium">Mensagem enviada. Obrigado!</p>}
       <button className="invite-btn" disabled={pending}>{pending ? "A enviar…" : "Enviar mensagem"}</button>
     </form>

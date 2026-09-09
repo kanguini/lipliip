@@ -20,7 +20,7 @@ export function ModernTemplate({ event, guestName, children }: TemplateProps) {
       <CoverImage src={event.coverImageUrl} alt={event.title} className="mt-8 h-80 w-full rounded-3xl" />
       {event.message && <p className="mt-8 text-lg leading-relaxed">{event.message}</p>}
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl p-5 text-white" style={{ background: "var(--inv-accent)" }}>
+        <div className="rounded-2xl p-5" style={{ background: "var(--inv-accent)", color: "var(--inv-on-accent, #fff)" }}>
           <p className="text-xs uppercase tracking-widest opacity-80">Quando</p>
           <DateLine event={event} className="mt-1 text-lg font-semibold" />
         </div>

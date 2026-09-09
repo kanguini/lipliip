@@ -1,6 +1,8 @@
 import { cookies, headers } from "next/headers";
 import type { Event, Guest } from "@prisma/client";
 import { db } from "./db";
+import { sha256 } from "./tokens";
+import { cache } from "react";
 
 export const DEVICE_COOKIE_DAYS = 365;
 
@@ -8,10 +10,10 @@ export function deviceCookieName(guestId: string) {
   return `lp_g_${guestId}`;
 }
 
-export async function getGuestByToken(token: string) {
+export const getGuestByToken = cache(async (token: string) => {
   if (!token || token.length > 64) return null;
   return db.guest.findUnique({ where: { token }, include: { event: true } });
-}
+});
 
 /** Verdadeiro se o convidado pode ver o convite neste dispositivo. */
 export async function isGuestAuthorized(guest: Guest, event: Event): Promise<boolean> {
@@ -19,7 +21,7 @@ export async function isGuestAuthorized(guest: Guest, event: Event): Promise<boo
   const store = await cookies();
   const deviceToken = store.get(deviceCookieName(guest.id))?.value;
   if (!deviceToken) return false;
-  const device = await db.guestDevice.findUnique({ where: { deviceToken } });
+  const device = await db.guestDevice.findUnique({ where: { deviceToken: sha256(deviceToken) } });
   if (!device || device.guestId !== guest.id) return false;
   // Atualiza "visto pela última vez" sem bloquear o pedido.
   db.guestDevice.update({ where: { id: device.id }, data: { lastSeenAt: new Date() } }).catch(() => {});
@@ -31,6 +33,7 @@ export async function requireGuestAccess(token: string) {
   const guest = await getGuestByToken(token);
   if (!guest) throw new Error("Convite inválido.");
   if (guest.suspendedAt) throw new Error("Este convite está suspenso.");
+  if (!guest.event.verificationRequired) return { guest, event: guest.event };
   if (!(await isGuestAuthorized(guest, guest.event))) throw new Error("Confirme o seu telemóvel para continuar.");
   return { guest, event: guest.event };
 }

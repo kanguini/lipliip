@@ -29,6 +29,11 @@ export function generateOtpCode(): string {
   return randomInt(0, 1_000_000).toString().padStart(6, "0");
 }
 
+/** Hash simples para tokens guardados na base de dados (sessões, dispositivos). */
+export function sha256(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
 export function hashOtp(code: string, guestId: string): string {
   return createHash("sha256").update(`${guestId}:${code.trim()}`).digest("hex");
 }

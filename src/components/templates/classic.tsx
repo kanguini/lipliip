@@ -7,7 +7,7 @@ export function ClassicTemplate({ event, guestName, children }: TemplateProps) {
       <div className="invite-card border-2 px-6 py-12 text-center" style={{ background: "rgba(255,255,255,0.75)" }}>
         <Greeting guestName={guestName} />
         <p className="invite-accent mt-6 text-xs font-semibold uppercase tracking-[0.35em]">{eventKicker(event)}</p>
-        <h1 className="mt-4 text-5xl leading-tight sm:text-6xl">{event.hostNames}</h1>
+        <h1 className="mt-4 text-4xl leading-tight [overflow-wrap:anywhere] text-balance sm:text-6xl">{event.hostNames}</h1>
         <div className="invite-divider" />
         {event.message && <p className="mx-auto max-w-md italic leading-relaxed opacity-90">{event.message}</p>}
         <CoverImage src={event.coverImageUrl} alt={event.title} className="mx-auto mt-8 h-72 w-full rounded-xl" />

@@ -5,6 +5,8 @@ import { calendarDaysUntil } from "@/lib/timezone";
 import { addTaskAction, deleteTaskAction, generateChecklistAction, toggleTaskAction } from "@/app/dashboard/planner-actions";
 import { FlashFromSearch, StatCard } from "@/components/ui";
 import { Check, UserRound, X, Plus } from "lucide-react";
+import { SubmitButton } from "@/components/dashboard/SubmitButton";
+import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 
 export default async function TasksPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string; show?: string }> }) {
   const { id } = await params;
@@ -37,7 +39,7 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
               <div><label className="label">Categoria</label><input name="category" className="input" list="task-cats" placeholder="Catering" /><datalist id="task-cats">{categories.map((c) => <option key={c} value={c} />)}</datalist></div>
             </div>
             <div><label className="label">Quem trata</label><input name="assignee" className="input" placeholder="Ana, João, cerimonialista…" /></div>
-            <button className="btn-primary w-full">Adicionar</button>
+            <SubmitButton className="btn-primary w-full" pendingText="A adicionar…">Adicionar</SubmitButton>
           </form>
           </details>
           <form action={generateChecklistAction.bind(null, id)} className="card">
@@ -81,7 +83,7 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
                       </p>
                       {t.description && <p className="mt-1 text-xs text-[#8c7b87]">{t.description}</p>}
                     </div>
-                    <form action={deleteTaskAction.bind(null, id, t.id)}><button className="text-[#a1939c] hover:text-red-700" title="Remover" aria-label="Remover tarefa"><X className="h-4 w-4" aria-hidden /></button></form>
+                    <form action={deleteTaskAction.bind(null, id, t.id)}><ConfirmButton className="text-[#a1939c] hover:text-red-700" message={`Remover a tarefa "${t.title}"?`}><X className="h-4 w-4" aria-label="Remover tarefa" /></ConfirmButton></form>
                   </li>
                 );
               })}

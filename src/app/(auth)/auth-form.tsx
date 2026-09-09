@@ -22,12 +22,12 @@ export function AuthForm({ mode, notice }: { mode: "login" | "register"; notice?
             {mode === "register" && (
               <div>
                 <label className="label" htmlFor="name">Nome</label>
-                <input id="name" name="name" className="input" required autoComplete="name" />
+                <input id="name" name="name" className="input" required autoComplete="name" defaultValue={state.name ?? ""} />
               </div>
             )}
             <div>
               <label className="label" htmlFor="email">Email</label>
-              <input id="email" name="email" type="email" className="input" required autoComplete="email" />
+              <input id="email" name="email" type="email" className="input" required autoComplete="email" defaultValue={state.email ?? ""} />
             </div>
             <div>
               <label className="label" htmlFor="password">Palavra-passe</label>
@@ -41,7 +41,7 @@ export function AuthForm({ mode, notice }: { mode: "login" | "register"; notice?
                 autoComplete={mode === "login" ? "current-password" : "new-password"}
               />
             </div>
-            {state.error && <p className="text-sm text-red-700">{state.error}</p>}
+            {state.error && <p className="text-sm text-red-700" role="alert">{state.error}</p>}
             {mode === "login" && <p className="text-right text-xs"><Link href="/forgot" className="text-stone-500 underline">Esqueceu-se da palavra-passe?</Link></p>}
             <button className="btn-primary w-full" disabled={pending}>
               {pending ? "Aguarde…" : mode === "login" ? "Entrar" : "Criar conta"}

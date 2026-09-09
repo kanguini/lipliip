@@ -7,16 +7,11 @@ import { requireEventAccess } from "@/lib/access";
 import { buildChecklist } from "@/lib/checklists";
 import { localInputToDate } from "@/lib/timezone";
 import { httpUrlOrNull } from "@/lib/validation";
+import { VENDOR_STATUS } from "@/lib/checklists";
+import { flash, str, opt, parseMoney } from "@/lib/form";
 
-function flash(path: string, kind: "ok" | "error", message: string): never {
-  redirect(`${path}?${kind}=${encodeURIComponent(message)}`);
-}
-const str = (fd: FormData, k: string, max = 300) => String(fd.get(k) ?? "").trim().slice(0, max);
-const opt = (fd: FormData, k: string, max = 300) => str(fd, k, max) || null;
-const num = (fd: FormData, k: string) => {
-  const v = Number.parseFloat(str(fd, k, 20).replace(/\s/g, "").replace(",", "."));
-  return Number.isFinite(v) && v >= 0 ? v : null;
-};
+const num = (fd: FormData, k: string) => parseMoney(str(fd, k, 24));
+const VENDOR_STATUSES = Object.keys(VENDOR_STATUS);
 
 // ---------- Tarefas ----------
 
@@ -81,7 +76,7 @@ export async function addVendorAction(eventId: string, fd: FormData) {
       email: opt(fd, "email", 120),
       website: httpUrlOrNull(str(fd, "website", 300)),
       price: num(fd, "price"),
-      status: ["CONTACTING", "PROPOSAL", "HIRED", "REJECTED"].includes(str(fd, "status", 20)) ? str(fd, "status", 20) : "CONTACTING",
+      status: VENDOR_STATUSES.includes(str(fd, "status", 20)) ? str(fd, "status", 20) : "CONTACTING",
       notes: opt(fd, "notes", 1000),
     },
   });
@@ -94,18 +89,25 @@ export async function updateVendorAction(eventId: string, vendorId: string, fd: 
   const vendor = await db.vendor.findFirst({ where: { id: vendorId, eventId } });
   if (!vendor) flash(path, "error", "Fornecedor não encontrado.");
   const status = str(fd, "status", 20);
+  if (fd.has("price") && str(fd, "price", 24) && num(fd, "price") == null) flash(path, "error", "Valor inválido. Use por exemplo 2500 ou 1.250,00.");
   const data = {
-    status: ["CONTACTING", "PROPOSAL", "HIRED", "REJECTED"].includes(status) ? status : vendor.status,
+    status: VENDOR_STATUSES.includes(status) ? status : vendor.status,
     price: fd.has("price") ? num(fd, "price") : vendor.price,
     notes: fd.has("notes") ? opt(fd, "notes", 1000) : vendor.notes,
   };
-  await db.vendor.update({ where: { id: vendorId }, data });
-  // Ao contratar, cria (ou atualiza) automaticamente a linha do orçamento com o valor fechado.
-  if (data.status === "HIRED" && data.price != null) {
-    const item = await db.budgetItem.findFirst({ where: { eventId, vendorId } });
-    if (item) await db.budgetItem.update({ where: { id: item.id }, data: { contracted: data.price } });
-    else await db.budgetItem.create({ data: { eventId, category: vendor.category, name: vendor.name, estimated: data.price, contracted: data.price, vendorId } });
-  }
+  await db.$transaction(async (tx) => {
+    await tx.vendor.update({ where: { id: vendorId }, data });
+    const item = await tx.budgetItem.findFirst({ where: { eventId, vendorId }, include: { payments: true } });
+    if (data.status === "HIRED" && data.price != null) {
+      // Ao contratar, cria (ou atualiza) a linha do orçamento com o valor fechado.
+      if (item) await tx.budgetItem.update({ where: { id: item.id }, data: { contracted: data.price } });
+      else await tx.budgetItem.create({ data: { eventId, category: vendor.category, name: vendor.name, estimated: data.price, contracted: data.price, vendorId } });
+    } else if (item && vendor.status === "HIRED" && data.status !== "HIRED") {
+      // Deixou de estar contratado: a linha automática sem pagamentos desaparece; com pagamentos fica só como estimativa.
+      if (item.payments.length === 0) await tx.budgetItem.delete({ where: { id: item.id } });
+      else await tx.budgetItem.update({ where: { id: item.id }, data: { contracted: null } });
+    }
+  });
   revalidatePath(path);
   revalidatePath(`/dashboard/events/${eventId}/budget`);
   redirect(path);
@@ -113,7 +115,15 @@ export async function updateVendorAction(eventId: string, vendorId: string, fd: 
 
 export async function deleteVendorAction(eventId: string, vendorId: string) {
   await requireEventAccess(eventId);
-  await db.vendor.deleteMany({ where: { id: vendorId, eventId } });
+  await db.$transaction(async (tx) => {
+    // Linhas de orçamento criadas automaticamente por este fornecedor e sem pagamentos vão com ele.
+    const items = await tx.budgetItem.findMany({ where: { eventId, vendorId }, include: { payments: true } });
+    for (const item of items) {
+      if (item.payments.length === 0) await tx.budgetItem.delete({ where: { id: item.id } });
+      else await tx.budgetItem.update({ where: { id: item.id }, data: { contracted: null } });
+    }
+    await tx.vendor.deleteMany({ where: { id: vendorId, eventId } });
+  });
   flash(`/dashboard/events/${eventId}/vendors`, "ok", "Fornecedor removido.");
 }
 
@@ -162,7 +172,7 @@ export async function addPaymentAction(eventId: string, itemId: string, fd: Form
   const item = await db.budgetItem.findFirst({ where: { id: itemId, eventId } });
   if (!item) flash(path, "error", "Item não encontrado.");
   const amount = num(fd, "amount");
-  if (!amount) flash(path, "error", "Indique o valor do pagamento.");
+  if (!amount) flash(path, "error", "Indique o valor do pagamento (ex.: 500 ou 1.250,00).");
   const due = str(fd, "dueAt", 10);
   await db.payment.create({
     data: {
@@ -199,7 +209,8 @@ export async function addMemberAction(eventId: string, fd: FormData) {
   const email = str(fd, "email", 120).toLowerCase();
   const role = str(fd, "role", 10) === "STAFF" ? "STAFF" : "EDITOR";
   const target = await db.user.findUnique({ where: { email } });
-  if (!target) flash(path, "error", `Não existe nenhuma conta com o email ${email}. Peça à pessoa para criar conta em ${process.env.APP_URL ?? "Liplip"} e tente de novo.`);
+  // Mensagem neutra: não confirma se o email tem conta.
+  if (!target) flash(path, "error", "Não foi possível dar acesso a este email. A pessoa precisa de ter conta na plataforma com exatamente este email; peça-lhe para se registar e tente de novo.");
   if (target.id === user.id) flash(path, "error", "Já é o dono deste evento.");
   await db.eventMember.upsert({
     where: { eventId_userId: { eventId, userId: target.id } },

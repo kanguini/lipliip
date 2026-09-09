@@ -68,10 +68,10 @@ Plataforma web para criar e enviar convites digitais **pessoais e intransmissív
 ## Começar
 
 ```bash
-docker run -d --name lipliip-db -e POSTGRES_PASSWORD=lipliip -e POSTGRES_DB=lipliip -p 5432:5432 postgres:16
+docker run -d --name liplip-db -e POSTGRES_PASSWORD=liplip -e POSTGRES_DB=liplip -p 5432:5432 postgres:16
 cp .env.example .env      # ajuste APP_URL, SMS_PROVIDER, etc.
 npm install               # gera o Prisma Client
-npm run db:push           # cria as tabelas
+npm run db:migrate        # cria as tabelas
 npm run db:seed           # (opcional) conta demo@liplip.online / demo12345 com eventos de exemplo
 npm run dev               # http://localhost:3000
 ```
@@ -80,9 +80,13 @@ Em desenvolvimento, com `SMS_PROVIDER=console` e `SHOW_OTP_IN_DEV=true`, o códi
 
 Testes: `npm test`. Build de produção: `npm run build && npm start`.
 
+## Migrações
+
+O esquema é versionado em `prisma/migrations/`. `npm run db:migrate` (ou o arranque em produção) aplica as migrações em falta; uma base de dados criada antes das migrações, com `db push`, é marcada automaticamente como já tendo a migração inicial. Para alterar o esquema: edite `prisma/schema.prisma` e gere a migração com `npx prisma migrate dev --name <nome>` (precisa de uma base de dados local).
+
 ## Deploy no Railway
 
-O repositório inclui `railway.json`: build com `npm run build` e arranque com `npm run start:railway` (aplica o esquema à base de dados e inicia o servidor). Serviços necessários:
+O repositório inclui `railway.json`: build com `npm run build` e arranque com `npm run start:railway` (aplica as migrações e inicia o servidor). Serviços necessários:
 
 - **Postgres** (imagem `postgres:16` com volume em `/var/lib/postgresql/data`, `PGDATA=/var/lib/postgresql/data/pgdata`).
 - **Web** ligado a este repositório, com as variáveis `DATABASE_URL` (via rede privada, ex.: `postgresql://postgres:<senha>@postgres.railway.internal:5432/railway`), `APP_URL` (o domínio público), `SMS_PROVIDER` e, para SMS reais, as credenciais Twilio.
@@ -110,15 +114,18 @@ Sem fornecedor configurado em produção, a página "Esqueceu-se da palavra-pass
 ## Estrutura
 
 ```
-prisma/schema.prisma        modelo de dados (User, Event, Guest, GuestDevice, OtpCode, AccessLog, GiftItem, GiftReservation, GuestbookEntry)
-src/app/(auth)              registo / login
-src/app/dashboard           painel do organizador (eventos, convidados, presentes, mensagens, check-in, design, definições)
+prisma/schema.prisma        modelo de dados (User, Session, PasswordReset, Event, EventMember, Task, Vendor, BudgetItem, Payment, Guest, GuestDevice, OtpCode, AccessLog, GiftItem, GiftReservation, GuestbookEntry)
+prisma/migrations           migrações versionadas
+src/app/(auth)              registo, login, recuperação de palavra-passe
+src/app/dashboard           painel: convites digitais (colecção), eventos, criação em 3 passos, conta
+src/app/dashboard/events/[id]  resumo, design, conteúdo, presentes, definições, convidados, mesas, mensagens, check-in, tarefas, orçamento, fornecedores, equipa, pré-visualização
 src/app/c/[token]           convite do convidado (OTP, RSVP, presentes, livro, QR, .ics)
 src/app/preview/[template]  pré-visualização pública dos templates
-src/components/templates    os 5 templates visuais
-src/components/invite       secções do convite (RSVP, presentes, livro, OTP)
-src/lib                     domínio: auth, tokens/OTP, telefones, SMS, CSV, ICS, templates
-tests/                      testes unitários
+src/components/templates    11 templates (6 cartazes da colecção 2026 + 5 clássicos)
+src/components/invite       secções do convite (envelope, contagem, música, RSVP, presentes, livro, OTP)
+src/lib                     domínio: auth, access/papéis, tokens/OTP, dispositivos, telefones, SMS, email, CSV, ICS, fuso horário, checklists, formulários
+scripts/migrate.mjs         aplica migrações (com baseline automático de bases antigas)
+tests/                      testes unitários (vitest)
 ```
 
 ## Ideias para as próximas versões
@@ -126,7 +133,7 @@ tests/                      testes unitários
 - Envio de convites por email e lembretes automáticos (ex.: 7 dias antes do prazo de RSVP) aos que não responderam.
 - Save the date antes do convite completo; mudança de última hora com notificação a todos os confirmados.
 - Upload direto de fotos de capa e galeria pós-evento partilhada com os convidados.
-- Plano de mesas visual com arrastar e largar, exportação para Excel/PDF da lista de presenças e das restrições alimentares.
+- Plano de mesas visual com arrastar e largar; exportação em PDF.
 - Pagamentos integrados na lista de presentes (Stripe, MB WAY, Multicaixa Express) com recibo automático.
 - Multi-idioma do convite (PT/EN/FR) escolhido por convidado.
 - Sub-eventos (jantar de ensaio, brunch) com listas de convidados diferentes.

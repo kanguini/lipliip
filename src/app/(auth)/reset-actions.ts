@@ -44,10 +44,11 @@ export async function resetPasswordAction(_prev: ResetState, fd: FormData): Prom
   if (password.length < 8) return { error: "A palavra-passe deve ter pelo menos 8 caracteres." };
   const reset = token ? await db.passwordReset.findUnique({ where: { tokenHash: sha(token) } }) : null;
   if (!reset || reset.usedAt || reset.expiresAt < new Date()) return { error: "Link inválido ou expirado. Peça um novo." };
+  await db.passwordReset.deleteMany({ where: { userId: reset.userId, OR: [{ expiresAt: { lt: new Date() } }, { usedAt: { not: null } }] } });
   await db.$transaction([
     db.passwordReset.update({ where: { id: reset.id }, data: { usedAt: new Date() } }),
     db.user.update({ where: { id: reset.userId }, data: { passwordHash: await hashPassword(password) } }),
     db.session.deleteMany({ where: { userId: reset.userId } }),
   ]);
-  redirect("/login?ok=" + encodeURIComponent("Palavra-passe alterada. Entre com a nova palavra-passe."));
+  redirect("/login?ok=password_changed");
 }
