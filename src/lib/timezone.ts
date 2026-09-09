@@ -3,32 +3,55 @@
  * formatamos sempre no fuso horário do evento, independentemente do servidor ou do telemóvel.
  */
 export const TIMEZONES: { id: string; label: string }[] = [
+  { id: "Africa/Luanda", label: "Luanda (Angola)" },
   { id: "Europe/Lisbon", label: "Lisboa (Portugal continental)" },
   { id: "Atlantic/Azores", label: "Açores" },
-  { id: "Africa/Luanda", label: "Luanda (Angola)" },
   { id: "Africa/Maputo", label: "Maputo (Moçambique)" },
   { id: "Atlantic/Cape_Verde", label: "Cabo Verde" },
   { id: "Africa/Sao_Tome", label: "São Tomé e Príncipe" },
   { id: "Africa/Bissau", label: "Guiné-Bissau" },
+  { id: "Africa/Windhoek", label: "Windhoek (Namíbia)" },
+  { id: "Africa/Johannesburg", label: "Joanesburgo (África do Sul)" },
+  { id: "Africa/Kinshasa", label: "Kinshasa (RD Congo)" },
+  { id: "Africa/Brazzaville", label: "Brazzaville (Congo)" },
+  { id: "Africa/Lusaka", label: "Lusaca (Zâmbia)" },
+  { id: "Africa/Lagos", label: "Lagos (Nigéria)" },
   { id: "America/Sao_Paulo", label: "São Paulo / Brasília" },
   { id: "Europe/Madrid", label: "Madrid" },
   { id: "Europe/Paris", label: "Paris" },
   { id: "Europe/London", label: "Londres" },
+  { id: "Europe/Berlin", label: "Berlim" },
   { id: "America/New_York", label: "Nova Iorque" },
+  { id: "America/Toronto", label: "Toronto" },
+  { id: "Asia/Dubai", label: "Dubai" },
+  { id: "Asia/Shanghai", label: "Xangai / Pequim" },
 ];
 
+export const DEFAULT_TIMEZONE = "Africa/Luanda";
+
+/** Fuso horário sugerido a partir do país por omissão dos telefones. */
 export const COUNTRY_TIMEZONE: Record<string, string> = {
-  PT: "Europe/Lisbon",
   AO: "Africa/Luanda",
+  PT: "Europe/Lisbon",
   MZ: "Africa/Maputo",
   BR: "America/Sao_Paulo",
   CV: "Atlantic/Cape_Verde",
   ST: "Africa/Sao_Tome",
   GW: "Africa/Bissau",
+  NA: "Africa/Windhoek",
+  ZA: "Africa/Johannesburg",
+  CD: "Africa/Kinshasa",
+  CG: "Africa/Brazzaville",
+  ZM: "Africa/Lusaka",
+  NG: "Africa/Lagos",
   ES: "Europe/Madrid",
   FR: "Europe/Paris",
   GB: "Europe/London",
+  DE: "Europe/Berlin",
   US: "America/New_York",
+  CA: "America/Toronto",
+  AE: "Asia/Dubai",
+  CN: "Asia/Shanghai",
 };
 
 export function isValidTimezone(tz: string): boolean {

@@ -1,11 +1,14 @@
 import { formatDateTimeShort, formatEventDate, formatTime } from "@/lib/format";
 import type { PartyMember, ProgramItem, StoryItem } from "@/lib/event-types";
 import { Countdown } from "./Countdown";
-import { CalendarPlus, MapPin } from "lucide-react";
+import { CalendarPlus, MapPin, Navigation } from "lucide-react";
 import type { TemplateEvent } from "@/components/templates/types";
+import { directionsUrl, hasCoordinates } from "@/lib/geo";
+import { VenueMap } from "./VenueMap";
 
 export function DetailsSection({ event, calendarUrl, googleUrl, daysLeft }: { event: TemplateEvent; calendarUrl?: string; googleUrl?: string; daysLeft?: number }) {
   const days = daysLeft ?? Math.ceil((event.date.getTime() - Date.now()) / 86_400_000);
+  const coords = hasCoordinates(event) ? { lat: event.venueLat, lng: event.venueLng } : null;
   const mapsUrl =
     event.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([event.venueName, event.venueAddress].filter(Boolean).join(", "))}`;
   return (
@@ -33,8 +36,17 @@ export function DetailsSection({ event, calendarUrl, googleUrl, daysLeft }: { ev
           </div>
         )}
       </div>
+      {coords && (
+        <div className="mt-5">
+          <VenueMap lat={coords.lat} lng={coords.lng} />
+        </div>
+      )}
       <div className="mt-5 flex flex-wrap gap-2">
-        <a href={mapsUrl} target="_blank" rel="noreferrer" className="invite-btn-outline btn-sm"><MapPin className="h-4 w-4" aria-hidden />Ver no mapa</a>
+        {coords ? (
+          <a href={directionsUrl(coords)} target="_blank" rel="noreferrer" className="invite-btn-outline btn-sm"><Navigation className="h-4 w-4" aria-hidden />Como chegar</a>
+        ) : (
+          <a href={mapsUrl} target="_blank" rel="noreferrer" className="invite-btn-outline btn-sm"><MapPin className="h-4 w-4" aria-hidden />Ver no mapa</a>
+        )}
         {calendarUrl && <a href={calendarUrl} className="invite-btn-outline btn-sm"><CalendarPlus className="h-4 w-4" aria-hidden />Adicionar ao calendário</a>}
         {googleUrl && <a href={googleUrl} target="_blank" rel="noreferrer" className="invite-btn-outline btn-sm">Google Calendar</a>}
         <a href="#rsvp" className="invite-btn btn-sm">Confirmar presença</a>

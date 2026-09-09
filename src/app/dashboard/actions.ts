@@ -5,21 +5,23 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireOwnedEvent, requireUser } from "@/lib/auth";
-import { normalizePhone } from "@/lib/phone";
+import { DEFAULT_COUNTRY, normalizePhone } from "@/lib/phone";
 import { generateCheckinCode, generateInviteToken } from "@/lib/tokens";
 import { parseGuestImport } from "@/lib/csv";
 import { SUPPORTED_COUNTRIES } from "@/lib/phone";
 import { parseGalleryText, parsePartyText, parseProgramText, parseStoryText } from "@/lib/event-types";
+import { parseMenuText } from "@/lib/menu";
+import { parseLatLng } from "@/lib/geo";
 import { getSmsProvider, isSmsConfigured } from "@/lib/sms";
 import { rateLimit, rateLimitRefund } from "@/lib/rate-limit";
 import { flash, str, opt, bool, parseMoney } from "@/lib/form";
 import { inviteShareMessage, inviteUrl } from "@/lib/urls";
-import { formatTime } from "@/lib/format";
+import { DEFAULT_CURRENCY, formatTime } from "@/lib/format";
 import { TEMPLATES } from "@/lib/templates";
 import { httpUrlOrNull } from "@/lib/validation";
 import { accessibleEventWhere, editableEventWhere, requireEventAccess } from "@/lib/access";
 import { buildChecklist } from "@/lib/checklists";
-import { COUNTRY_TIMEZONE, isValidTimezone, localInputToDate } from "@/lib/timezone";
+import { COUNTRY_TIMEZONE, DEFAULT_TIMEZONE, isValidTimezone, localInputToDate } from "@/lib/timezone";
 
 function dateOrNull(v: string, tz: string) {
   if (!v) return null;
@@ -38,6 +40,15 @@ const eventSchema = z.object({
   country: z.enum(SUPPORTED_COUNTRIES.map((c) => c.code) as [string, ...string[]], { message: "País inválido" }),
 });
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+const CURRENCY_CODE = /^[A-Z]{3}$/;
+
+/** Moeda: opção da lista ou, se "Outra", o código escrito à mão. Por omissão, Kwanza. */
+function currencyFromForm(fd: FormData): string {
+  const chosen = str(fd, "currency", 3).toUpperCase();
+  const other = str(fd, "currencyOther", 3).toUpperCase();
+  const code = chosen || other;
+  return CURRENCY_CODE.test(code) ? code : DEFAULT_CURRENCY;
+}
 
 function eventDataFromForm(fd: FormData) {
   const parsed = eventSchema.safeParse({
@@ -47,13 +58,18 @@ function eventDataFromForm(fd: FormData) {
     hostNames: fd.get("hostNames"),
     date: fd.get("date"),
     venueName: fd.get("venueName"),
-    country: fd.get("country") || "PT",
+    country: fd.get("country") || DEFAULT_COUNTRY,
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message } as const;
   const tzInput = str(fd, "timezone", 60);
-  const timezone = isValidTimezone(tzInput) ? tzInput : (COUNTRY_TIMEZONE[parsed.data.country] ?? "Europe/Lisbon");
+  const timezone = isValidTimezone(tzInput) ? tzInput : (COUNTRY_TIMEZONE[parsed.data.country] ?? DEFAULT_TIMEZONE);
   const date = dateOrNull(parsed.data.date, timezone);
   if (!date) return { error: "Data inválida" } as const;
+  // Coordenadas do marcador: só são guardadas se vierem ambas e dentro dos limites; caso contrário ficam a null.
+  const latRaw = str(fd, "venueLat", 30);
+  const lngRaw = str(fd, "venueLng", 30);
+  const coords = parseLatLng(latRaw, lngRaw);
+  if ((latRaw || lngRaw) && !coords) return { error: "Coordenadas do mapa inválidas. Volte a colocar o marcador." } as const;
   const typeLabel = { WEDDING: "Casamento de", ENGAGEMENT: "Noivado de", BIRTHDAY: "Aniversário de", OTHER: "Festa de" }[parsed.data.type];
   return {
     data: {
@@ -65,10 +81,12 @@ function eventDataFromForm(fd: FormData) {
       message: opt(fd, "message", 1000),
       venueAddress: opt(fd, "venueAddress", 200),
       mapsUrl: httpUrlOrNull(str(fd, "mapsUrl", 500)),
+      venueLat: coords?.lat ?? null,
+      venueLng: coords?.lng ?? null,
       dressCode: opt(fd, "dressCode", 80),
       coverImageUrl: httpUrlOrNull(str(fd, "coverImageUrl", 500)),
       accentColor: HEX_COLOR.test(str(fd, "accentColor", 9)) ? str(fd, "accentColor", 9) : null,
-      currency: str(fd, "currency", 3).toUpperCase() || "EUR",
+      currency: currencyFromForm(fd),
       rsvpDeadline: dateOrNull(str(fd, "rsvpDeadline", 30) ? `${str(fd, "rsvpDeadline", 30)}T23:59` : "", timezone),
       allowChildren: fd.has("_full") ? bool(fd, "allowChildren") : true,
       verificationRequired: !fd.has("_full") ? true : bool(fd, "verificationRequired"),
@@ -129,6 +147,12 @@ export async function updateDesignAction(eventId: string, fd: FormData) {
   flash(`/dashboard/events/${eventId}/design`, "ok", "Design atualizado.");
 }
 
+/** Ementa em texto → JSON guardado (null quando não há secções com pratos). */
+function menuJsonFromText(text: string): string | null {
+  const sections = parseMenuText(text).slice(0, 12);
+  return sections.length ? JSON.stringify(sections) : null;
+}
+
 export async function updateContentAction(eventId: string, fd: FormData) {
   await requireOwnedEvent(eventId);
   const path = `/dashboard/events/${eventId}/content`;
@@ -146,6 +170,7 @@ export async function updateContentAction(eventId: string, fd: FormData) {
       galleryJson: JSON.stringify(parseGalleryText(str(fd, "galleryText", 10_000)).slice(0, 30)),
       storyJson: JSON.stringify(parseStoryText(str(fd, "storyText", 10_000)).slice(0, 20)),
       partyJson: JSON.stringify(parsePartyText(str(fd, "partyText", 10_000)).slice(0, 30)),
+      menuJson: menuJsonFromText(str(fd, "menuText", 10_000)),
       envelopeEnabled: bool(fd, "envelopeEnabled"),
       songRequestsEnabled: bool(fd, "songRequestsEnabled"),
     },
@@ -205,7 +230,7 @@ export async function addGuestAction(eventId: string, fd: FormData) {
   const name = str(fd, "name", 120);
   if (name.length < 2) flash(path, "error", "Indique o nome do convidado.");
   const phone = normalizePhone(str(fd, "phone", 30), event.country);
-  if (!phone) flash(path, "error", "Telefone inválido. Use o formato internacional (+351 ...) ou o número nacional.");
+  if (!phone) flash(path, "error", "Telefone inválido. Escreva o número nacional ou, para outros países, com o indicativo (ex.: +351 912 345 678).");
   const duplicate = await db.guest.findFirst({ where: { eventId, phone } });
   if (duplicate) flash(path, "error", `Já existe um convidado com este telefone: ${duplicate.name}.`);
   try {
@@ -267,7 +292,7 @@ export async function updateGuestAction(guestId: string, fd: FormData) {
   const name = str(fd, "name", 120);
   if (name.length < 2) flash(path, "error", "Indique o nome.");
   const phone = normalizePhone(str(fd, "phone", 30), guest.event.country);
-  if (!phone) flash(path, "error", "Telefone inválido.");
+  if (!phone) flash(path, "error", "Telefone inválido. Para outros países, escreva com o indicativo (ex.: +351 912 345 678).");
   const duplicate = await db.guest.findFirst({ where: { eventId: guest.eventId, phone, id: { not: guestId } } });
   if (duplicate) flash(path, "error", `Já existe outro convidado com este telefone: ${duplicate.name}.`);
   const maxCompanions = Math.min(MAX_COMPANIONS, Math.max(0, Number.parseInt(str(fd, "maxCompanions", 3), 10) || 0));

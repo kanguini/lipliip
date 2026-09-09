@@ -1,5 +1,6 @@
 import { requireOwnedEvent } from "@/lib/auth";
 import { parseGallery, parseParty, parseStory, partyToText, storyToText } from "@/lib/event-types";
+import { menuToText, parseMenu } from "@/lib/menu";
 import { updateContentAction } from "@/app/dashboard/actions";
 import { FlashFromSearch } from "@/components/ui";
 import { SubmitButton } from "@/components/dashboard/SubmitButton";
@@ -57,6 +58,22 @@ export default async function ContentPage({ params, searchParams }: { params: Pr
           <legend className="px-1 text-sm font-semibold text-stone-700">{isWedding ? "Padrinhos, madrinhas e damas" : "Pessoas especiais"}</legend>
           <textarea name="partyText" className="input font-mono text-xs" rows={5} defaultValue={partyToText(parseParty(event.partyJson))} placeholder={"Rita Sousa - Madrinha - https://…/rita.jpg\nTiago Lopes - Padrinho\nLeonor - Menina das alianças"} />
           <p className="hint">Uma pessoa por linha: nome - papel - link da foto (papel e foto opcionais).</p>
+        </fieldset>
+
+        <fieldset className="card space-y-3">
+          <legend className="px-1 text-sm font-semibold text-stone-700">Ementa</legend>
+          <textarea
+            id="menuText"
+            name="menuText"
+            className="input font-mono text-xs"
+            rows={8}
+            defaultValue={menuToText(parseMenu(event.menuJson))}
+            placeholder={"# Entradas\nSalada de polvo - com batata-doce - sem glúten\nPastéis de bacalhau\n\n# Pratos principais\nMuamba de galinha - com funje e quiabos\nCabrito assado - vegetariano à parte a pedido\n\n# Sobremesas\nCocada amarela\n\n# Bebidas\nSumo de múcua - sem álcool"}
+          />
+          <p className="hint">
+            Uma linha <code className="rounded bg-brand-50 px-1"># Título</code> abre uma secção (Entradas, Pratos principais, Sobremesas, Bebidas…). Cada linha seguinte é um prato:{" "}
+            <code className="rounded bg-brand-50 px-1">nome - descrição - etiquetas separadas por vírgula</code> (descrição e etiquetas opcionais, ex.: vegetariano, sem glúten). Deixe vazio para não mostrar a ementa.
+          </p>
         </fieldset>
 
         <fieldset className="card space-y-3">

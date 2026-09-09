@@ -1,12 +1,16 @@
 import type { Event } from "@prisma/client";
 import { EVENT_TYPES } from "@/lib/event-types";
-import { SUPPORTED_COUNTRIES } from "@/lib/phone";
-import { TIMEZONES, dateToLocalDateInput, dateToLocalInput } from "@/lib/timezone";
+import { DEFAULT_COUNTRY, SUPPORTED_COUNTRIES } from "@/lib/phone";
+import { DEFAULT_TIMEZONE, TIMEZONES, dateToLocalDateInput, dateToLocalInput } from "@/lib/timezone";
 import { parseProgram, programToText } from "@/lib/event-types";
+import { CURRENCIES, DEFAULT_CURRENCY } from "@/lib/format";
+import { MapPicker } from "./MapPicker";
 
 /** Campos de detalhe do evento, partilhados entre "novo evento" e "definições". */
 export function EventDetailsFields({ event, type }: { event?: Event; type: string }) {
   const t = EVENT_TYPES[type as keyof typeof EVENT_TYPES] ?? EVENT_TYPES.OTHER;
+  const currency = (event?.currency ?? DEFAULT_CURRENCY).toUpperCase();
+  const knownCurrency = CURRENCIES.some((c) => c.code === currency);
   return (
     <div className="space-y-6">
       <input type="hidden" name="_full" value="1" />
@@ -31,7 +35,7 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
           </div>
           <div>
             <label className="label">Fuso horário do evento</label>
-            <select name="timezone" className="input" defaultValue={event?.timezone ?? "Europe/Lisbon"}>
+            <select name="timezone" className="input" defaultValue={event?.timezone ?? DEFAULT_TIMEZONE}>
               {TIMEZONES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
             </select>
             <p className="hint">As horas do convite, a contagem decrescente e o calendário usam este fuso.</p>
@@ -47,23 +51,29 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
         <legend>Local</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="label">Nome do local</label>
-            <input name="venueName" className="input" required minLength={2} maxLength={120} defaultValue={event?.venueName ?? ""} placeholder="Quinta da Serra" />
+            <label className="label" htmlFor="venueName">Nome do local</label>
+            <input id="venueName" name="venueName" className="input" required minLength={2} maxLength={120} defaultValue={event?.venueName ?? ""} placeholder="Salão Nobre do Hotel Epic Sana" />
           </div>
           <div>
-            <label className="label">Morada</label>
-            <input name="venueAddress" className="input" defaultValue={event?.venueAddress ?? ""} placeholder="Estrada da Serra 12, Sintra" />
+            <label className="label" htmlFor="venueAddress">Morada</label>
+            <input id="venueAddress" name="venueAddress" className="input" maxLength={200} defaultValue={event?.venueAddress ?? ""} placeholder="Rua da Missão 12, Luanda" />
           </div>
           <div>
-            <label className="label">Link do Google Maps (opcional)</label>
-            <input name="mapsUrl" type="url" className="input" defaultValue={event?.mapsUrl ?? ""} placeholder="https://maps.app.goo.gl/…" />
-            <p className="hint">Se vazio, o botão do mapa pesquisa pela morada.</p>
+            <label className="label" htmlFor="mapsUrl">Link do Google Maps (opcional)</label>
+            <input id="mapsUrl" name="mapsUrl" type="url" className="input" defaultValue={event?.mapsUrl ?? ""} placeholder="https://maps.app.goo.gl/…" />
+            <p className="hint">Alternativa ao marcador no mapa. Se ambos estiverem vazios, o botão do mapa pesquisa pela morada.</p>
           </div>
           <div>
-            <label className="label">Dress code (opcional)</label>
-            <input name="dressCode" className="input" defaultValue={event?.dressCode ?? ""} placeholder="Formal, cocktail, à vontade…" />
+            <label className="label" htmlFor="dressCode">Dress code (opcional)</label>
+            <input id="dressCode" name="dressCode" className="input" defaultValue={event?.dressCode ?? ""} placeholder="Formal, cocktail, à vontade…" />
           </div>
         </div>
+      </fieldset>
+
+      <fieldset className="card space-y-4">
+        <legend>Localização no mapa</legend>
+        <p className="-mt-2 text-sm text-muted">Marque o ponto exato: os convidados veem o mapa no convite e um botão &ldquo;Como chegar&rdquo; que abre a navegação no telemóvel.</p>
+        <MapPicker initialLat={event?.venueLat ?? null} initialLng={event?.venueLng ?? null} />
       </fieldset>
 
       <fieldset className="card space-y-4">
@@ -82,13 +92,13 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
         <legend>Convidados e segurança</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="label">País dos telefones (por omissão)</label>
-            <select name="country" className="input" defaultValue={event?.country ?? "PT"}>
+            <label className="label" htmlFor="country">País por omissão dos telefones</label>
+            <select id="country" name="country" className="input" defaultValue={event?.country ?? DEFAULT_COUNTRY}>
               {SUPPORTED_COUNTRIES.map((c) => (
                 <option key={c.code} value={c.code}>{c.label}</option>
               ))}
             </select>
-            <p className="hint">Números sem indicativo serão interpretados neste país.</p>
+            <p className="hint">Números de outros países: escreva com o indicativo, ex.: +351 912 345 678</p>
           </div>
           <div>
             <label className="label">Prazo para confirmar presença (opcional)</label>
@@ -124,8 +134,15 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
         <legend>Contribuições em dinheiro (opcional)</legend>
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
-            <label className="label">Moeda</label>
-            <input name="currency" className="input" maxLength={3} defaultValue={event?.currency ?? "EUR"} placeholder="EUR, AOA, BRL, MZN" />
+            <label className="label" htmlFor="currency">Moeda</label>
+            <select id="currency" name="currency" className="input" defaultValue={knownCurrency ? currency : ""}>
+              {CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code}>{c.label}</option>
+              ))}
+              <option value="">Outra (indicar código)</option>
+            </select>
+            <input name="currencyOther" className="input mt-2" maxLength={3} defaultValue={knownCurrency ? "" : currency} placeholder="Código ISO, ex.: CHF" aria-label="Código da moeda (se escolher Outra)" />
+            <p className="hint">Usada nos preços da lista de presentes. Se escolher &ldquo;Outra&rdquo;, escreva o código de 3 letras.</p>
           </div>
           <div>
             <label className="label">IBAN</label>
