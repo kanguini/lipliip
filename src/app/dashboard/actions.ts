@@ -15,6 +15,8 @@ import { inviteShareMessage, inviteUrl } from "@/lib/urls";
 import { formatTime } from "@/lib/format";
 import { TEMPLATES } from "@/lib/templates";
 import { httpUrlOrNull } from "@/lib/validation";
+import { accessibleEventWhere, requireEventAccess } from "@/lib/access";
+import { buildChecklist } from "@/lib/checklists";
 import { COUNTRY_TIMEZONE, isValidTimezone, localInputToDate } from "@/lib/timezone";
 
 function flash(path: string, kind: "ok" | "error", message: string): never {
@@ -95,7 +97,9 @@ export async function createEventAction(fd: FormData) {
   const result = eventDataFromForm(fd);
   if (result.error !== undefined) flash("/dashboard/events/new", "error", result.error);
   const event = await db.event.create({ data: { ...result.data, ownerId: user.id } });
-  redirect(`/dashboard/events/${event.id}?ok=${encodeURIComponent("Evento criado! Agora adicione os convidados.")}`);
+  // Checklist inicial com prazos calculados a partir da data do evento.
+  await db.task.createMany({ data: buildChecklist(event.type, event.date).map((t) => ({ ...t, eventId: event.id })) });
+  redirect(`/dashboard/events/${event.id}?ok=${encodeURIComponent("Evento criado! Já tem uma checklist de tarefas com prazos. Depois, adicione os convidados.")}`);
 }
 
 export async function updateEventAction(eventId: string, fd: FormData) {
@@ -155,7 +159,7 @@ export async function assignTableAction(eventId: string, fd: FormData) {
 }
 
 export async function deleteEventAction(eventId: string) {
-  await requireOwnedEvent(eventId);
+  await requireEventAccess(eventId, { ownerOnly: true });
   await db.event.delete({ where: { id: eventId } });
   flash("/dashboard", "ok", "Evento eliminado.");
 }
@@ -234,7 +238,7 @@ export async function importGuestsAction(eventId: string, fd: FormData) {
 
 async function requireOwnedGuest(guestId: string) {
   const user = await requireUser();
-  const guest = await db.guest.findFirst({ where: { id: guestId, event: { ownerId: user.id } }, include: { event: true } });
+  const guest = await db.guest.findFirst({ where: { id: guestId, event: accessibleEventWhere(user.id) }, include: { event: true } });
   if (!guest) redirect("/dashboard");
   return guest;
 }
@@ -330,7 +334,7 @@ export async function sendSmsInviteAction(guestId: string) {
 }
 
 export async function checkinAction(eventId: string, fd: FormData) {
-  const { event } = await requireOwnedEvent(eventId);
+  const { event } = await requireEventAccess(eventId, { allowStaff: true });
   const path = `/dashboard/events/${eventId}/checkin`;
   const code = str(fd, "code", 12).toUpperCase().replace(/[^A-Z0-9]/g, "");
   const guest = await db.guest.findFirst({ where: { eventId, checkinCode: code } });
@@ -347,7 +351,9 @@ export async function checkinAction(eventId: string, fd: FormData) {
 }
 
 export async function toggleCheckinAction(guestId: string) {
-  const guest = await requireOwnedGuest(guestId);
+  const user = await requireUser();
+  const guest = await db.guest.findFirst({ where: { id: guestId, event: accessibleEventWhere(user.id) } });
+  if (!guest) redirect("/dashboard");
   await db.guest.update({ where: { id: guestId }, data: { checkedInAt: guest.checkedInAt ? null : new Date() } });
   revalidatePath(`/dashboard/events/${guest.eventId}/checkin`);
 }
@@ -378,7 +384,7 @@ export async function addGiftAction(eventId: string, fd: FormData) {
 
 export async function deleteGiftAction(giftId: string) {
   const user = await requireUser();
-  const gift = await db.giftItem.findFirst({ where: { id: giftId, event: { ownerId: user.id } } });
+  const gift = await db.giftItem.findFirst({ where: { id: giftId, event: accessibleEventWhere(user.id) } });
   if (!gift) redirect("/dashboard");
   await db.giftItem.delete({ where: { id: giftId } });
   flash(`/dashboard/events/${gift.eventId}/gifts`, "ok", "Presente removido.");
@@ -388,7 +394,7 @@ export async function deleteGiftAction(giftId: string) {
 
 export async function deleteGuestbookEntryAction(entryId: string) {
   const user = await requireUser();
-  const entry = await db.guestbookEntry.findFirst({ where: { id: entryId, event: { ownerId: user.id } } });
+  const entry = await db.guestbookEntry.findFirst({ where: { id: entryId, event: accessibleEventWhere(user.id) } });
   if (!entry) redirect("/dashboard");
   await db.guestbookEntry.delete({ where: { id: entryId } });
   flash(`/dashboard/events/${entry.eventId}/guestbook`, "ok", "Mensagem removida.");

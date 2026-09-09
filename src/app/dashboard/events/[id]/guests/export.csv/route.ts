@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { accessibleEventWhere } from "@/lib/access";
 import { RSVP_LABELS } from "@/lib/event-types";
 import { csvSafe } from "@/lib/validation";
 
@@ -19,7 +20,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params;
   const user = await getCurrentUser();
   if (!user) return new Response("Unauthorized", { status: 401 });
-  const event = await db.event.findFirst({ where: { id, ownerId: user.id } });
+  const event = await db.event.findFirst({ where: { id, ...accessibleEventWhere(user.id) } });
   if (!event) return new Response("Not found", { status: 404 });
   const guests = await db.guest.findMany({ where: { eventId: id }, orderBy: [{ groupName: "asc" }, { name: "asc" }] });
 

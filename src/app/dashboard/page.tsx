@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { accessibleEventWhere } from "@/lib/access";
 import { EVENT_TYPES, type EventType } from "@/lib/event-types";
 import { formatEventDate } from "@/lib/format";
 import { EmptyState, FlashFromSearch, PageHeader } from "@/components/ui";
@@ -11,7 +12,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const user = await requireUser();
   const sp = await searchParams;
   const events = await db.event.findMany({
-    where: { ownerId: user.id },
+    where: accessibleEventWhere(user.id),
     orderBy: { date: "asc" },
     include: { _count: { select: { guests: true } }, guests: { select: { rsvpStatus: true, companions: true } } },
   });

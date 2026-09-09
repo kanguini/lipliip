@@ -20,6 +20,7 @@ model User {
   events       Event[]
   sessions     Session[]
   resets       PasswordReset[]
+  memberships  EventMember[]
 }
 
 model Session {
@@ -85,6 +86,86 @@ model Event {
   guests    Guest[]
   gifts     GiftItem[]
   guestbook GuestbookEntry[]
+  members   EventMember[]
+  tasks     Task[]
+  budget    BudgetItem[]
+  vendors   Vendor[]
+}
+
+/// Quem pode trabalhar num evento além do dono: co-organizadores, cerimonialistas, equipa de receção.
+model EventMember {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   @default("EDITOR") // EDITOR (tudo menos eliminar/equipa) | STAFF (só check-in)
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, userId])
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  eventId     String
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  category    String? // Local, Catering, Fotografia...
+  dueAt       DateTime?
+  assignee    String? // nome de quem trata
+  completedAt DateTime?
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+
+  @@index([eventId])
+}
+
+model Vendor {
+  id          String       @id @default(cuid())
+  eventId     String
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  category    String
+  name        String
+  contactName String?
+  phone       String?
+  email       String?
+  website     String?
+  price       Float? // valor da proposta
+  status      String       @default("CONTACTING") // CONTACTING | PROPOSAL | HIRED | REJECTED
+  notes       String?
+  createdAt   DateTime     @default(now())
+  budgetItems BudgetItem[]
+
+  @@index([eventId])
+}
+
+model BudgetItem {
+  id         String    @id @default(cuid())
+  eventId    String
+  event      Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  category   String
+  name       String
+  estimated  Float     @default(0)
+  contracted Float? // valor fechado com o fornecedor
+  vendorId   String?
+  vendor     Vendor?   @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  notes      String?
+  createdAt  DateTime  @default(now())
+  payments   Payment[]
+
+  @@index([eventId])
+}
+
+model Payment {
+  id           String     @id @default(cuid())
+  budgetItemId String
+  budgetItem   BudgetItem @relation(fields: [budgetItemId], references: [id], onDelete: Cascade)
+  label        String? // Sinal, 2ª prestação...
+  amount       Float
+  dueAt        DateTime?
+  paidAt       DateTime?
+  createdAt    DateTime   @default(now())
 }
 
 model Guest {

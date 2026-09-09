@@ -10,11 +10,18 @@ export default async function EventOverviewPage({ params, searchParams }: { para
   const { id } = await params;
   const sp = await searchParams;
   const { event } = await requireOwnedEvent(id);
-  const [guests, gifts, guestbookCount] = await Promise.all([
+  const [guests, gifts, guestbookCount, tasks, budgetItems, vendorsHired] = await Promise.all([
     db.guest.findMany({ where: { eventId: id }, orderBy: { respondedAt: "desc" } }),
     db.giftItem.findMany({ where: { eventId: id }, include: { reservations: true } }),
     db.guestbookEntry.count({ where: { eventId: id } }),
+    db.task.findMany({ where: { eventId: id }, orderBy: { dueAt: "asc" } }),
+    db.budgetItem.findMany({ where: { eventId: id }, include: { payments: true } }),
+    db.vendor.count({ where: { eventId: id, status: "HIRED" } }),
   ]);
+  const tasksDone = tasks.filter((t) => t.completedAt).length;
+  const nextTasks = tasks.filter((t) => !t.completedAt).slice(0, 4);
+  const budgetTotal = budgetItems.reduce((s, i) => s + (i.contracted ?? i.estimated), 0);
+  const budgetPaid = budgetItems.flatMap((i) => i.payments).filter((p) => p.paidAt).reduce((s, p) => s + p.amount, 0);
 
   const accepted = guests.filter((g) => g.rsvpStatus === "ACCEPTED");
   const declined = guests.filter((g) => g.rsvpStatus === "DECLINED");
@@ -58,6 +65,29 @@ export default async function EventOverviewPage({ params, searchParams }: { para
         <StatCard label="Presentes reservados" value={`${reservedGifts}${cash > 0 ? ` + ${formatMoney(cash, event.currency)}` : ""}`} />
       </div>
 
+      <div className="mt-8 grid gap-6 lg:grid-cols-3">
+        <Link href={`/dashboard/events/${id}/tasks`} className="card transition hover:shadow-md">
+          <p className="eyebrow">Tarefas</p>
+          <p className="font-display mt-2 text-3xl text-brand-700">{tasks.length ? Math.round((tasksDone / tasks.length) * 100) : 0}%</p>
+          <p className="text-xs text-[#8c7b87]">{tasksDone} de {tasks.length} feitas</p>
+          <ul className="mt-3 space-y-1 text-sm">
+            {nextTasks.map((t) => <li key={t.id} className="truncate">○ {t.title}</li>)}
+            {nextTasks.length === 0 && <li className="text-[#8c7b87]">Tudo feito 🎉</li>}
+          </ul>
+        </Link>
+        <Link href={`/dashboard/events/${id}/budget`} className="card transition hover:shadow-md">
+          <p className="eyebrow">Orçamento</p>
+          <p className="font-display mt-2 text-3xl text-brand-700">{formatMoney(budgetTotal, event.currency)}</p>
+          <p className="text-xs text-[#8c7b87]">pago {formatMoney(budgetPaid, event.currency)} · por pagar {formatMoney(Math.max(budgetTotal - budgetPaid, 0), event.currency)}</p>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-brand-100"><div className="h-full bg-brand-600" style={{ width: `${budgetTotal ? Math.min(100, (budgetPaid / budgetTotal) * 100) : 0}%` }} /></div>
+        </Link>
+        <Link href={`/dashboard/events/${id}/vendors`} className="card transition hover:shadow-md">
+          <p className="eyebrow">Fornecedores</p>
+          <p className="font-display mt-2 text-3xl text-brand-700">{vendorsHired}</p>
+          <p className="text-xs text-[#8c7b87]">contratados</p>
+          <p className="mt-3 text-sm text-[#8c7b87]">Registe propostas e compare por categoria.</p>
+        </Link>
+      </div>
       {(songs.length > 0 || dietary.length > 0) && (
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           {songs.length > 0 && (

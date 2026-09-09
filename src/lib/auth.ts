@@ -52,10 +52,8 @@ export async function requireUser() {
   return user;
 }
 
-/** Garante que o evento pertence ao utilizador autenticado. */
+/** Garante que o utilizador é dono ou editor do evento (ver lib/access.ts para papéis). */
 export async function requireOwnedEvent(eventId: string) {
-  const user = await requireUser();
-  const event = await db.event.findFirst({ where: { id: eventId, ownerId: user.id } });
-  if (!event) redirect("/dashboard");
-  return { user, event };
+  const { requireEventAccess } = await import("./access");
+  return requireEventAccess(eventId);
 }

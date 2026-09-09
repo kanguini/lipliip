@@ -21,6 +21,12 @@ Plataforma web para criar e enviar convites digitais **pessoais e intransmissív
 - Conteúdo do convite: história (linha do tempo com fotos), galeria, padrinhos/madrinhas, música de fundo, hashtag, informações úteis (alojamento, transporte).
 - Plano de mesas, lembretes por WhatsApp a quem não respondeu, exportação para Excel/CSV, lista de músicas pedidas e restrições alimentares.
 
+**Planner (para anfitriões e cerimonialistas)**
+- Tarefas com checklist automática por tipo de evento e prazos calculados a partir da data (progresso, atrasadas, por categoria e responsável).
+- Orçamento por categorias com estimado, contratado e pago; pagamentos (sinal, prestações) com prazos e próximos vencimentos; contribuições da lista de presentes.
+- Fornecedores com propostas por categoria e estado (a contactar, proposta, contratado); ao contratar, o valor entra automaticamente no orçamento.
+- Equipa por evento: dono, editores (par, pais, cerimonialista) e receção (só check-in). Uma cerimonialista vê todos os eventos dos seus clientes na mesma conta.
+
 **Para o convidado**
 - Link pessoal `/c/<token>`; para abrir tem de validar o telemóvel com um código SMS (OTP).
 - Envelope animado de abertura, música de fundo, contagem decrescente ao segundo, mapa, "adicionar ao calendário" (Google ou .ics), programa, história, galeria, padrinhos.

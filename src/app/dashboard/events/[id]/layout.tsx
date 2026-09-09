@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { requireOwnedEvent } from "@/lib/auth";
+import { requireEventAccess } from "@/lib/access";
 import { eventTypeLabel } from "@/lib/event-types";
 import { formatEventDate, formatTime } from "@/lib/format";
 import { EventTabs } from "./tabs";
 
 export default async function EventLayout({ children, params }: { children: React.ReactNode; params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { event } = await requireOwnedEvent(id);
+  const { event, role } = await requireEventAccess(id, { allowStaff: true });
   return (
     <>
       <Link href="/dashboard" className="mb-3 inline-block text-sm text-stone-500 hover:text-stone-900">← Os meus eventos</Link>
@@ -18,7 +18,7 @@ export default async function EventLayout({ children, params }: { children: Reac
         </div>
         <Link href={`/dashboard/events/${event.id}/preview`} className="btn-secondary btn-sm">👁 Ver convite</Link>
       </div>
-      <EventTabs eventId={event.id} />
+      {role === "STAFF" ? <p className="border-b border-brand-200/70 pb-2 text-sm text-[#8c7b87]">Acesso de receção: check-in no dia do evento.</p> : <EventTabs eventId={event.id} />}
       <div className="mt-6">{children}</div>
     </>
   );

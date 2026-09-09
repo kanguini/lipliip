@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { requireOwnedEvent } from "@/lib/auth";
+import { requireEventAccess } from "@/lib/access";
 import { checkinAction, toggleCheckinAction } from "@/app/dashboard/actions";
 import { FlashFromSearch, StatCard } from "@/components/ui";
 import { CheckinForm } from "./CheckinForm";
@@ -7,7 +7,7 @@ import { CheckinForm } from "./CheckinForm";
 export default async function CheckinPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string; q?: string }> }) {
   const { id } = await params;
   const sp = await searchParams;
-  await requireOwnedEvent(id);
+  await requireEventAccess(id, { allowStaff: true });
   const guests = await db.guest.findMany({ where: { eventId: id }, orderBy: { name: "asc" } });
   const q = (sp.q ?? "").toLowerCase();
   const list = q ? guests.filter((g) => g.name.toLowerCase().includes(q) || g.checkinCode.toLowerCase().includes(q)) : guests;
