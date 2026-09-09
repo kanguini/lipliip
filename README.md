@@ -84,6 +84,8 @@ Testes: `npm test`. Build de produção: `npm run build && npm start`.
 
 O esquema é versionado em `prisma/migrations/`. `npm run db:migrate` (ou o arranque em produção) aplica as migrações em falta; uma base de dados criada antes das migrações, com `db push`, é marcada automaticamente como já tendo a migração inicial. Para alterar o esquema: edite `prisma/schema.prisma` e gere a migração com `npx prisma migrate dev --name <nome>` (precisa de uma base de dados local).
 
+**Se uma migração falhar em produção**, o Prisma regista-a como falhada e os arranques seguintes param até ser resolvida (o Railway mantém o deploy anterior no ar). O caso previsto é a migração `0002_audit`, que cria o índice único de telefone por evento: ela apaga sozinha os convidados duplicados nunca usados, mas falha de propósito se restarem duplicados com resposta, abertura, envio ou check-in. Para resolver: corrija os duplicados na base de dados (apague ou altere o telefone de um deles), marque a migração como revertida com `npx prisma migrate resolve --rolled-back 0002_audit` e volte a fazer deploy.
+
 ## Deploy no Railway
 
 O repositório inclui `railway.json`: build com `npm run build` e arranque com `npm run start:railway` (aplica as migrações e inicia o servidor). Serviços necessários:
