@@ -41,6 +41,11 @@ class TwilioSmsProvider implements SmsProvider {
   }
 }
 
+/** Verdadeiro quando existe um fornecedor real de SMS configurado (os códigos chegam mesmo aos convidados). */
+export function isSmsConfigured(): boolean {
+  return process.env.SMS_PROVIDER === "twilio" && !!process.env.TWILIO_ACCOUNT_SID && !!process.env.TWILIO_AUTH_TOKEN && !!process.env.TWILIO_FROM;
+}
+
 export function getSmsProvider(): SmsProvider {
   if (process.env.SMS_PROVIDER === "twilio") {
     const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM } = process.env;

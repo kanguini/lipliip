@@ -8,6 +8,7 @@ import { requireOwnedEvent, requireUser } from "@/lib/auth";
 import { normalizePhone } from "@/lib/phone";
 import { generateCheckinCode, generateInviteToken } from "@/lib/tokens";
 import { parseGuestImport } from "@/lib/csv";
+import { SUPPORTED_COUNTRIES } from "@/lib/phone";
 import { parseGalleryText, parsePartyText, parseProgramText, parseStoryText } from "@/lib/event-types";
 import { getSmsProvider } from "@/lib/sms";
 import { inviteShareMessage, inviteUrl } from "@/lib/urls";
@@ -43,8 +44,9 @@ const eventSchema = z.object({
   hostNames: z.string().trim().min(1, "Indique os nomes dos anfitriões").max(120),
   date: z.string().min(1, "Indique a data"),
   venueName: z.string().trim().min(2, "Indique o local").max(120),
-  country: z.string().length(2),
+  country: z.enum(SUPPORTED_COUNTRIES.map((c) => c.code) as [string, ...string[]], { message: "País inválido" }),
 });
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 
 function eventDataFromForm(fd: FormData) {
   const parsed = eventSchema.safeParse({
@@ -72,7 +74,7 @@ function eventDataFromForm(fd: FormData) {
       mapsUrl: httpUrlOrNull(str(fd, "mapsUrl", 500)),
       dressCode: opt(fd, "dressCode", 80),
       coverImageUrl: httpUrlOrNull(str(fd, "coverImageUrl", 500)),
-      accentColor: opt(fd, "accentColor", 9),
+      accentColor: HEX_COLOR.test(str(fd, "accentColor", 9)) ? str(fd, "accentColor", 9) : null,
       currency: str(fd, "currency", 3).toUpperCase() || "EUR",
       rsvpDeadline: dateOrNull(str(fd, "rsvpDeadline", 30) ? `${str(fd, "rsvpDeadline", 30)}T23:59` : "", timezone),
       allowChildren: bool(fd, "allowChildren"),
@@ -101,7 +103,9 @@ export async function updateEventAction(eventId: string, fd: FormData) {
   const path = `/dashboard/events/${eventId}/settings`;
   const result = eventDataFromForm(fd);
   if (result.error !== undefined) flash(path, "error", result.error);
-  await db.event.update({ where: { id: eventId }, data: result.data });
+  // O design (template, cor, capa) só é alterado no separador Design.
+  const { templateId: _t, accentColor: _a, coverImageUrl: _c, ...data } = result.data;
+  await db.event.update({ where: { id: eventId }, data });
   revalidatePath(`/dashboard/events/${eventId}`);
   flash(path, "ok", "Alterações guardadas.");
 }
@@ -110,10 +114,10 @@ export async function updateDesignAction(eventId: string, fd: FormData) {
   await requireOwnedEvent(eventId);
   const templateId = str(fd, "templateId", 40);
   if (!TEMPLATES.some((t) => t.id === templateId)) flash(`/dashboard/events/${eventId}/design`, "error", "Template inválido");
-  const accent = opt(fd, "accentColor", 9);
+  const accent = str(fd, "accentColor", 9);
   await db.event.update({
     where: { id: eventId },
-    data: { templateId, accentColor: bool(fd, "useCustomColor") ? accent : null, coverImageUrl: httpUrlOrNull(str(fd, "coverImageUrl", 500)) },
+    data: { templateId, accentColor: bool(fd, "useCustomColor") && HEX_COLOR.test(accent) ? accent : null, coverImageUrl: httpUrlOrNull(str(fd, "coverImageUrl", 500)) },
   });
   revalidatePath(`/dashboard/events/${eventId}`);
   flash(`/dashboard/events/${eventId}/design`, "ok", "Design atualizado.");
@@ -158,20 +162,29 @@ export async function deleteEventAction(eventId: string) {
 
 // ---------- Convidados ----------
 
+const MAX_COMPANIONS = 20;
+
 async function createGuest(eventId: string, input: { name: string; phone: string; maxCompanions: number; groupName?: string | null; email?: string | null; tableNumber?: string | null }) {
-  return db.guest.create({
-    data: {
-      eventId,
-      name: input.name,
-      phone: input.phone,
-      email: input.email ?? null,
-      groupName: input.groupName ?? null,
-      tableNumber: input.tableNumber ?? null,
-      maxCompanions: input.maxCompanions,
-      token: generateInviteToken(),
-      checkinCode: generateCheckinCode(),
-    },
-  });
+  // Repete se, por azar, o código de check-in ou o token colidirem com outro já existente.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await db.guest.create({
+        data: {
+          eventId,
+          name: input.name,
+          phone: input.phone,
+          email: input.email ?? null,
+          groupName: input.groupName ?? null,
+          tableNumber: input.tableNumber ?? null,
+          maxCompanions: Math.min(MAX_COMPANIONS, Math.max(0, input.maxCompanions)),
+          token: generateInviteToken(),
+          checkinCode: generateCheckinCode(),
+        },
+      });
+    } catch (e) {
+      if ((e as { code?: string }).code !== "P2002" || attempt >= 4) throw e;
+    }
+  }
 }
 
 export async function addGuestAction(eventId: string, fd: FormData) {
@@ -233,13 +246,17 @@ export async function updateGuestAction(guestId: string, fd: FormData) {
   if (name.length < 2) flash(path, "error", "Indique o nome.");
   const phone = normalizePhone(str(fd, "phone", 30), guest.event.country);
   if (!phone) flash(path, "error", "Telefone inválido.");
+  const duplicate = await db.guest.findFirst({ where: { eventId: guest.eventId, phone, id: { not: guestId } } });
+  if (duplicate) flash(path, "error", `Já existe outro convidado com este telefone: ${duplicate.name}.`);
+  const maxCompanions = Math.min(MAX_COMPANIONS, Math.max(0, Number.parseInt(str(fd, "maxCompanions", 3), 10) || 0));
   const data = {
     name,
     phone,
     email: opt(fd, "email", 120),
     groupName: opt(fd, "groupName", 60),
     tableNumber: opt(fd, "tableNumber", 20),
-    maxCompanions: Math.max(0, Number.parseInt(str(fd, "maxCompanions", 3), 10) || 0),
+    maxCompanions,
+    companions: Math.min(guest.companions, maxCompanions),
   };
   // Se o telefone mudou, as verificações anteriores deixam de fazer sentido.
   if (phone !== guest.phone) {
@@ -288,7 +305,10 @@ export async function sendSmsInviteAction(guestId: string) {
   const path = `/dashboard/events/${guest.eventId}/guests`;
   const body = inviteShareMessage({ guestName: guest.name, hostNames: guest.event.hostNames, eventTitle: guest.event.title, url: inviteUrl(guest.token) });
   const res = await getSmsProvider().send(guest.phone, body);
-  if (!res.ok) flash(path, "error", `Falha ao enviar SMS: ${res.error}`);
+  if (!res.ok) {
+    console.error("Falha ao enviar SMS de convite:", res.error);
+    flash(path, "error", "Não foi possível enviar o SMS. Verifique a configuração do fornecedor de SMS.");
+  }
   await db.guest.update({ where: { id: guestId }, data: { sentAt: new Date(), sentVia: "sms" } });
   flash(path, "ok", `SMS enviado a ${guest.name}.`);
 }
@@ -299,8 +319,12 @@ export async function checkinAction(eventId: string, fd: FormData) {
   const code = str(fd, "code", 12).toUpperCase().replace(/[^A-Z0-9]/g, "");
   const guest = await db.guest.findFirst({ where: { eventId, checkinCode: code } });
   if (!guest) flash(path, "error", `Código ${code || "(vazio)"} não encontrado.`);
-  if (guest.checkedInAt) flash(path, "error", `⚠️ ${guest.name} já fez check-in às ${formatTime(guest.checkedInAt, event.timezone)}. Possível entrada duplicada.`);
-  await db.guest.update({ where: { id: guest.id }, data: { checkedInAt: new Date() } });
+  // Atualização condicional: se dois dispositivos lerem o mesmo QR ao mesmo tempo, só um regista a entrada.
+  const { count } = await db.guest.updateMany({ where: { id: guest.id, checkedInAt: null }, data: { checkedInAt: new Date() } });
+  if (count === 0) {
+    const when = guest.checkedInAt ?? new Date();
+    flash(path, "error", `⚠️ ${guest.name} já fez check-in às ${formatTime(when, event.timezone)}. Possível entrada duplicada.`);
+  }
   await db.accessLog.create({ data: { guestId: guest.id, outcome: "CHECKIN" } });
   const extra = guest.rsvpStatus === "ACCEPTED" ? `${guest.companions ? ` +${guest.companions} acompanhante(s)` : ""}${guest.tableNumber ? ` · mesa ${guest.tableNumber}` : ""}` : " (não tinha confirmado presença)";
   flash(path, "ok", `✅ ${guest.name}${extra}`);

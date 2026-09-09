@@ -21,6 +21,7 @@ function fail(error: string): ActionResult {
 export async function requestOtpAction(token: string): Promise<ActionResult> {
   const guest = await getGuestByToken(token);
   if (!guest) return fail("Convite inválido.");
+  if (!guest.event.verificationRequired) return fail("Este convite não precisa de validação.");
   const meta = await requestMeta();
   if (!rateLimit(`otp:${meta.ip ?? "?"}`, 10, 15 * 60_000).ok) return fail("Demasiados pedidos a partir desta ligação. Tente mais tarde.");
 
@@ -32,15 +33,15 @@ export async function requestOtpAction(token: string): Promise<ActionResult> {
   }
 
   const code = generateOtpCode();
-  await db.otpCode.create({
-    data: { guestId: guest.id, codeHash: hashOtp(code, guest.id), expiresAt: new Date(Date.now() + OTP_TTL_MIN * 60_000) },
-  });
-
   const result = await getSmsProvider().send(guest.phone, otpMessage(code, guest.event.title));
   if (!result.ok) {
     console.error("Falha no envio de SMS:", result.error);
     return fail("Não foi possível enviar o SMS. Tente novamente mais tarde.");
   }
+  // Só depois de enviado é que o código conta para o limite do convidado.
+  await db.otpCode.create({
+    data: { guestId: guest.id, codeHash: hashOtp(code, guest.id), expiresAt: new Date(Date.now() + OTP_TTL_MIN * 60_000) },
+  });
   await logAccess(guest.id, "OTP_SENT");
 
   const showDev = process.env.NODE_ENV !== "production" && process.env.SHOW_OTP_IN_DEV === "true" && process.env.SMS_PROVIDER !== "twilio";
@@ -52,31 +53,37 @@ export async function verifyOtpAction(token: string, code: string): Promise<Acti
   if (!guest) return fail("Convite inválido.");
   const clean = code.replace(/\D/g, "");
   if (clean.length !== 6) return fail("O código tem 6 dígitos.");
+  const meta = await requestMeta();
+  if (!rateLimit(`otp-verify:${meta.ip ?? "?"}:${guest.id}`, 15, 10 * 60_000).ok) return fail("Demasiadas tentativas. Aguarde alguns minutos.");
 
   const otp = await db.otpCode.findFirst({
     where: { guestId: guest.id, consumedAt: null, expiresAt: { gt: new Date() } },
     orderBy: { createdAt: "desc" },
   });
   if (!otp) return fail("Código expirado. Peça um novo código.");
-  if (otp.attempts >= OTP_MAX_ATTEMPTS) return fail("Demasiadas tentativas. Peça um novo código.");
+  // Incremento atómico: só quem conseguir reservar uma tentativa (attempts < máx.) pode comparar o código.
+  const reserved = await db.otpCode.updateMany({ where: { id: otp.id, attempts: { lt: OTP_MAX_ATTEMPTS } }, data: { attempts: { increment: 1 } } });
+  if (reserved.count === 0) return fail("Demasiadas tentativas. Peça um novo código.");
 
   if (!verifyOtpHash(clean, guest.id, otp.codeHash)) {
-    await db.otpCode.update({ where: { id: otp.id }, data: { attempts: { increment: 1 } } });
     await logAccess(guest.id, "OTP_FAIL");
     return fail("Código incorreto.");
   }
 
-  const deviceCount = await db.guestDevice.count({ where: { guestId: guest.id } });
-  if (deviceCount >= guest.event.maxDevicesPerGuest) {
+  const deviceToken = generateDeviceToken();
+  const devices = await db.guestDevice.findMany({ where: { guestId: guest.id }, orderBy: { lastSeenAt: "asc" } });
+  // O mesmo telemóvel a validar de novo (cookies apagados, modo privado) reutiliza o seu lugar em vez de gastar outro.
+  const sameDevice = meta.userAgent ? devices.find((d) => d.userAgent === meta.userAgent) : undefined;
+  if (!sameDevice && devices.length >= guest.event.maxDevicesPerGuest) {
     await logAccess(guest.id, "DEVICE_LIMIT");
     return fail("Este convite já foi aberto no número máximo de dispositivos permitido. Contacte os anfitriões.");
   }
 
-  const meta = await requestMeta();
-  const deviceToken = generateDeviceToken();
   await db.$transaction([
     db.otpCode.update({ where: { id: otp.id }, data: { consumedAt: new Date() } }),
-    db.guestDevice.create({ data: { guestId: guest.id, deviceToken, userAgent: meta.userAgent } }),
+    sameDevice
+      ? db.guestDevice.update({ where: { id: sameDevice.id }, data: { deviceToken, lastSeenAt: new Date() } })
+      : db.guestDevice.create({ data: { guestId: guest.id, deviceToken, userAgent: meta.userAgent } }),
     db.guest.update({ where: { id: guest.id }, data: { verifiedAt: guest.verifiedAt ?? new Date() } }),
   ]);
   await logAccess(guest.id, "OTP_OK");
@@ -133,31 +140,47 @@ export async function reserveGiftAction(token: string, giftId: string, formData:
   }
   const { guest, event } = ctx;
   if (!event.giftsEnabled) return fail("Lista de presentes desativada.");
-  const gift = await db.giftItem.findFirst({ where: { id: giftId, eventId: event.id }, include: { reservations: true } });
-  if (!gift) return fail("Presente não encontrado.");
-
   const note = String(formData.get("note") ?? "").trim().slice(0, 300) || null;
-  if (gift.kind === "CASH") {
-    const amount = Number.parseFloat(String(formData.get("amount") ?? "").replace(",", "."));
-    if (!Number.isFinite(amount) || amount <= 0) return fail("Indique um valor válido.");
-    await db.giftReservation.upsert({
-      where: { giftId_guestId: { giftId, guestId: guest.id } },
-      create: { giftId, guestId: guest.id, amount, note },
-      update: { amount, note },
-    });
-  } else {
-    const already = gift.reservations.find((r) => r.guestId === guest.id);
-    const reserved = gift.reservations.reduce((s, r) => s + r.quantity, 0) - (already?.quantity ?? 0);
-    const wanted = Math.max(1, Number.parseInt(String(formData.get("quantity") ?? "1"), 10) || 1);
-    if (reserved + wanted > gift.quantity) return fail("Este presente já foi reservado por outro convidado.");
-    await db.giftReservation.upsert({
-      where: { giftId_guestId: { giftId, guestId: guest.id } },
-      create: { giftId, guestId: guest.id, quantity: wanted, note },
-      update: { quantity: wanted, note },
-    });
+  const amount = Number.parseFloat(String(formData.get("amount") ?? "").replace(",", "."));
+  const wanted = Math.max(1, Math.min(50, Number.parseInt(String(formData.get("quantity") ?? "1"), 10) || 1));
+
+  // Transação serializável (com repetição) para dois convidados não reservarem a última unidade ao mesmo tempo.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const result = await db.$transaction(
+        async (tx) => {
+          const gift = await tx.giftItem.findFirst({ where: { id: giftId, eventId: event.id }, include: { reservations: true } });
+          if (!gift) return "Presente não encontrado.";
+          if (gift.kind === "CASH") {
+            if (!Number.isFinite(amount) || amount <= 0) return "Indique um valor válido.";
+            await tx.giftReservation.upsert({
+              where: { giftId_guestId: { giftId, guestId: guest.id } },
+              create: { giftId, guestId: guest.id, amount, note },
+              update: { amount, note },
+            });
+            return null;
+          }
+          const already = gift.reservations.find((r) => r.guestId === guest.id);
+          const reservedByOthers = gift.reservations.reduce((s, r) => s + r.quantity, 0) - (already?.quantity ?? 0);
+          if (reservedByOthers + wanted > gift.quantity) return "Este presente já foi reservado por outro convidado.";
+          await tx.giftReservation.upsert({
+            where: { giftId_guestId: { giftId, guestId: guest.id } },
+            create: { giftId, guestId: guest.id, quantity: wanted, note },
+            update: { quantity: wanted, note },
+          });
+          return null;
+        },
+        { isolationLevel: "Serializable" },
+      );
+      if (result) return fail(result);
+      revalidatePath(`/c/${token}`);
+      return { ok: true };
+    } catch (e) {
+      const code = (e as { code?: string }).code;
+      if (code !== "P2034" && code !== "P2002") throw e;
+    }
   }
-  revalidatePath(`/c/${token}`);
-  return { ok: true };
+  return fail("Muita gente a reservar ao mesmo tempo. Tente de novo.");
 }
 
 export async function cancelReservationAction(token: string, giftId: string): Promise<ActionResult> {
@@ -181,6 +204,7 @@ export async function guestbookAction(token: string, formData: FormData): Promis
   }
   const { guest, event } = ctx;
   if (!event.guestbookEnabled) return fail("Livro de mensagens desativado.");
+  if (!rateLimit(`guestbook:${guest.id}`, 5, 10 * 60_000).ok) return fail("Já deixou várias mensagens. Obrigado! Tente mais tarde.");
   const message = String(formData.get("message") ?? "").trim().slice(0, 600);
   if (message.length < 2) return fail("Escreva uma mensagem.");
   await db.guestbookEntry.create({ data: { eventId: event.id, guestId: guest.id, message } });

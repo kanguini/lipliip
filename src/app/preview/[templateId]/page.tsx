@@ -15,9 +15,9 @@ export default async function TemplatePreviewPage({ params }: { params: Promise<
   const event = sampleEventForTemplate(templateId);
   return (
     <>
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-stone-200 bg-white/90 px-4 py-2 text-sm backdrop-blur">
+      <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b border-stone-200 bg-white/90 px-4 py-2 text-sm backdrop-blur">
         <span>Pré-visualização do template <strong>{meta.name}</strong> (dados de exemplo)</span>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {TEMPLATES.map((t) => (
             <Link key={t.id} href={`/preview/${t.id}`} className={`btn-sm ${t.id === templateId ? "btn-primary" : "btn-secondary"}`}>{t.name}</Link>
           ))}

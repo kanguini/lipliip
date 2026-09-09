@@ -6,10 +6,10 @@ import { db } from "@/lib/db";
 import { createSession, destroySession, hashPassword, verifyPassword } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { headers } from "next/headers";
+import { clientIpFromHeaders } from "@/lib/guest-access";
 
 async function clientIp() {
-  const h = await headers();
-  return h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip") ?? "local";
+  return clientIpFromHeaders(await headers()) ?? "local";
 }
 
 const registerSchema = z.object({
@@ -30,7 +30,12 @@ export async function registerAction(_prev: AuthState, formData: FormData): Prom
   const exists = await db.user.findUnique({ where: { email } });
   if (exists) return { error: "Já existe uma conta com este email." };
 
-  const user = await db.user.create({ data: { name, email, passwordHash: await hashPassword(password) } });
+  let user;
+  try {
+    user = await db.user.create({ data: { name, email, passwordHash: await hashPassword(password) } });
+  } catch {
+    return { error: "Já existe uma conta com este email." };
+  }
   await createSession(user.id);
   redirect("/dashboard");
 }
@@ -39,7 +44,8 @@ export async function loginAction(_prev: AuthState, formData: FormData): Promise
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   const limit = rateLimit(`login:${await clientIp()}:${email}`, 8, 15 * 60_000);
-  if (!limit.ok) return { error: `Demasiadas tentativas. Tente de novo dentro de ${Math.ceil(limit.retryAfterSec / 60)} minutos.` };
+  const emailLimit = rateLimit(`login-email:${email}`, 30, 15 * 60_000);
+  if (!limit.ok || !emailLimit.ok) return { error: `Demasiadas tentativas. Tente de novo dentro de ${Math.ceil(Math.max(limit.retryAfterSec, emailLimit.retryAfterSec) / 60)} minutos.` };
   const user = await db.user.findUnique({ where: { email } });
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
     return { error: "Email ou palavra-passe incorretos." };

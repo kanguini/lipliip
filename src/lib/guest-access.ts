@@ -34,10 +34,20 @@ export async function requireGuestAccess(token: string) {
   return { guest, event: guest.event };
 }
 
+/** IP do cliente: o último valor de X-Forwarded-For é o que o proxy de confiança acrescentou; os anteriores podem ser forjados. */
+export function clientIpFromHeaders(h: Headers): string | undefined {
+  const xff = h.get("x-forwarded-for");
+  if (xff) {
+    const parts = xff.split(",").map((p) => p.trim()).filter(Boolean);
+    if (parts.length) return parts[parts.length - 1];
+  }
+  return h.get("x-real-ip") ?? h.get("cf-connecting-ip") ?? undefined;
+}
+
 export async function requestMeta() {
   const h = await headers();
   return {
-    ip: h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip") ?? undefined,
+    ip: clientIpFromHeaders(h),
     userAgent: h.get("user-agent")?.slice(0, 250) ?? undefined,
   };
 }

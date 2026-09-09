@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireOwnedEvent } from "@/lib/auth";
-import { daysUntil, formatMoney } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
+import { calendarDaysUntil } from "@/lib/timezone";
+import { isSmsConfigured } from "@/lib/sms";
 import { FlashFromSearch, StatCard } from "@/components/ui";
 
 export default async function EventOverviewPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
@@ -22,7 +24,7 @@ export default async function EventOverviewPage({ params, searchParams }: { para
   const people = accepted.reduce((s, g) => s + 1 + g.companions, 0);
   const reservedGifts = gifts.filter((g) => g.kind === "PRODUCT" && g.reservations.length > 0).length;
   const cash = gifts.flatMap((g) => g.reservations).reduce((s, r) => s + (r.amount ?? 0), 0);
-  const days = daysUntil(event.date);
+  const days = calendarDaysUntil(event.date, event.timezone);
   const recent = guests.filter((g) => g.respondedAt).slice(0, 8);
   const songs = accepted.filter((g) => g.songRequest);
   const dietary = accepted.filter((g) => g.dietaryNotes);
@@ -30,6 +32,15 @@ export default async function EventOverviewPage({ params, searchParams }: { para
   return (
     <>
       <FlashFromSearch {...sp} />
+      {event.verificationRequired && !isSmsConfigured() && (
+        <div className="card mb-6 border-amber-200 bg-amber-50 text-sm text-amber-900">
+          <p className="font-semibold">Envio de SMS ainda não configurado</p>
+          <p className="mt-1">
+            A validação por SMS está ativa, mas não há fornecedor de SMS configurado: os códigos ficam apenas nos registos do servidor e os convidados não os recebem.
+            Configure a Twilio (variáveis <code>SMS_PROVIDER</code>, <code>TWILIO_*</code>) ou desative a validação por SMS nas <Link href={`/dashboard/events/${id}/settings`} className="underline">Definições</Link> enquanto testa.
+          </p>
+        </div>
+      )}
       {guests.length === 0 && (
         <div className="card mb-6 flex flex-wrap items-center justify-between gap-3 border-brand-200 bg-brand-50">
           <p className="text-sm">O evento está criado. O próximo passo é adicionar os convidados e enviar os links pessoais.</p>
@@ -37,7 +48,7 @@ export default async function EventOverviewPage({ params, searchParams }: { para
         </div>
       )}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Faltam" value={days > 0 ? `${days} dias` : days === 0 ? "É hoje!" : "Já aconteceu"} />
+        <StatCard label="Faltam" value={days > 1 ? `${days} dias` : days === 1 ? "1 dia" : days === 0 ? "É hoje!" : "Já aconteceu"} />
         <StatCard label="Convidados" value={guests.length} />
         <StatCard label="Confirmados" value={accepted.length} tone="good" />
         <StatCard label="Pessoas previstas" value={people} tone="good" />

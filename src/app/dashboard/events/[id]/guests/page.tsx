@@ -74,7 +74,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
             <div className="flex flex-wrap gap-2">
             <a href={`/dashboard/events/${id}/guests/export.csv`} className="btn-secondary btn-sm">⬇ Exportar Excel/CSV</a>
             <form className="flex gap-2">
-              <input name="q" className="input w-40" placeholder="Pesquisar" defaultValue={sp.q ?? ""} />
+              <input name="q" className="input w-40" placeholder="Pesquisar" aria-label="Pesquisar convidados" defaultValue={sp.q ?? ""} />
               <select name="status" className="input w-36" defaultValue={sp.status ?? ""}>
                 <option value="">Todos</option>
                 <option value="ACCEPTED">Confirmados</option>

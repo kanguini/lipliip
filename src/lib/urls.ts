@@ -16,9 +16,9 @@ export function inviteShareMessage(opts: { guestName: string; hostNames: string;
 }
 
 /** Link "Adicionar ao Google Calendar" (alternativa ao ficheiro .ics). */
-export function googleCalendarUrl(opts: { title: string; start: Date; durationHours?: number; location?: string; details?: string }) {
+export function googleCalendarUrl(opts: { title: string; start: Date; end?: Date; durationHours?: number; location?: string; details?: string }) {
   const fmt = (d: Date) => d.toISOString().replace(/[-:]|\.\d{3}/g, "");
-  const end = new Date(opts.start.getTime() + (opts.durationHours ?? 5) * 3600_000);
+  const end = opts.end ?? new Date(opts.start.getTime() + (opts.durationHours ?? 5) * 3600_000);
   const p = new URLSearchParams({
     action: "TEMPLATE",
     text: opts.title,

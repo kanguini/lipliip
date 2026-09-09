@@ -87,3 +87,24 @@ export function dateToLocalInput(date: Date, tz: string): string {
 export function dateToLocalDateInput(date: Date, tz: string): string {
   return dateToLocalInput(date, tz).slice(0, 10);
 }
+
+/** Instante de fim do evento a partir de "HH:MM" (no dia seguinte se for antes do início). Por omissão, 5 horas. */
+export function eventEnd(start: Date, endTime: string | null | undefined, tz: string): Date {
+  const m = /^(\d{1,2}):(\d{2})$/.exec((endTime ?? "").trim());
+  if (!m) return new Date(start.getTime() + 5 * 3600_000);
+  const day = dateToLocalDateInput(start, tz);
+  let end = localInputToDate(`${day}T${m[1].padStart(2, "0")}:${m[2]}`, tz);
+  if (!end) return new Date(start.getTime() + 5 * 3600_000);
+  if (end <= start) {
+    const next = new Date(start.getTime() + 24 * 3600_000);
+    end = localInputToDate(`${dateToLocalDateInput(next, tz)}T${m[1].padStart(2, "0")}:${m[2]}`, tz) ?? end;
+  }
+  return end;
+}
+
+/** Dias de calendário (no fuso do evento) entre hoje e a data do evento: 0 = é hoje, negativo = já passou. */
+export function calendarDaysUntil(date: Date, tz: string, now: Date = new Date()): number {
+  const a = Date.parse(dateToLocalDateInput(now, tz) + "T00:00:00Z");
+  const b = Date.parse(dateToLocalDateInput(date, tz) + "T00:00:00Z");
+  return Math.round((b - a) / 86_400_000);
+}

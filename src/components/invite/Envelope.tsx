@@ -14,11 +14,11 @@ export function Envelope({ hostNames, guestName, kicker, children }: { hostNames
     return () => clearTimeout(t);
   }, [opened]);
 
-  if (gone) return <>{children}</>;
-
+  // A árvore mantém sempre a mesma forma (overlay opcional + div do convite) para o React não remontar o convite.
   return (
     <>
-      <div className={opened ? "invite-envelope invite-envelope-open" : "invite-envelope"} onClick={() => setOpened(true)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && setOpened(true)}>
+      {!gone && (
+      <div className={opened ? "invite-envelope invite-envelope-open" : "invite-envelope"} onClick={() => setOpened(true)} role="button" tabIndex={0} aria-label="Abrir convite" onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setOpened(true)}>
         <div className="invite-envelope-card">
           <p className="text-xs uppercase tracking-[0.35em] opacity-70">{kicker}</p>
           <p className="invite-heading invite-accent mt-3 text-4xl">{hostNames}</p>
@@ -28,6 +28,7 @@ export function Envelope({ hostNames, guestName, kicker, children }: { hostNames
         </div>
         <div className="invite-envelope-flap" />
       </div>
+      )}
       <div className={opened ? "" : "hidden"}>{children}</div>
     </>
   );

@@ -1,6 +1,7 @@
 import { getGuestByToken, isGuestAuthorized } from "@/lib/guest-access";
 import { buildIcs } from "@/lib/ics";
 import { inviteUrl } from "@/lib/urls";
+import { eventEnd } from "@/lib/timezone";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
     description: e.message ?? undefined,
     location: [e.venueName, e.venueAddress].filter(Boolean).join(", "),
     start: e.date,
+    end: eventEnd(e.date, e.endTime, e.timezone),
     url: inviteUrl(token),
   });
   return new Response(ics, {

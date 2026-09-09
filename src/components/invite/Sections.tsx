@@ -1,10 +1,10 @@
-import { daysUntil, formatDateTimeShort, formatEventDate, formatTime } from "@/lib/format";
+import { formatDateTimeShort, formatEventDate, formatTime } from "@/lib/format";
 import type { PartyMember, ProgramItem, StoryItem } from "@/lib/event-types";
 import { Countdown } from "./Countdown";
 import type { TemplateEvent } from "@/components/templates/types";
 
-export function DetailsSection({ event, calendarUrl, googleUrl }: { event: TemplateEvent; calendarUrl?: string; googleUrl?: string }) {
-  const days = daysUntil(event.date);
+export function DetailsSection({ event, calendarUrl, googleUrl, daysLeft }: { event: TemplateEvent; calendarUrl?: string; googleUrl?: string; daysLeft?: number }) {
+  const days = daysLeft ?? Math.ceil((event.date.getTime() - Date.now()) / 86_400_000);
   const mapsUrl =
     event.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([event.venueName, event.venueAddress].filter(Boolean).join(", "))}`;
   return (
@@ -62,7 +62,7 @@ export function ProgramSection({ items }: { items: ProgramItem[] }) {
   );
 }
 
-export function GuestbookSection({ entries, children }: { entries: { id: string; name: string; message: string; createdAt: Date }[]; children: React.ReactNode }) {
+export function GuestbookSection({ entries, children, tz }: { entries: { id: string; name: string; message: string; createdAt: Date }[]; children: React.ReactNode; tz?: string }) {
   return (
     <section className="invite-card">
       <h2 className="text-2xl">Livro de mensagens</h2>
@@ -71,7 +71,7 @@ export function GuestbookSection({ entries, children }: { entries: { id: string;
           {entries.map((e) => (
             <li key={e.id} className="rounded-lg p-3 text-sm" style={{ background: "color-mix(in srgb, var(--inv-accent) 8%, transparent)" }}>
               <p className="italic">“{e.message}”</p>
-              <p className="mt-1 text-xs opacity-60">— {e.name}, {formatDateTimeShort(e.createdAt)}</p>
+              <p className="mt-1 text-xs opacity-60">— {e.name}, {formatDateTimeShort(e.createdAt, tz)}</p>
             </li>
           ))}
         </ul>
@@ -81,7 +81,7 @@ export function GuestbookSection({ entries, children }: { entries: { id: string;
   );
 }
 
-export function CheckinSection({ qrDataUrl, code, checkedInAt }: { qrDataUrl: string; code: string; checkedInAt: Date | null }) {
+export function CheckinSection({ qrDataUrl, code, checkedInAt, tz }: { qrDataUrl: string; code: string; checkedInAt: Date | null; tz?: string }) {
   return (
     <section className="invite-card text-center">
       <h2 className="text-2xl">O seu bilhete de entrada</h2>
@@ -89,7 +89,7 @@ export function CheckinSection({ qrDataUrl, code, checkedInAt }: { qrDataUrl: st
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={qrDataUrl} alt="QR code de entrada" className="mx-auto mt-4 h-44 w-44 rounded-lg bg-white p-2" />
       <p className="mt-2 font-mono text-2xl font-bold tracking-[0.3em]">{code}</p>
-      {checkedInAt && <p className="mt-2 text-sm font-medium">Entrada registada em {formatDateTimeShort(checkedInAt)}.</p>}
+      {checkedInAt && <p className="mt-2 text-sm font-medium">Entrada registada em {formatDateTimeShort(checkedInAt, tz)}.</p>}
     </section>
   );
 }

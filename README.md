@@ -44,7 +44,9 @@ Plataforma web para criar e enviar convites digitais **pessoais e intransmissív
 - Cabeçalhos de segurança (`X-Frame-Options`, `nosniff`, `Referrer-Policy`), `robots.txt` a excluir convites e painel dos motores de busca.
 - Exportação CSV protegida contra injeção de fórmulas no Excel.
 - Datas guardadas em UTC e mostradas sempre no fuso horário do evento (configurável por evento), incluindo contagem decrescente, .ics e Google Calendar.
-- Ações destrutivas (eliminar evento/convidado/presente, revogar link) pedem confirmação. Alterar a palavra-passe termina todas as sessões.
+- Ações destrutivas (eliminar evento/convidado/presente, revogar link) pedem confirmação. Alterar ou repor a palavra-passe termina todas as sessões.
+- Operações concorrentes protegidas: reserva de presentes em transação serializável, check-in e tentativas de OTP com atualizações condicionais.
+- O IP usado nos limites é o último salto de `X-Forwarded-For` (o que o proxy de confiança acrescenta), não o primeiro (forjável).
 
 ## Stack
 
@@ -85,7 +87,17 @@ O repositório inclui `railway.json`: build com `npm run build` e arranque com `
 | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` | credenciais Twilio |
 | `TWILIO_FROM` | número remetente; use `whatsapp:+1415…` para enviar o OTP por WhatsApp |
 
-Outros fornecedores (Vonage, Infobip, Africa's Talking, operadora local) implementam a interface `SmsProvider` em `src/lib/sms.ts`.
+Outros fornecedores (Vonage, Infobip, Africa's Talking, operadora local) implementam a interface `SmsProvider` em `src/lib/sms.ts`. Enquanto não houver fornecedor configurado, o painel mostra um aviso e os códigos ficam apenas nos registos do servidor.
+
+## Configuração de email (recuperação de palavra-passe)
+
+| Variável | Descrição |
+| --- | --- |
+| `EMAIL_PROVIDER` | `console` (dev, imprime no terminal) ou `resend` |
+| `RESEND_API_KEY` | chave da API Resend |
+| `EMAIL_FROM` | remetente, ex.: `Lipliip <no-reply@liplip.online>` (domínio verificado na Resend) |
+
+Sem fornecedor configurado em produção, a página "Esqueceu-se da palavra-passe?" informa que o envio de emails não está disponível.
 
 ## Estrutura
 

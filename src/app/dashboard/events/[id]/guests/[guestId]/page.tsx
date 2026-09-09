@@ -22,7 +22,8 @@ const OUTCOME_LABEL: Record<string, string> = {
 export default async function GuestDetailPage({ params, searchParams }: { params: Promise<{ id: string; guestId: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { id, guestId } = await params;
   const sp = await searchParams;
-  await requireOwnedEvent(id);
+  const { event } = await requireOwnedEvent(id);
+  const tz = event.timezone;
   const guest = await db.guest.findFirst({
     where: { id: guestId, eventId: id },
     include: {
@@ -63,7 +64,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
 
           <div className="card space-y-3">
             <h2 className="font-semibold">Resposta</h2>
-            <p className="text-sm"><RsvpBadge status={guest.rsvpStatus} />{guest.respondedAt && <span className="ml-2 text-stone-500">em {formatDateTimeShort(guest.respondedAt)}</span>}</p>
+            <p className="text-sm"><RsvpBadge status={guest.rsvpStatus} />{guest.respondedAt && <span className="ml-2 text-stone-500">em {formatDateTimeShort(guest.respondedAt, tz)}</span>}</p>
             {guest.rsvpStatus === "ACCEPTED" && (
               <ul className="text-sm text-stone-700">
                 <li>Acompanhantes: {guest.companions}{guest.companionNames ? ` (${guest.companionNames})` : ""}</li>
@@ -93,7 +94,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
               <form action={regenerateTokenAction.bind(null, guest.id)}><ConfirmButton message="O link atual deixa de funcionar e terá de enviar o novo link ao convidado. Continuar?">Revogar e gerar novo link</ConfirmButton></form>
             </div>
             <p className="text-xs text-stone-500">
-              Código de entrada: <span className="font-mono font-semibold">{guest.checkinCode}</span> · Telemóvel validado: {guest.verifiedAt ? formatDateTimeShort(guest.verifiedAt) : "não"} · Aberto {guest.openCount}×
+              Código de entrada: <span className="font-mono font-semibold">{guest.checkinCode}</span> · Telemóvel validado: {guest.verifiedAt ? formatDateTimeShort(guest.verifiedAt, tz) : "não"} · Aberto {guest.openCount}×
             </p>
             {suspicious && (
               <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
@@ -106,7 +107,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
                 <p className="text-xs text-stone-500">Nenhum.</p>
               ) : (
                 <ul className="mt-1 space-y-1 text-xs text-stone-600">
-                  {guest.devices.map((d) => <li key={d.id}>{formatDateTimeShort(d.createdAt)} · {d.userAgent?.slice(0, 80) ?? "?"}</li>)}
+                  {guest.devices.map((d) => <li key={d.id}>{formatDateTimeShort(d.createdAt, tz)} · {d.userAgent?.slice(0, 80) ?? "?"}</li>)}
                 </ul>
               )}
             </div>
@@ -121,7 +122,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
                 {guest.accessLogs.map((l) => (
                   <li key={l.id} className={`flex justify-between gap-3 ${l.outcome === "DEVICE_LIMIT" || l.outcome === "OTP_RATE_LIMIT" ? "text-amber-800" : "text-stone-700"}`}>
                     <span>{OUTCOME_LABEL[l.outcome] ?? l.outcome}{l.ip ? ` · ${l.ip}` : ""}</span>
-                    <span className="text-stone-400">{formatDateTimeShort(l.createdAt)}</span>
+                    <span className="text-stone-400">{formatDateTimeShort(l.createdAt, tz)}</span>
                   </li>
                 ))}
               </ul>

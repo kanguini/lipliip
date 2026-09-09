@@ -8,6 +8,7 @@ import { parseGallery, parseParty, parseProgram, parseStory } from "@/lib/event-
 import { formatEventDate } from "@/lib/format";
 import { buildEpcPayload } from "@/lib/epc";
 import { googleCalendarUrl } from "@/lib/urls";
+import { calendarDaysUntil, eventEnd } from "@/lib/timezone";
 import { Invite } from "@/components/templates";
 import { TemplateFrame } from "@/components/templates/Frame";
 import { OtpGate } from "@/components/invite/OtpGate";
@@ -84,12 +85,12 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   const deadlinePassed = !!event.rsvpDeadline && event.rsvpDeadline < new Date();
   const storyTitle = event.type === "BIRTHDAY" ? "A nossa história" : event.type === "WEDDING" || event.type === "ENGAGEMENT" ? "A nossa história" : "História";
   const partyTitle = event.type === "WEDDING" ? "Padrinhos e madrinhas" : "Pessoas especiais";
-  const googleUrl = googleCalendarUrl({ title: event.title, start: event.date, location: [event.venueName, event.venueAddress].filter(Boolean).join(", "), details: event.message ?? undefined });
+  const googleUrl = googleCalendarUrl({ title: event.title, start: event.date, end: eventEnd(event.date, event.endTime, event.timezone), location: [event.venueName, event.venueAddress].filter(Boolean).join(", "), details: event.message ?? undefined });
+  const daysLeft = calendarDaysUntil(event.date, event.timezone);
 
   const body = (
     <Invite event={event} guestName={guest.name}>
-      {event.musicUrl && <MusicPlayer src={event.musicUrl} autoplay={event.envelopeEnabled} />}
-      <DetailsSection event={event} calendarUrl={`/c/${token}/calendar.ics`} googleUrl={googleUrl} />
+      <DetailsSection event={event} calendarUrl={`/c/${token}/calendar.ics`} googleUrl={googleUrl} daysLeft={daysLeft} />
       <StorySection items={parseStory(event.storyJson)} title={storyTitle} />
       <ProgramSection items={parseProgram(event.programJson)} />
       <GallerySection images={parseGallery(event.galleryJson)} />
@@ -98,7 +99,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
         token={token}
         maxCompanions={guest.maxCompanions}
         allowChildren={event.allowChildren}
-        current={guest}
+        current={{ rsvpStatus: guest.rsvpStatus, companions: guest.companions, companionNames: guest.companionNames, dietaryNotes: guest.dietaryNotes, rsvpMessage: guest.rsvpMessage, songRequest: guest.songRequest }}
         deadlinePassed={deadlinePassed}
         deadlineLabel={event.rsvpDeadline ? formatEventDate(event.rsvpDeadline, false, event.timezone) : undefined}
         songRequests={event.songRequestsEnabled}
@@ -112,21 +113,24 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
         />
       )}
       {event.guestbookEnabled && (
-        <GuestbookSection entries={guestbook.map((e) => ({ id: e.id, name: e.guest.name, message: e.message, createdAt: e.createdAt }))}>
+        <GuestbookSection tz={event.timezone} entries={guestbook.map((e) => ({ id: e.id, name: e.guest.name, message: e.message, createdAt: e.createdAt }))}>
           <GuestbookForm token={token} />
         </GuestbookSection>
       )}
       <InfoSection hashtag={event.hashtag} extraInfo={event.extraInfo} />
-      <CheckinSection qrDataUrl={qrDataUrl} code={guest.checkinCode} checkedInAt={guest.checkedInAt} />
+      <CheckinSection qrDataUrl={qrDataUrl} code={guest.checkinCode} checkedInAt={guest.checkedInAt} tz={event.timezone} />
       <p className="pb-6 text-center text-xs opacity-50">
         Convite pessoal de {guest.name} · intransmissível · criado com Lipliip
       </p>
     </Invite>
   );
 
-  if (!event.envelopeEnabled) return body;
+  // O leitor de música fica fora do envelope para não ser desmontado quando o convite se revela.
+  const music = event.musicUrl ? <MusicPlayer src={event.musicUrl} autoplay={event.envelopeEnabled} /> : null;
+  if (!event.envelopeEnabled) return (<>{music}{body}</>);
   return (
     <TemplateFrame templateId={event.templateId} accentColor={event.accentColor}>
+      {music}
       <Envelope hostNames={event.hostNames} guestName={guest.name} kicker={eventKicker(event)}>
         {body}
       </Envelope>

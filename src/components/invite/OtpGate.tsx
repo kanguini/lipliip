@@ -57,6 +57,7 @@ export function OtpGate({ token, guestName, hostNames, maskedPhone }: { token: s
             <input
               className="invite-input text-center text-2xl tracking-[0.5em]"
               inputMode="numeric"
+              aria-label="Código de 6 dígitos"
               autoComplete="one-time-code"
               maxLength={6}
               placeholder="••••••"

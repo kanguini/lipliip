@@ -32,7 +32,7 @@ export default async function CheckinPage({ params, searchParams }: { params: Pr
         <div className="card">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold">Lista de convidados</h2>
-            <form><input name="q" className="input w-44" placeholder="Nome ou código" defaultValue={sp.q ?? ""} /></form>
+            <form><input name="q" className="input w-44" placeholder="Nome ou código" aria-label="Pesquisar convidado" defaultValue={sp.q ?? ""} /></form>
           </div>
           <ul className="mt-3 divide-y divide-stone-100 text-sm">
             {list.map((g) => (

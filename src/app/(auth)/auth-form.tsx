@@ -42,6 +42,7 @@ export function AuthForm({ mode, notice }: { mode: "login" | "register"; notice?
               />
             </div>
             {state.error && <p className="text-sm text-red-700">{state.error}</p>}
+            {mode === "login" && <p className="text-right text-xs"><Link href="/forgot" className="text-stone-500 underline">Esqueceu-se da palavra-passe?</Link></p>}
             <button className="btn-primary w-full" disabled={pending}>
               {pending ? "Aguarde…" : mode === "login" ? "Entrar" : "Criar conta"}
             </button>
