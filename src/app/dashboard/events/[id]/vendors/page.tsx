@@ -55,10 +55,6 @@ export default async function VendorsPage({ params, searchParams }: { params: Pr
         )}
 
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-brand-50 px-5 py-4 text-sm text-brand-800">
-            <span>Ainda à procura de salão, buffet ou fotógrafo?</span>
-            <Link href="/fornecedores" className="btn-secondary btn-sm">Encontrar fornecedores no diretório <ArrowUpRight className="h-3.5 w-3.5" aria-hidden /></Link>
-          </div>
           {vendors.length === 0 && <p className="card text-sm text-[#8c7b87]">Registe aqui as propostas que recebe. Ao marcar um fornecedor como contratado, o valor entra automaticamente no orçamento.</p>}
           {[...byCategory.entries()].map(([cat, list]) => (
             <div key={cat} className="card">

@@ -50,6 +50,11 @@ export default async function AdminUserPage({ params, searchParams }: { params: 
           </Alert>
         </div>
       )}
+      {resetGone && (
+        <div className="mb-6">
+          <Alert kind="info">O link de recuperação só é mostrado uma vez, no momento em que é criado. Gere um novo se precisar de o enviar.</Alert>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Papel" value={isAdmin(user) ? "Admin" : "Utilizador"} />

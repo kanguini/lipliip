@@ -8,7 +8,7 @@ export function SupplierFormFields({ supplier }: { supplier?: Supplier | null })
   const s = supplier;
   return (
     <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-      <div className="space-y-5">
+      <div className="min-w-0 space-y-5">
         <fieldset className="card space-y-3">
           <legend>Identificação</legend>
           <div>
@@ -83,7 +83,7 @@ export function SupplierFormFields({ supplier }: { supplier?: Supplier | null })
         </fieldset>
       </div>
 
-      <div className="space-y-5">
+      <div className="min-w-0 space-y-5">
         <fieldset className="card space-y-3">
           <legend>Fotografia</legend>
           {s?.imageMediaId ? (

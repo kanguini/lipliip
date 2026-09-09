@@ -92,6 +92,11 @@ body {
 .icon-circle {
   @apply flex h-11 w-11 flex-none items-center justify-center rounded-full;
 }
+/* Por omissão o <fieldset> não encolhe abaixo do conteúdo (min-inline-size: min-content),
+   o que faz o texto longo transbordar do cartão em grelhas/flex. Deixá-lo encolher e quebrar. */
+fieldset.card {
+  min-inline-size: 0;
+}
 fieldset.card > legend {
   @apply px-2 font-display text-lg text-brand-700;
   font-variation-settings: "opsz" 48, "SOFT" 60;
