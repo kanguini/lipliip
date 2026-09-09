@@ -1,3 +1,4 @@
+import { planForEvent } from "@/lib/platform";
 import { getGuestByToken, isGuestAuthorized } from "@/lib/guest-access";
 import { buildIcs } from "@/lib/ics";
 import { inviteUrl } from "@/lib/urls";
@@ -10,6 +11,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
   const guest = await getGuestByToken(token);
   if (!guest) return new Response("Not found", { status: 404 });
   if (guest.suspendedAt) return new Response("Forbidden", { status: 403 });
+  // Antes da ativação do evento o convite não está disponível, e o calendário também não.
+  if (!(await planForEvent(guest.event)).canShare) return new Response("Forbidden", { status: 403 });
   if (!(await isGuestAuthorized(guest, guest.event))) return new Response("Forbidden", { status: 403 });
   const e = guest.event;
   const ics = buildIcs({

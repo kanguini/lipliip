@@ -27,6 +27,22 @@ Plataforma web para criar e enviar convites digitais **pessoais e intransmissív
 - Fornecedores com propostas por categoria e estado (a contactar, proposta, contratado); ao contratar, o valor entra automaticamente no orçamento.
 - Equipa por evento: dono, editores (par, pais, cerimonialista) e receção (só check-in). Uma cerimonialista vê todos os eventos dos seus clientes na mesma conta.
 
+**Dia do evento**
+- Acesso de receção sem conta: link `/r/<token>` com PIN de 4 dígitos, com leitor de QR, pesquisa, check-in manual e a lista de pedidos dos convidados em tempo real; o link pode ser revogado a qualquer momento.
+- Pedidos dos convidados (comida, bebida, música, outro) feitos a partir do convite e acompanhados no painel e na receção.
+- Galeria "Momentos": os convidados tiram fotografias a partir do convite e todas ficam numa galeria comum; os anfitriões podem esconder ou apagar; álbum dos anfitriões com upload direto.
+- Ementa (secções e pratos, com etiquetas) mostrada no convite.
+
+**Localização, moeda e contactos**
+- Local marcado no mapa (OpenStreetMap, pesquisa de moradas) com pré-visualização e botão "Como chegar" no convite; em alternativa, link do Google Maps.
+- Moeda por evento (Kwanza por omissão; EUR, USD, BRL, MZN, ZAR, CVE, STN, GBP ou outra) e telefones de qualquer país (o país do evento é só o indicativo por omissão).
+
+**Administração e ativação de eventos** (`/admin`, para contas com papel ADMIN)
+- Painel com números da plataforma; utilizadores (pesquisa, administrador, suspensão, link de recuperação de acesso); eventos (ativação manual); templates (ativo/premium/ordem); definições (preço de ativação, dados bancários, limites do plano gratuito).
+- Ativação por transferência bancária: o anfitrião cria o convite e prepara tudo, envia o comprovativo em `/dashboard/events/<id>/activate` com uma referência única, e o administrador aprova ou rejeita em `/admin/orders`. Antes da ativação (com preço > 0) os convidados não abrem o convite e há um limite de convidados para testar; com preço 0 não há ativação.
+- Diretório público de fornecedores (`/fornecedores`): categorias e províncias, contactos (WhatsApp, telefone, email, site), mapa e pedido de orçamento que chega ao administrador em `/admin/service-requests`.
+- Barra superior no painel com pesquisa (eventos, convidados, fornecedores) e notificações (respostas, mensagens, pedidos, fotografias, ativações).
+
 **Para o convidado**
 - Link pessoal `/c/<token>`; para abrir tem de validar o telemóvel com um código SMS (OTP).
 - Envelope animado de abertura, música de fundo, contagem decrescente ao segundo, mapa, "adicionar ao calendário" (Google ou .ics), programa, história, galeria, padrinhos.
@@ -93,6 +109,10 @@ O repositório inclui `railway.json`: build com `npm run build` e arranque com `
 - **Postgres** (imagem `postgres:16` com volume em `/var/lib/postgresql/data`, `PGDATA=/var/lib/postgresql/data/pgdata`).
 - **Web** ligado a este repositório, com as variáveis `DATABASE_URL` (via rede privada, ex.: `postgresql://postgres:<senha>@postgres.railway.internal:5432/railway`), `APP_URL` (o domínio público), `SMS_PROVIDER` e, para SMS reais, as credenciais Twilio.
 
+## Administrador da plataforma
+
+O primeiro administrador é definido de uma de duas formas: a variável de ambiente `ADMIN_EMAILS` (emails separados por vírgula, sem alterar a base de dados) ou `node scripts/make-admin.mjs email@exemplo.com` depois de a conta existir. Os administradores veem "Administração" no menu lateral do painel. Os comprovativos de pagamento só são visíveis ao administrador e a quem os enviou.
+
 ## Configuração de SMS
 
 | Variável | Descrição |
@@ -134,7 +154,9 @@ tests/                      testes unitários (vitest)
 
 - Envio de convites por email e lembretes automáticos (ex.: 7 dias antes do prazo de RSVP) aos que não responderam.
 - Save the date antes do convite completo; mudança de última hora com notificação a todos os confirmados.
-- Upload direto de fotos de capa e galeria pós-evento partilhada com os convidados.
+- Upload direto da foto de capa (a galeria e os momentos dos convidados já existem).
+- Pagamentos automáticos da ativação (Multicaixa Express, EMIS, AppyPay/ProxyPay) em vez de comprovativo manual; marketplace de serviços com reserva e pagamento na plataforma.
+- Armazenamento das fotografias num bucket S3 em vez da base de dados (o código em `src/lib/media.ts` está preparado para a troca).
 - Plano de mesas visual com arrastar e largar; exportação em PDF.
 - Pagamentos integrados na lista de presentes (Stripe, MB WAY, Multicaixa Express) com recibo automático.
 - Multi-idioma do convite (PT/EN/FR) escolhido por convidado.
