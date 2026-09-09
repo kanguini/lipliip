@@ -20,7 +20,7 @@ async function main() {
     data: {
       ownerId: user.id,
       type: "WEDDING",
-      templateId: "classic",
+      templateId: "rubi",
       title: "Casamento de Ana & João",
       hostNames: "Ana & João",
       message: "Com a bênção das nossas famílias, temos a alegria de vos convidar para celebrar connosco o dia do nosso casamento.",
@@ -61,7 +61,7 @@ async function main() {
     data: {
       ownerId: user.id,
       type: "BIRTHDAY",
-      templateId: "festive",
+      templateId: "festa",
       title: "30 anos da Ana",
       hostNames: "Ana faz 30!",
       message: "Três décadas merecem uma grande festa. Conto contigo!",

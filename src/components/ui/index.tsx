@@ -5,8 +5,8 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-stone-500">{subtitle}</p>}
+        <h1 className="display-title text-3xl">{title}<span className="plum">.</span></h1>
+        {subtitle && <p className="mt-1 text-sm text-[#8c7b87]">{subtitle}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </div>
@@ -15,26 +15,27 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
 
 export function StatCard({ label, value, tone = "default" }: { label: string; value: ReactNode; tone?: "default" | "good" | "bad" | "warn" }) {
   const tones = {
-    default: "text-stone-900",
-    good: "text-emerald-700",
-    bad: "text-red-700",
-    warn: "text-amber-700",
+    default: "text-brand-700",
+    good: "text-emerald-800",
+    bad: "text-red-800",
+    warn: "text-amber-800",
   };
   return (
     <div className="card">
-      <p className="text-xs font-medium uppercase tracking-wide text-stone-500">{label}</p>
-      <p className={`mt-1 text-3xl font-semibold ${tones[tone]}`}>{value}</p>
+      <p className="text-[0.8125rem] text-[#8c7585]">{label}</p>
+      <p className={`font-display mt-1 text-4xl font-normal ${tones[tone]}`}>{value}</p>
     </div>
   );
 }
 
 export function RsvpBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    PENDING: "badge bg-stone-100 text-stone-700",
-    ACCEPTED: "badge bg-emerald-100 text-emerald-800",
-    DECLINED: "badge bg-red-100 text-red-800",
+    PENDING: "badge bg-[#f8f0de] text-[#8b6b2d]",
+    ACCEPTED: "badge bg-[#e9f2eb] text-[#416c4a]",
+    DECLINED: "badge bg-[#f4e8eb] text-[#97596a]",
+    SUSPENDED: "badge bg-[#eeeaee] text-[#6d5e69]",
   };
-  const label: Record<string, string> = { PENDING: "Sem resposta", ACCEPTED: "Confirmado", DECLINED: "Não vai" };
+  const label: Record<string, string> = { PENDING: "Por confirmar", ACCEPTED: "Confirmado", DECLINED: "Não vai", SUSPENDED: "Suspenso" };
   return <span className={map[status] ?? map.PENDING}>{label[status] ?? status}</span>;
 }
 

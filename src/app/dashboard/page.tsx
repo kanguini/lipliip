@@ -4,6 +4,8 @@ import { requireUser } from "@/lib/auth";
 import { EVENT_TYPES, type EventType } from "@/lib/event-types";
 import { formatEventDate } from "@/lib/format";
 import { EmptyState, FlashFromSearch, PageHeader } from "@/components/ui";
+import { InvitationArt } from "@/components/templates/InvitationArt";
+import { formatTime } from "@/lib/format";
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
   const user = await requireUser();
@@ -16,7 +18,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   return (
     <>
-      <PageHeader title="Os meus eventos" subtitle="Crie e acompanhe os seus convites." actions={<Link href="/dashboard/events/new" className="btn-primary">+ Novo evento</Link>} />
+      <p className="eyebrow">Cada momento, um laço</p>
+      <PageHeader title="As suas celebrações" subtitle="Prepare os detalhes e acompanhe quem vai estar consigo." actions={<Link href="/dashboard/events/new" className="btn-primary">+ Criar evento</Link>} />
       <FlashFromSearch {...sp} />
       {events.length === 0 ? (
         <EmptyState
@@ -25,22 +28,30 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           action={<Link href="/dashboard/events/new" className="btn-primary">Criar o primeiro evento</Link>}
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           {events.map((e) => {
             const accepted = e.guests.filter((g) => g.rsvpStatus === "ACCEPTED");
             const people = accepted.reduce((s, g) => s + 1 + g.companions, 0);
             const t = EVENT_TYPES[e.type as EventType];
             return (
-              <Link key={e.id} href={`/dashboard/events/${e.id}`} className="card transition hover:shadow-md">
-                <div className="flex items-start justify-between">
-                  <span className="badge bg-stone-100 text-stone-700">{t?.emoji} {t?.label}</span>
-                  <span className="text-xs text-stone-400">{e._count.guests} convidados</span>
+              <Link key={e.id} href={`/dashboard/events/${e.id}`} className="grid overflow-hidden rounded-xl border border-brand-200/70 bg-white transition hover:shadow-md sm:grid-cols-[40%_60%]">
+                <div className="hidden sm:block">
+                  <InvitationArt templateId={e.templateId} kicker={t?.label ?? "Evento"} names={e.hostNames} dateLabel={formatEventDate(e.date, false, e.timezone)} placeLabel={e.venueName} coverImageUrl={e.coverImageUrl} small className="h-full rounded-none" style={{ aspectRatio: "3 / 5" }} />
                 </div>
-                <p className="mt-3 text-lg font-semibold">{e.title}</p>
-                <p className="text-sm text-stone-500">{formatEventDate(e.date, true, e.timezone)}</p>
-                <p className="mt-3 text-sm text-stone-600">
-                  <strong className="text-emerald-700">{accepted.length}</strong> confirmados · <strong>{people}</strong> pessoas previstas
-                </p>
+                <div className="p-6">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[0.65rem] uppercase tracking-[0.1em] text-brand-500">{t?.label}</span>
+                    <span className="text-[0.65rem] text-[#a1939c]">{e._count.guests} convites</span>
+                  </div>
+                  <p className="font-display mt-4 text-2xl leading-snug">{e.title}</p>
+                  <p className="mt-3 text-xs text-[#8d7986]">📅 {formatEventDate(e.date, true, e.timezone)} · {formatTime(e.date, e.timezone)}</p>
+                  <p className="mt-1 text-xs text-[#8d7986]">📍 {e.venueName}</p>
+                  <div className="mt-5 flex gap-6 border-t border-brand-200/70 pt-4 text-[0.6875rem] text-[#96828f]">
+                    <span><strong className="font-display block text-xl text-[#654354]">{accepted.length}</strong>confirmados</span>
+                    <span><strong className="font-display block text-xl text-[#654354]">{people}</strong>presenças</span>
+                  </div>
+                  <span className="btn-secondary mt-4 w-full">Gerir evento →</span>
+                </div>
               </Link>
             );
           })}

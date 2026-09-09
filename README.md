@@ -7,7 +7,9 @@ Plataforma web para criar e enviar convites digitais **pessoais e intransmissív
 **Para quem organiza**
 - Conta própria; vários eventos por conta.
 - Assistente de criação: tipo de evento → template → detalhes (nomes, data, local, mensagem, programa do dia, dress code, foto de capa, cor personalizada).
-- 5 templates: Clássico Elegante, Botânico, Moderno Minimal, Festa Colorida e Noite Dourada.
+- 11 templates: a **Colecção 2026** (Rubi, Sim para sempre, Primeiro capítulo, A vida é uma festa, Depois do pôr do sol, Nosso encontro), cartazes 4:5 com tipografia que escala com o ecrã, e 5 clássicos (Clássico Elegante, Botânico, Moderno Minimal, Festa Colorida, Noite Dourada).
+- Assistente de criação com pré-visualização do cartaz ao vivo enquanto escreve; painel com barra lateral e identidade ameixa/serifada.
+- Suspender e reativar convites (sem acesso, reservas libertadas) sem apagar o convidado.
 - Gestão de convidados: adicionar um a um ou importar lista colada do Excel (`Nome; Telefone; Acompanhantes; Grupo`), limite de acompanhantes por convidado, grupos, mesa.
 - Envio do link pessoal por **WhatsApp** (mensagem pré-escrita), **SMS** (via fornecedor configurável) ou cópia do link; registo de "enviado / aberto / validado".
 - Painel com estatísticas: confirmados, pessoas previstas, sem resposta, presentes reservados, contribuições.

@@ -36,6 +36,21 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   if (!guest) notFound();
   const event = guest.event;
 
+  if (guest.suspendedAt) {
+    return (
+      <TemplateFrame templateId={event.templateId} accentColor={event.accentColor}>
+        <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-12">
+          <div className="invite-card text-center">
+            <p className="text-xs uppercase tracking-[0.3em] opacity-70">Convite de</p>
+            <h1 className="invite-accent mt-2 text-4xl">{event.hostNames}</h1>
+            <div className="invite-divider" />
+            <p className="text-sm opacity-80">Este convite está temporariamente suspenso. Por favor fale com os anfitriões.</p>
+          </div>
+        </div>
+      </TemplateFrame>
+    );
+  }
+
   if (!(await isGuestAuthorized(guest, event))) {
     return (
       <TemplateFrame templateId={event.templateId} accentColor={event.accentColor}>

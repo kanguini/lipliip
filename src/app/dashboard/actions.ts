@@ -286,6 +286,22 @@ export async function regenerateTokenAction(guestId: string) {
   flash(`/dashboard/events/${guest.eventId}/guests/${guestId}`, "ok", "Novo link gerado. O link anterior foi revogado.");
 }
 
+/** Suspende (ou reativa) um convite: sem acesso, sem dispositivos e com as reservas de presentes libertadas. */
+export async function toggleSuspendAction(guestId: string, returnTo: string | null, _fd?: FormData) {
+  const guest = await requireOwnedGuest(guestId);
+  if (guest.suspendedAt) {
+    await db.guest.update({ where: { id: guestId }, data: { suspendedAt: null } });
+  } else {
+    await db.$transaction([
+      db.guestDevice.deleteMany({ where: { guestId } }),
+      db.giftReservation.deleteMany({ where: { guestId } }),
+      db.guest.update({ where: { id: guestId }, data: { suspendedAt: new Date() } }),
+    ]);
+  }
+  revalidatePath(`/dashboard/events/${guest.eventId}/guests`);
+  redirect(returnTo ?? `/dashboard/events/${guest.eventId}/guests/${guestId}?ok=${encodeURIComponent(guest.suspendedAt ? "Convite reativado." : "Convite suspenso.")}`);
+}
+
 /** Remove os dispositivos autorizados: o convidado terá de validar o telemóvel de novo. */
 export async function resetDevicesAction(guestId: string) {
   const guest = await requireOwnedGuest(guestId);

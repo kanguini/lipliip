@@ -112,6 +112,7 @@ model Guest {
   sentAt         DateTime?
   sentVia        String?
   checkedInAt    DateTime?
+  suspendedAt    DateTime? // convite suspenso pelo organizador (sem acesso, reservas libertadas)
   createdAt      DateTime  @default(now())
 
   devices      GuestDevice[]

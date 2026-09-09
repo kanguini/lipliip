@@ -4,7 +4,7 @@ import { requireOwnedEvent } from "@/lib/auth";
 import { formatPhone, phoneForWhatsApp } from "@/lib/phone";
 import { formatEventDate } from "@/lib/format";
 import { inviteShareMessage, inviteUrl } from "@/lib/urls";
-import { addGuestAction, importGuestsAction, markSentAction, sendSmsInviteAction } from "@/app/dashboard/actions";
+import { addGuestAction, importGuestsAction, markSentAction, sendSmsInviteAction, toggleSuspendAction } from "@/app/dashboard/actions";
 import { FlashFromSearch, RsvpBadge } from "@/components/ui";
 import { CopyButton } from "@/components/dashboard/CopyButton";
 
@@ -102,7 +102,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
                         <span className="ml-2 text-xs text-stone-500">{formatPhone(g.phone)}</span>
                         {g.groupName && <span className="badge ml-2 bg-stone-100 text-stone-600">{g.groupName}</span>}
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-stone-500">
-                          <RsvpBadge status={g.rsvpStatus} />
+                          <RsvpBadge status={g.suspendedAt ? "SUSPENDED" : g.rsvpStatus} />
                           {g.rsvpStatus === "ACCEPTED" && g.maxCompanions > 0 && <span>+{g.companions} de {g.maxCompanions}</span>}
                           <span>{g.sentAt ? `enviado (${g.sentVia ?? "?"})` : "não enviado"}</span>
                           <span>· {g.firstOpenedAt ? `aberto ${g.openCount}×` : "não aberto"}</span>
@@ -114,6 +114,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
                         <a href={wa} target="_blank" rel="noreferrer" className="btn-secondary btn-sm">WhatsApp</a>
                         <form action={sendSmsInviteAction.bind(null, g.id)}><button className="btn-secondary btn-sm">SMS</button></form>
                         <CopyButton text={url} />
+                        <form action={toggleSuspendAction.bind(null, g.id, returnTo)}><button className="btn-ghost btn-sm" title={g.suspendedAt ? "Reativar convite" : "Suspender convite"}>{g.suspendedAt ? "Reativar" : "Suspender"}</button></form>
                         {!g.sentAt && (
                           <form action={markSentAction.bind(null, g.id, "manual", returnTo)}><button className="btn-ghost btn-sm" title="Marcar como enviado">✓ enviado</button></form>
                         )}

@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { requireOwnedEvent } from "@/lib/auth";
 import { formatDateTimeShort } from "@/lib/format";
 import { inviteUrl } from "@/lib/urls";
-import { deleteGuestAction, regenerateTokenAction, resetDevicesAction, updateGuestAction } from "@/app/dashboard/actions";
+import { deleteGuestAction, regenerateTokenAction, resetDevicesAction, toggleSuspendAction, updateGuestAction } from "@/app/dashboard/actions";
 import { FlashFromSearch, RsvpBadge } from "@/components/ui";
 import { CopyButton } from "@/components/dashboard/CopyButton";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
@@ -64,7 +64,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
 
           <div className="card space-y-3">
             <h2 className="font-semibold">Resposta</h2>
-            <p className="text-sm"><RsvpBadge status={guest.rsvpStatus} />{guest.respondedAt && <span className="ml-2 text-stone-500">em {formatDateTimeShort(guest.respondedAt, tz)}</span>}</p>
+            <p className="text-sm"><RsvpBadge status={guest.suspendedAt ? "SUSPENDED" : guest.rsvpStatus} />{guest.respondedAt && <span className="ml-2 text-stone-500">em {formatDateTimeShort(guest.respondedAt, tz)}</span>}</p>
             {guest.rsvpStatus === "ACCEPTED" && (
               <ul className="text-sm text-stone-700">
                 <li>Acompanhantes: {guest.companions}{guest.companionNames ? ` (${guest.companionNames})` : ""}</li>
@@ -91,6 +91,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
             <div className="flex flex-wrap gap-2">
               <CopyButton text={url} />
               <form action={resetDevicesAction.bind(null, guest.id)}><button className="btn-secondary btn-sm">Remover dispositivos</button></form>
+              <form action={toggleSuspendAction.bind(null, guest.id, null)}><button className="btn-secondary btn-sm">{guest.suspendedAt ? "Reativar convite" : "Suspender convite"}</button></form>
               <form action={regenerateTokenAction.bind(null, guest.id)}><ConfirmButton message="O link atual deixa de funcionar e terá de enviar o novo link ao convidado. Continuar?">Revogar e gerar novo link</ConfirmButton></form>
             </div>
             <p className="text-xs text-stone-500">

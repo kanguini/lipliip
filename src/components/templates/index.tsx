@@ -6,6 +6,8 @@ import { BotanicalTemplate } from "./botanical";
 import { ModernTemplate } from "./modern";
 import { FestiveTemplate } from "./festive";
 import { NightTemplate } from "./night";
+import { PosterTemplate } from "./poster";
+import { POSTER_TEMPLATE_IDS, getTemplate } from "@/lib/templates";
 
 const COMPONENTS = {
   classic: ClassicTemplate,
@@ -16,7 +18,7 @@ const COMPONENTS = {
 } as const;
 
 export function Invite({ event, guestName, children }: { event: TemplateEvent; guestName?: string; children?: ReactNode }) {
-  const Component = COMPONENTS[event.templateId as keyof typeof COMPONENTS] ?? ClassicTemplate;
+  const Component = POSTER_TEMPLATE_IDS.has(event.templateId) ? PosterTemplate : (COMPONENTS[event.templateId as keyof typeof COMPONENTS] ?? ClassicTemplate);
   return (
     <TemplateFrame templateId={event.templateId} accentColor={event.accentColor}>
       <Component event={event} guestName={guestName}>{children}</Component>
@@ -76,7 +78,8 @@ export const SAMPLE_EVENTS: Record<string, TemplateEvent> = {
 };
 
 export function sampleEventForTemplate(templateId: string): TemplateEvent {
-  const byType: Record<string, string> = { festive: "BIRTHDAY", modern: "ENGAGEMENT", night: "BIRTHDAY" };
+  const byType: Record<string, string> = { festive: "BIRTHDAY", modern: "ENGAGEMENT", night: "BIRTHDAY", festa: "BIRTHDAY", noite: "BIRTHDAY", azul: "ENGAGEMENT", encontro: "ENGAGEMENT" };
   const base = SAMPLE_EVENTS[byType[templateId] ?? "WEDDING"];
-  return { ...base, templateId };
+  const sample = getTemplate(templateId).sample;
+  return { ...base, templateId, hostNames: sample.names, title: sample.names };
 }

@@ -9,6 +9,12 @@ const EXTRA_VARS: Record<string, Record<string, string>> = {
     "--inv-input-text": "#f5f0e6",
     "--inv-on-accent": "#14121a",
   },
+  noite: {
+    "--inv-card": "rgba(255,255,255,0.06)",
+    "--inv-input-bg": "rgba(255,255,255,0.08)",
+    "--inv-input-text": "#f1e6d0",
+    "--inv-on-accent": "#1c1622",
+  },
   festive: { "--inv-card": "rgba(255,255,255,0.9)" },
   modern: { "--inv-card": "#f7f7f7" },
 };

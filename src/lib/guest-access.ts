@@ -30,6 +30,7 @@ export async function isGuestAuthorized(guest: Guest, event: Event): Promise<boo
 export async function requireGuestAccess(token: string) {
   const guest = await getGuestByToken(token);
   if (!guest) throw new Error("Convite inválido.");
+  if (guest.suspendedAt) throw new Error("Este convite está suspenso.");
   if (!(await isGuestAuthorized(guest, guest.event))) throw new Error("Confirme o seu telemóvel para continuar.");
   return { guest, event: guest.event };
 }

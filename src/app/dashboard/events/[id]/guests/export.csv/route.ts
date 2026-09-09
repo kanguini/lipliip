@@ -25,7 +25,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
   const header = ["Nome", "Telefone", "Email", "Grupo", "Mesa", "Resposta", "Acompanhantes", "Nomes acompanhantes", "Restrições alimentares", "Música pedida", "Mensagem", "Enviado", "Aberto", "Validado", "Entrou", "Código entrada"];
   const rows = guests.map((g) => [
-    g.name, phoneCell(g.phone), g.email, g.groupName, g.tableNumber, RSVP_LABELS[g.rsvpStatus] ?? g.rsvpStatus,
+    g.name, phoneCell(g.phone), g.email, g.groupName, g.tableNumber, g.suspendedAt ? "Suspenso" : (RSVP_LABELS[g.rsvpStatus] ?? g.rsvpStatus),
     g.rsvpStatus === "ACCEPTED" ? g.companions : 0, g.companionNames, g.dietaryNotes, g.songRequest, g.rsvpMessage,
     g.sentAt ? "sim" : "não", g.firstOpenedAt ? "sim" : "não", g.verifiedAt ? "sim" : "não", g.checkedInAt ? "sim" : "não", g.checkinCode,
   ]);

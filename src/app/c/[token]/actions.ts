@@ -21,6 +21,7 @@ function fail(error: string): ActionResult {
 export async function requestOtpAction(token: string): Promise<ActionResult> {
   const guest = await getGuestByToken(token);
   if (!guest) return fail("Convite inválido.");
+  if (guest.suspendedAt) return fail("Este convite está suspenso. Contacte os anfitriões.");
   if (!guest.event.verificationRequired) return fail("Este convite não precisa de validação.");
   const meta = await requestMeta();
   if (!rateLimit(`otp:${meta.ip ?? "?"}`, 10, 15 * 60_000).ok) return fail("Demasiados pedidos a partir desta ligação. Tente mais tarde.");

@@ -12,9 +12,9 @@ export default async function EventLayout({ children, params }: { children: Reac
       <Link href="/dashboard" className="mb-3 inline-block text-sm text-stone-500 hover:text-stone-900">← Os meus eventos</Link>
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <span className="badge bg-stone-100 text-stone-700">{eventTypeLabel(event.type)}</span>
-          <h1 className="mt-1 text-2xl font-semibold">{event.title}</h1>
-          <p className="text-sm text-stone-500">{formatEventDate(event.date, true, event.timezone)} · {formatTime(event.date, event.timezone)} · {event.venueName}</p>
+          <span className="eyebrow">{eventTypeLabel(event.type)}</span>
+          <h1 className="display-title mt-1 text-3xl">{event.title}</h1>
+          <p className="text-sm text-[#8c7b87]">{formatEventDate(event.date, true, event.timezone)} · {formatTime(event.date, event.timezone)} · {event.venueName}</p>
         </div>
         <Link href={`/dashboard/events/${event.id}/preview`} className="btn-secondary btn-sm">👁 Ver convite</Link>
       </div>
