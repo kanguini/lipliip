@@ -3,10 +3,14 @@ import { requireUser } from "@/lib/auth";
 import { logoutAction } from "@/app/(auth)/actions";
 import { DashboardNav } from "./nav";
 import { isAdmin } from "@/lib/admin";
+import { Quotes } from "@/components/dashboard/Quotes";
+import { TopBar } from "@/components/dashboard/TopBar";
+import { loadNotifications } from "./notifications/data";
 import { LogOut } from "lucide-react";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
+  const { unread } = await loadNotifications(user);
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[16.5rem_1fr]">
       <aside className="bg-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
@@ -17,11 +21,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </form>
         </div>
         <DashboardNav admin={isAdmin(user)} />
-        <div className="mx-6 mt-8 hidden rounded-3xl bg-brand-50 p-5 text-[0.8125rem] text-muted lg:block">
-          <p className="font-display text-lg leading-snug text-brand-700">As pessoas certas.<br />O seu momento.</p>
-          <p className="mt-2 leading-relaxed">Um convite pessoal, ligado ao contacto de cada convidado.</p>
+        <div className="hidden lg:mt-auto lg:block">
+          <Quotes />
         </div>
-        <div className="hidden items-center gap-3 px-6 py-5 lg:mt-auto lg:flex">
+        <div className="hidden items-center gap-3 px-6 py-5 lg:flex">
           <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-joy-sun font-display text-lg text-brand-800">{user.name.charAt(0).toUpperCase()}</div>
           <div className="min-w-0 flex-1">
             <Link href="/dashboard/account" className="block truncate text-sm font-semibold hover:underline">{user.name}</Link>
@@ -32,9 +35,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </form>
         </div>
       </aside>
-      <main className="min-w-0 px-5 py-8 lg:px-10 lg:py-10">
-        <div className="mx-auto max-w-6xl">{children}</div>
-      </main>
+      <div className="min-w-0">
+        <TopBar name={user.name} unread={unread} />
+        <main className="px-5 py-8 lg:px-10 lg:py-10">
+          <div className="mx-auto max-w-6xl">{children}</div>
+        </main>
+      </div>
     </div>
   );
 }
