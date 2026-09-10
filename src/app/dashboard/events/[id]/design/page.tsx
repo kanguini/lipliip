@@ -15,7 +15,7 @@ export default async function DesignPage({ params, searchParams }: { params: Pro
   const [all, plan] = await Promise.all([getAllTemplates(), planForEvent(event)]);
   // Templates ativos para este tipo de evento; o template atual aparece sempre, mesmo que entretanto tenha sido desativado.
   const templates = all.filter((t) => t.types.includes(event.type) && (t.enabled || t.id === event.templateId));
-  const current = getTemplate(event.templateId);
+  const current = all.find((t) => t.id === event.templateId) ?? getTemplate(event.templateId);
   const hasPremium = templates.some((t) => t.premium && t.id !== event.templateId);
 
   return (

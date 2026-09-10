@@ -5,13 +5,14 @@ import { formatEventDate, formatTime } from "@/lib/format";
 import { getTemplate } from "@/lib/templates";
 
 /** Templates da colecção 2026: o cartaz é o cabeçalho do convite. */
-export function PosterTemplate({ event, guestName, children }: TemplateProps) {
-  const t = getTemplate(event.templateId);
+export function PosterTemplate({ event, guestName, children, template }: TemplateProps) {
+  const t = template ?? getTemplate(event.templateId);
   return (
     <div className="mx-auto max-w-2xl px-5 py-8">
       <Greeting guestName={guestName} className="mb-4 text-center" />
       <InvitationArt
         templateId={event.templateId}
+        template={template}
         kicker={eventKicker(event)}
         names={event.hostNames}
         dateLabel={formatEventDate(event.date, false, event.timezone)}

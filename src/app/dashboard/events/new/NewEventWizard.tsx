@@ -33,6 +33,7 @@ export function NewEventWizard({ initialType, initialTemplate, templates: catalo
   const [draft, setDraft] = useState<Draft>({ hostNames: "", date: "", venueName: "", message: "" });
   const templates: WizardTemplate[] = catalog ? catalog.filter((t) => t.types.includes(type)) : templatesForType(type);
   const effectiveTemplate = templates.some((t) => t.id === templateId) ? templateId : (templates[0]?.id ?? templatesForType(type)[0].id);
+  const effectiveMeta = templates.find((t) => t.id === effectiveTemplate);
   const kind = EVENT_TYPES[type];
 
   function onInput(e: React.FormEvent<HTMLFormElement>) {
@@ -127,7 +128,7 @@ export function NewEventWizard({ initialType, initialTemplate, templates: catalo
           <aside className="lg:sticky lg:top-6 lg:self-start">
             <div className="rounded-3xl bg-brand-100 p-5">
               <p className="mb-4 text-center text-[0.65rem] font-semibold uppercase tracking-[0.13em] text-brand-500">O seu convite</p>
-              <InvitationArt templateId={effectiveTemplate} kicker={kind.label} names={draft.hostNames || kind.hostPlaceholder} dateLabel={dateLabel(draft.date)} placeLabel={draft.venueName || "Local do evento"} caption={draft.message ? undefined : "O convite adapta-se ao telemóvel."} className="shadow-xl" />
+              <InvitationArt templateId={effectiveTemplate} template={effectiveMeta} kicker={kind.label} names={draft.hostNames || kind.hostPlaceholder} dateLabel={dateLabel(draft.date)} placeLabel={draft.venueName || "Local do evento"} caption={draft.message ? undefined : "O convite adapta-se ao telemóvel."} className="shadow-xl" />
               {draft.message && <p className="mt-4 text-center text-xs italic text-muted">{draft.message.slice(0, 160)}{draft.message.length > 160 ? "…" : ""}</p>}
             </div>
           </aside>

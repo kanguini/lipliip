@@ -11,6 +11,7 @@ import { googleCalendarUrl } from "@/lib/urls";
 import { calendarDaysUntil, eventEnd } from "@/lib/timezone";
 import { Invite } from "@/components/templates";
 import { TemplateFrame } from "@/components/templates/Frame";
+import { resolveTemplateMeta } from "@/lib/templates-settings";
 import { OtpGate } from "@/components/invite/OtpGate";
 import { RsvpForm } from "@/components/invite/RsvpForm";
 import { GiftList, type GiftView } from "@/components/invite/GiftList";
@@ -40,6 +41,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   const guest = await getGuestByToken(token);
   if (!guest) notFound();
   const event = guest.event;
+  const template = await resolveTemplateMeta(event.templateId);
 
   const plan = await planForEvent(event);
   if (guest.suspendedAt || !plan.canShare) {
@@ -47,7 +49,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
       ? "Este convite está temporariamente suspenso. Por favor fale com os anfitriões."
       : "Este convite ainda não está disponível. Os anfitriões vão libertá-lo em breve.";
     return (
-      <TemplateFrame templateId={event.templateId} accentColor={event.accentColor}>
+      <TemplateFrame templateId={event.templateId} accentColor={event.accentColor} template={template}>
         <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-12">
           <div className="invite-card text-center">
             <p className="text-xs uppercase tracking-[0.3em] opacity-70">Convite de</p>
@@ -62,7 +64,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
 
   if (!(await isGuestAuthorized(guest, event))) {
     return (
-      <TemplateFrame templateId={event.templateId} accentColor={event.accentColor}>
+      <TemplateFrame templateId={event.templateId} accentColor={event.accentColor} template={template}>
         <OtpGate token={token} guestName={guest.name} hostNames={event.hostNames} maskedPhone={maskPhone(guest.phone)} />
       </TemplateFrame>
     );
@@ -118,7 +120,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   const daysLeft = calendarDaysUntil(event.date, event.timezone);
 
   const body = (
-    <Invite event={event} guestName={guest.name}>
+    <Invite event={event} guestName={guest.name} template={template}>
       <DetailsSection event={event} calendarUrl={`/c/${token}/calendar.ics`} googleUrl={googleUrl} daysLeft={daysLeft} />
       <StorySection items={parseStory(event.storyJson)} title={storyTitle} />
       <ProgramSection items={parseProgram(event.programJson)} />

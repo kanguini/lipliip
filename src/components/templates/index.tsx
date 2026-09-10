@@ -7,7 +7,7 @@ import { ModernTemplate } from "./modern";
 import { FestiveTemplate } from "./festive";
 import { NightTemplate } from "./night";
 import { PosterTemplate } from "./poster";
-import { POSTER_TEMPLATE_IDS, getTemplate } from "@/lib/templates";
+import { POSTER_TEMPLATE_IDS, getTemplate, type TemplateMeta } from "@/lib/templates";
 
 const COMPONENTS = {
   classic: ClassicTemplate,
@@ -17,11 +17,13 @@ const COMPONENTS = {
   night: NightTemplate,
 } as const;
 
-export function Invite({ event, guestName, children }: { event: TemplateEvent; guestName?: string; children?: ReactNode }) {
-  const Component = POSTER_TEMPLATE_IDS.has(event.templateId) ? PosterTemplate : (COMPONENTS[event.templateId as keyof typeof COMPONENTS] ?? ClassicTemplate);
+export function Invite({ event, guestName, children, template }: { event: TemplateEvent; guestName?: string; children?: ReactNode; template?: TemplateMeta }) {
+  // Os personalizados (com cartaz carregado) desenham-se como os da colecção 2026.
+  const isPoster = POSTER_TEMPLATE_IDS.has(event.templateId) || !!template?.image;
+  const Component = isPoster ? PosterTemplate : (COMPONENTS[event.templateId as keyof typeof COMPONENTS] ?? ClassicTemplate);
   return (
-    <TemplateFrame templateId={event.templateId} accentColor={event.accentColor}>
-      <Component event={event} guestName={guestName}>{children}</Component>
+    <TemplateFrame templateId={event.templateId} accentColor={event.accentColor} template={template}>
+      <Component event={event} guestName={guestName} template={template}>{children}</Component>
     </TemplateFrame>
   );
 }
@@ -77,9 +79,11 @@ export const SAMPLE_EVENTS: Record<string, TemplateEvent> = {
   },
 };
 
-export function sampleEventForTemplate(templateId: string): TemplateEvent {
+export function sampleEventForTemplate(templateId: string, meta?: TemplateMeta): TemplateEvent {
   const byType: Record<string, string> = { festive: "BIRTHDAY", modern: "ENGAGEMENT", night: "BIRTHDAY", festa: "BIRTHDAY", noite: "BIRTHDAY", azul: "ENGAGEMENT", encontro: "ENGAGEMENT" };
-  const base = SAMPLE_EVENTS[byType[templateId] ?? "WEDDING"];
-  const sample = getTemplate(templateId).sample;
-  return { ...base, templateId, hostNames: sample.names, title: sample.names };
+  const m = meta ?? getTemplate(templateId);
+  // Um personalizado aplica-se a vários tipos: escolhe o primeiro que declarou (ou casamento por omissão).
+  const type = meta?.custom ? (meta.types[0] ?? "WEDDING") : (byType[templateId] ?? "WEDDING");
+  const base = SAMPLE_EVENTS[type] ?? SAMPLE_EVENTS.WEDDING;
+  return { ...base, type, templateId, hostNames: m.sample.names, title: m.sample.names };
 }

@@ -17,7 +17,7 @@ export function TemplateCard({ t, type, names, selected }: { t: TemplateMeta & {
     <div className={`relative overflow-hidden rounded-xl border bg-white transition ${selected ? "border-brand-500 ring-2 ring-brand-200" : "border-brand-200/70 hover:border-brand-300"}`}>
       {t.premium && <PremiumPill className="absolute left-2 top-2 z-10 shadow-sm" />}
       {t.collection === "2026" ? (
-        <InvitationArt templateId={t.id} kicker={kicker} names={names || t.sample.names} dateLabel="12 de dezembro de 2026" placeLabel="Local do evento · 16:00" caption={t.sample.caption} className="rounded-none" />
+        <InvitationArt templateId={t.id} template={t} kicker={kicker} names={names || t.sample.names} dateLabel="12 de dezembro de 2026" placeLabel="Local do evento · 16:00" caption={t.sample.caption} className="rounded-none" />
       ) : (
         <div className="flex aspect-[4/5] flex-col items-center justify-center p-4 text-center" style={{ background: t.colors.bg, color: t.colors.text }}>
           <span className="text-xs uppercase tracking-[0.2em] opacity-70">{kicker}</span>

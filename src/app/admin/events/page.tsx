@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/admin";
 import { formatDateTimeShort, formatEventDate, formatTime } from "@/lib/format";
 import { eventTypeLabel } from "@/lib/event-types";
 import { getTemplate } from "@/lib/templates";
+import { getCustomTemplates } from "@/lib/custom-templates";
 import { setEventActivationAction } from "@/app/admin/actions";
 import { EmptyState, FlashFromSearch, PageHeader } from "@/components/ui";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
@@ -38,6 +39,8 @@ export default async function AdminEventsPage({ searchParams }: { searchParams: 
     }),
     db.event.count({ where }),
   ]);
+  const customNames = new Map((await getCustomTemplates()).map((t) => [t.id, t.name]));
+  const templateName = (templateId: string) => customNames.get(templateId) ?? getTemplate(templateId).name;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const qs = (p: number) => `/admin/events?${new URLSearchParams({ ...(q ? { q } : {}), ...(only ? { only } : {}), ...(p > 1 ? { page: String(p) } : {}) }).toString()}`;
   const returnTo = qs(page);
@@ -81,7 +84,7 @@ export default async function AdminEventsPage({ searchParams }: { searchParams: 
                       <dl className="mt-2 grid gap-x-4 gap-y-1 text-xs text-muted sm:grid-cols-2">
                         <div><dt className="inline font-medium">Anfitriões:</dt> <dd className="inline">{e.hostNames}</dd></div>
                         <div><dt className="inline font-medium">Local:</dt> <dd className="inline">{e.venueName}</dd></div>
-                        <div><dt className="inline font-medium">Template:</dt> <dd className="inline">{getTemplate(e.templateId).name}</dd></div>
+                        <div><dt className="inline font-medium">Template:</dt> <dd className="inline">{templateName(e.templateId)}</dd></div>
                         <div><dt className="inline font-medium">País / fuso:</dt> <dd className="inline">{e.country} · {e.timezone}</dd></div>
                         <div><dt className="inline font-medium">Criado:</dt> <dd className="inline">{formatDateTimeShort(e.createdAt)}</dd></div>
                         <div><dt className="inline font-medium">Pedidos de ativação:</dt> <dd className="inline">{e._count.orders}</dd></div>

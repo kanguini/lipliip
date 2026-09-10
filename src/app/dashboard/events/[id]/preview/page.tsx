@@ -7,12 +7,16 @@ import { DetailsSection, ProgramSection } from "@/components/invite/Sections";
 import { MenuSection } from "@/components/invite/MenuSection";
 import { parseMenu } from "@/lib/menu";
 import { formatMoney } from "@/lib/format";
+import { resolveTemplateMeta } from "@/lib/templates-settings";
 
 /** Pré-visualização do convite tal como um convidado o vê (sem as partes interativas). */
 export default async function EventPreviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { event } = await requireEventAccess(id, { allowStaff: true });
-  const gifts = await db.giftItem.findMany({ where: { eventId: id }, orderBy: { createdAt: "asc" } });
+  const [gifts, template] = await Promise.all([
+    db.giftItem.findMany({ where: { eventId: id }, orderBy: { createdAt: "asc" } }),
+    resolveTemplateMeta(event.templateId),
+  ]);
   return (
     <div className="-mx-5 -my-8 lg:-mx-10 lg:-my-10">
       <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 bg-white/90 px-4 py-2 text-sm backdrop-blur">
@@ -22,7 +26,7 @@ export default async function EventPreviewPage({ params }: { params: Promise<{ i
           <Link href={`/dashboard/events/${id}`} className="btn-primary btn-sm">Voltar ao painel</Link>
         </div>
       </div>
-      <Invite event={event} guestName="Nome do Convidado">
+      <Invite event={event} guestName="Nome do Convidado" template={template}>
         <DetailsSection event={event} />
         <ProgramSection items={parseProgram(event.programJson)} />
         <MenuSection menu={parseMenu(event.menuJson)} />

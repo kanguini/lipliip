@@ -468,3 +468,24 @@ model TemplateSetting {
   sortOrder Int      @default(0)
   updatedAt DateTime @updatedAt
 }
+
+/// Template personalizado: um cartaz carregado pela administração que passa a estar disponível como modelo de convite.
+/// A imagem é o fundo do cartaz (4:5) e o texto do convite é sobreposto por cima (como uma foto de capa).
+model CustomTemplate {
+  id            String   @id @default(cuid())
+  name          String
+  description   String   @default("")
+  tag           String   @default("")
+  types         String[] // tipos de evento em que se aplica (WEDDING, ENGAGEMENT, BIRTHDAY, OTHER)
+  imageMediaId  String // fundo do cartaz (Media)
+  accentColor   String   @default("#541b38") // cor de destaque do convite (botões, divisórias)
+  bgColor       String   @default("#fbf5f7") // fundo das secções do convite
+  textColor     String   @default("#30262e")
+  sampleNames   String   @default("Sofia & Miguel")
+  sampleCaption String   @default("Uma vida inteira começa aqui.")
+  enabled       Boolean  @default(true)
+  premium       Boolean  @default(false)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

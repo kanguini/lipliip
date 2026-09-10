@@ -18,7 +18,6 @@ import { flash, str, opt, bool, parseMoney } from "@/lib/form";
 import { inviteShareMessage, inviteUrl } from "@/lib/urls";
 import { performCheckin } from "@/lib/checkin";
 import { DEFAULT_CURRENCY } from "@/lib/format";
-import { TEMPLATES } from "@/lib/templates";
 import { httpUrlOrNull } from "@/lib/validation";
 import { accessibleEventWhere, editableEventWhere, requireEventAccess } from "@/lib/access";
 import { buildChecklist } from "@/lib/checklists";
@@ -35,7 +34,8 @@ function dateOrNull(v: string, tz: string) {
 
 const eventSchema = z.object({
   type: z.enum(["WEDDING", "ENGAGEMENT", "BIRTHDAY", "OTHER"]),
-  templateId: z.string().refine((id) => TEMPLATES.some((t) => t.id === id), "Template inválido"),
+  // Formato apenas; a existência e disponibilidade (catálogo fixo ou personalizado) são validadas com getTemplateState.
+  templateId: z.string().trim().min(1, "Escolha um template").max(40),
   title: z.string().trim().max(120).optional().default(""),
   hostNames: z.string().trim().min(1, "Indique os nomes dos anfitriões").max(120),
   date: z.string().min(1, "Indique a data"),
@@ -148,8 +148,9 @@ export async function updateDesignAction(eventId: string, fd: FormData) {
   const { event } = await requireOwnedEvent(eventId);
   const path = `/dashboard/events/${eventId}/design`;
   const templateId = str(fd, "templateId", 40);
-  if (!TEMPLATES.some((t) => t.id === templateId)) flash(path, "error", "Template inválido");
+  if (!templateId) flash(path, "error", "Template inválido");
   // Mudar para um template desativado ou Premium (sem o evento ativado) não é permitido; manter o atual é.
+  // A existência (catálogo fixo ou personalizado) é validada por getTemplateState no bloco abaixo.
   if (templateId !== event.templateId) {
     const [state, plan] = await Promise.all([getTemplateState(templateId), planForEvent(event)]);
     if (!state || !state.enabled) flash(path, "error", "Este template já não está disponível. Escolha outro.");

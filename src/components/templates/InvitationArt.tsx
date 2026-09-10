@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { getTemplate } from "@/lib/templates";
+import { getTemplate, type TemplateMeta } from "@/lib/templates";
 
 export type ArtProps = {
   templateId: string;
@@ -9,6 +9,8 @@ export type ArtProps = {
   placeLabel?: string; // "Quinta da Serra · 16:00"
   caption?: string;
   coverImageUrl?: string | null;
+  /** Meta já resolvida (necessária para templates personalizados, que não estão no catálogo fixo). */
+  template?: TemplateMeta;
   small?: boolean;
   className?: string;
   style?: CSSProperties;
@@ -18,14 +20,17 @@ export type ArtProps = {
  * Cartaz do convite (4:5). A tipografia escala com a largura do contentor (unidades cqw),
  * por isso o mesmo componente serve para miniaturas, cartões e o cabeçalho do convite.
  */
-export function InvitationArt({ templateId, kicker, names, dateLabel, placeLabel, caption, coverImageUrl, small = false, className = "", style }: ArtProps) {
-  const t = getTemplate(templateId);
+export function InvitationArt({ templateId, kicker, names, dateLabel, placeLabel, caption, coverImageUrl, template, small = false, className = "", style }: ArtProps) {
+  const t = template ?? getTemplate(templateId);
   const parts = names.split(/\s*&\s*|\s+e\s+/i).map((p) => p.trim()).filter(Boolean);
   const long = names.length > 45;
-  const cover = coverImageUrl || (templateId === "rubi" ? "/images/rubi.jpg" : null);
+  // Nos templates personalizados o cartaz carregado é o fundo; qualquer foto de capa do evento tem prioridade.
+  const cover = coverImageUrl || t.image || (t.id === "rubi" ? "/images/rubi.jpg" : null);
+  // Texto branco sobre a imagem (com o degradê de contraste) quando há foto de capa ou cartaz personalizado.
+  const hasCover = !!(coverImageUrl || t.image);
 
   return (
-    <div className={`invitation-art art-${t.id} ${small ? "art-small" : ""} ${coverImageUrl ? "art-has-cover" : ""} ${className}`} style={style}>
+    <div className={`invitation-art art-${t.id} ${small ? "art-small" : ""} ${hasCover ? "art-has-cover" : ""} ${className}`} style={style}>
       {cover && (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={cover} alt="" className="floral-art" />

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { TemplateMeta } from "@/lib/templates";
 
 /** Subconjunto do evento necessário para desenhar o convite (usado também nas pré-visualizações). */
 export type TemplateEvent = {
@@ -25,4 +26,6 @@ export type TemplateProps = {
   event: TemplateEvent;
   guestName?: string;
   children?: ReactNode;
+  /** Meta já resolvida (necessária para templates personalizados). */
+  template?: TemplateMeta;
 };

@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { getTemplate } from "@/lib/templates";
+import { getTemplate, type TemplateMeta } from "@/lib/templates";
 import { luminance } from "@/lib/color";
 
 /** Ajustes por template (fundos escuros precisam de cartões, inputs e botões diferentes). */
@@ -24,13 +24,16 @@ export function TemplateFrame({
   accentColor,
   children,
   extraVars,
+  template,
 }: {
   templateId: string;
   accentColor?: string | null;
   children: ReactNode;
   extraVars?: Record<string, string>;
+  /** Meta já resolvida (necessária para templates personalizados). */
+  template?: TemplateMeta;
 }) {
-  const meta = getTemplate(templateId);
+  const meta = template ?? getTemplate(templateId);
   const accent = accentColor || meta.colors.accent;
   const darkBg = luminance(meta.colors.bg) < 0.3;
   const style = {

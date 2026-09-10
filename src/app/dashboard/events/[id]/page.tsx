@@ -7,6 +7,7 @@ import { isSmsConfigured } from "@/lib/sms";
 import { EVENT_TYPES, type EventType } from "@/lib/event-types";
 import { FlashFromSearch } from "@/components/ui";
 import { InvitationArt } from "@/components/templates/InvitationArt";
+import { resolveTemplateMeta } from "@/lib/templates-settings";
 import { planForEvent } from "@/lib/platform";
 import { activationState } from "@/lib/activation";
 import { ArrowRight, BadgeCheck, Check, Circle, ListChecks, Mail, Music, Salad, Users, Wallet } from "lucide-react";
@@ -23,6 +24,7 @@ export default async function EventOverviewPage({ params, searchParams }: { para
     planForEvent(event),
     db.order.findFirst({ where: { eventId: id }, orderBy: { createdAt: "desc" }, select: { status: true, reference: true, createdAt: true, adminNote: true } }),
   ]);
+  const template = await resolveTemplateMeta(event.templateId);
   const activation = activationState(plan, lastOrder);
   const activationCopy = {
     NOT_REQUIRED: { label: "Não é necessária", detail: "tudo desbloqueado", tone: "bg-joy-sage/40" },
@@ -68,7 +70,7 @@ export default async function EventOverviewPage({ params, searchParams }: { para
       <section className="grid gap-6 lg:grid-cols-[0.9fr_1.4fr]">
         <div className="card flex gap-5">
           <div className="w-28 flex-none sm:w-36">
-            <InvitationArt templateId={event.templateId} kicker={EVENT_TYPES[event.type as EventType]?.label ?? "Evento"} names={event.hostNames} dateLabel={formatEventDate(event.date, false, event.timezone)} placeLabel={event.venueName} coverImageUrl={event.coverImageUrl} small className="shadow-lg" />
+            <InvitationArt templateId={event.templateId} template={template} kicker={EVENT_TYPES[event.type as EventType]?.label ?? "Evento"} names={event.hostNames} dateLabel={formatEventDate(event.date, false, event.timezone)} placeLabel={event.venueName} coverImageUrl={event.coverImageUrl} small className="shadow-lg" />
           </div>
           <div className="min-w-0">
             <p className="eyebrow">{days > 1 ? `Faltam ${days} dias` : days === 1 ? "É amanhã" : days === 0 ? "É hoje" : "Já aconteceu"}</p>

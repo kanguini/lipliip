@@ -10,6 +10,13 @@ export type TemplateMeta = {
   fontBody: string;
   /** Nomes e legenda de exemplo para as pré-visualizações. */
   sample: { names: string; caption: string };
+  /**
+   * Cartaz carregado (templates personalizados da administração): serve de fundo do convite,
+   * com o texto sobreposto por cima. Os templates do catálogo fixo não o têm.
+   */
+  image?: string;
+  /** Verdadeiro nos templates personalizados (carregados na administração), falso no catálogo fixo. */
+  custom?: boolean;
 };
 
 const SERIF = "'Playfair Display', Georgia, 'Times New Roman', serif";

@@ -6,6 +6,7 @@ import { EVENT_TYPES, type EventType } from "@/lib/event-types";
 import { formatEventDate } from "@/lib/format";
 import { EmptyState, FlashFromSearch, PageHeader } from "@/components/ui";
 import { InvitationArt } from "@/components/templates/InvitationArt";
+import { getCustomTemplates } from "@/lib/custom-templates";
 import { formatTime } from "@/lib/format";
 import { ArrowRight, CalendarDays, MapPin } from "lucide-react";
 
@@ -20,6 +21,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     const acc = counts.find((c) => c.eventId === e.id && c.rsvpStatus === "ACCEPTED");
     return { ...e, acceptedCount: acc?._count._all ?? 0, people: (acc?._count._all ?? 0) + (acc?._sum.companions ?? 0) };
   });
+  // Metas dos templates personalizados usados pelos eventos (os do catálogo fixo resolvem-se sozinhos).
+  const customById = new Map((await getCustomTemplates()).map((t) => [t.id, t]));
 
   return (
     <>
@@ -39,7 +42,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             return (
               <Link key={e.id} href={`/dashboard/events/${e.id}`} className="grid overflow-hidden rounded-3xl bg-white shadow-[0_2px_24px_rgba(84,27,56,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(84,27,56,0.14)] sm:grid-cols-[40%_60%]">
                 <div className="hidden sm:block">
-                  <InvitationArt templateId={e.templateId} kicker={t?.label ?? "Evento"} names={e.hostNames} dateLabel={formatEventDate(e.date, false, e.timezone)} placeLabel={e.venueName} coverImageUrl={e.coverImageUrl} small className="h-full rounded-none" style={{ aspectRatio: "3 / 5" }} />
+                  <InvitationArt templateId={e.templateId} template={customById.get(e.templateId)} kicker={t?.label ?? "Evento"} names={e.hostNames} dateLabel={formatEventDate(e.date, false, e.timezone)} placeLabel={e.venueName} coverImageUrl={e.coverImageUrl} small className="h-full rounded-none" style={{ aspectRatio: "3 / 5" }} />
                 </div>
                 <div className="p-6">
                   <div className="flex items-center justify-between gap-2">

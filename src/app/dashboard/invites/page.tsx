@@ -43,7 +43,7 @@ export default async function InvitesPage({ searchParams }: { searchParams: Prom
                     <Link href={`/dashboard/events/new?template=${t.id}&type=${kind}`} className="relative block overflow-hidden rounded-3xl shadow-[0_2px_24px_rgba(84,27,56,0.08)] transition group-hover:-translate-y-1 group-hover:shadow-[0_12px_32px_rgba(84,27,56,0.16)]">
                       {t.premium && <PremiumPill className="absolute left-3 top-3 z-10 shadow-sm" />}
                       {t.collection === "2026" ? (
-                        <InvitationArt templateId={t.id} kicker={EVENT_TYPES[kind].label} names={t.sample.names} dateLabel="12 de dezembro de 2026" placeLabel="O seu local · 16:00" caption={t.sample.caption} className="rounded-none" />
+                        <InvitationArt templateId={t.id} template={t} kicker={EVENT_TYPES[kind].label} names={t.sample.names} dateLabel="12 de dezembro de 2026" placeLabel="O seu local · 16:00" caption={t.sample.caption} className="rounded-none" />
                       ) : (
                         <div className="flex aspect-[4/5] flex-col items-center justify-center p-4 text-center" style={{ background: t.colors.bg, color: t.colors.text }}>
                           <span className="text-xs uppercase tracking-[0.2em] opacity-70">{EVENT_TYPES[kind].label}</span>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TEMPLATES } from "@/lib/templates";
+import { getCustomTemplate } from "@/lib/custom-templates";
 import { Invite, sampleEventForTemplate } from "@/components/templates";
 import { DetailsSection, PartySection, ProgramSection, StorySection } from "@/components/invite/Sections";
 
@@ -10,9 +11,9 @@ export function generateStaticParams() {
 
 export default async function TemplatePreviewPage({ params }: { params: Promise<{ templateId: string }> }) {
   const { templateId } = await params;
-  const meta = TEMPLATES.find((t) => t.id === templateId);
+  const meta = TEMPLATES.find((t) => t.id === templateId) ?? (await getCustomTemplate(templateId));
   if (!meta) notFound();
-  const event = sampleEventForTemplate(templateId);
+  const event = sampleEventForTemplate(templateId, meta);
   return (
     <>
       <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b border-stone-200 bg-white/90 px-4 py-2 text-sm backdrop-blur">
@@ -24,7 +25,7 @@ export default async function TemplatePreviewPage({ params }: { params: Promise<
           <Link href="/register" className="btn-primary btn-sm">Usar este template</Link>
         </div>
       </div>
-      <Invite event={event} guestName="Convidado Exemplo">
+      <Invite event={event} guestName="Convidado Exemplo" template={meta}>
         <DetailsSection event={event} />
         <StorySection
           title="A nossa história"
