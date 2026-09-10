@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-joy-sun font-display text-lg text-brand-800">{user.name.charAt(0).toUpperCase()}</div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{user.name}</p>
-            <Link href="/dashboard" className="block text-xs text-white/70 hover:underline">Voltar ao painel</Link>
+            <p className="block text-xs text-white/70">Administrador da plataforma</p>
           </div>
           <form action={logoutAction}>
             <button className="flex h-9 w-9 items-center justify-center rounded-full text-white/80 hover:bg-white/10" title="Terminar sessão" aria-label="Terminar sessão"><LogOut className="h-4 w-4" aria-hidden /></button>

@@ -12,10 +12,13 @@ export function isAdmin(user: Pick<User, "email" | "role"> | null | undefined): 
   return user.role === "ADMIN" || envAdmins().has(user.email.toLowerCase());
 }
 
-/** Usado nas páginas e ações de /admin: utilizador autenticado com papel de administrador. */
+/**
+ * Usado nas páginas e ações de /admin: utilizador autenticado com papel de administrador.
+ * A administração tem uma entrada própria (/admin-login), separada da conta cliente —
+ * quem não é administrador é sempre reencaminhado para lá, nunca para o painel do cliente.
+ */
 export async function requireAdmin() {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
-  if (!isAdmin(user)) redirect("/dashboard");
-  return user;
+  if (!isAdmin(user)) redirect("/admin-login");
+  return user!;
 }
