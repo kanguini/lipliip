@@ -9,7 +9,7 @@ import { CalendarHeart, Mail, UserRound } from "lucide-react";
 const ITEMS = [
   { href: "/dashboard/invites", label: "Convites digitais", icon: Mail, mobileOnly: false },
   { href: "/dashboard", label: "Eventos", icon: CalendarHeart, mobileOnly: false },
-  { href: "/dashboard/account", label: "A minha conta", icon: UserRound, mobileOnly: true },
+  { href: "/dashboard/account", label: "A sua conta", icon: UserRound, mobileOnly: true },
 ];
 
 export function DashboardNav() {

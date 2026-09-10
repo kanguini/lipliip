@@ -11,7 +11,7 @@ export function TopBar({ name, unread, items }: { name: string; unread: number; 
         <SearchBox />
         <div className="ml-auto flex items-center gap-2">
           <NotificationsBell unread={unread} items={items} />
-          <Link href="/dashboard/account" className="flex h-10 w-10 items-center justify-center rounded-full bg-joy-sun font-display text-lg text-brand-800 transition hover:ring-4 hover:ring-brand-100" aria-label="A minha conta" title={name}>
+          <Link href="/dashboard/account" className="flex h-10 w-10 items-center justify-center rounded-full bg-joy-sun font-display text-lg text-brand-800 transition hover:ring-4 hover:ring-brand-100" aria-label="A sua conta" title={name}>
             {name.charAt(0).toUpperCase()}
           </Link>
         </div>

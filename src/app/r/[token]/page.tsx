@@ -5,7 +5,7 @@ import { receptionAccess } from "@/lib/reception";
 import { matchesGuestQuery } from "@/lib/checkin";
 import { formatEventDate, formatTime } from "@/lib/format";
 import { receptionCheckinAction, receptionLogoutAction, receptionPinAction, receptionRequestDoneAction, receptionToggleCheckinAction } from "@/app/dashboard/reception-actions";
-import { FlashFromSearch, StatCard } from "@/components/ui";
+import { Badge, FlashFromSearch, StatCard } from "@/components/ui";
 import { SubmitButton } from "@/components/dashboard/SubmitButton";
 import { AutoRefresh } from "@/components/dashboard/AutoRefresh";
 import { RequestKindBadge } from "@/components/dashboard/RequestKindBadge";
@@ -96,7 +96,7 @@ export default async function ReceptionPage({ params, searchParams }: { params: 
             <CheckinForm action={receptionCheckinAction.bind(null, token)} />
           </div>
           <div className="card">
-            <h2 className="font-semibold">Pedidos dos convidados {openRequests.length > 0 && <span className="badge ml-1 bg-[#fff1d6] text-[#8b6b2d]">{openRequests.length} por atender</span>}</h2>
+            <h2 className="font-semibold">Pedidos dos convidados {openRequests.length > 0 && <Badge tone="pending" className="ml-1">{openRequests.length} por atender</Badge>}</h2>
             {openRequests.length === 0 && doneRequests.length === 0 ? (
               <p className="mt-2 text-sm text-muted">Sem pedidos por agora. Os convidados pedem comida, bebida ou música a partir do convite.</p>
             ) : (
@@ -145,7 +145,7 @@ export default async function ReceptionPage({ params, searchParams }: { params: 
                 <div className="min-w-0">
                   <span className={g.checkedInAt ? "inline-flex items-center gap-1 font-medium text-emerald-700" : "font-medium"}>{g.checkedInAt ? <CheckCircle2 className="h-4 w-4" aria-hidden /> : null}{g.name}</span>
                   <span className="ml-2 font-mono text-xs text-stone-400">{g.checkinCode}</span>
-                  <span className="ml-2 text-xs text-stone-500">
+                  <span className="ml-2 text-xs text-muted">
                     {g.checkedInAt ? `entrou às ${formatTime(g.checkedInAt, tz)}` : g.suspendedAt ? "suspenso" : g.rsvpStatus === "ACCEPTED" ? `confirmado${g.companions ? ` +${g.companions}` : ""}` : g.rsvpStatus === "DECLINED" ? "não vinha" : "sem resposta"}
                     {g.tableNumber ? ` · mesa ${g.tableNumber}` : ""}
                   </span>

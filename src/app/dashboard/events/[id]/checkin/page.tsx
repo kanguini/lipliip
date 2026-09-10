@@ -37,7 +37,7 @@ export default async function CheckinPage({ params, searchParams }: { params: Pr
         <div className="space-y-6">
           <div className="card space-y-4">
             <h2 className="font-semibold">Validar entrada</h2>
-            <p className="text-sm text-stone-500">Leia o QR do convite ou escreva o código de 6 caracteres que aparece no convite do convidado.</p>
+            <p className="text-sm text-muted">Leia o QR do convite ou escreva o código de 6 caracteres que aparece no convite do convidado.</p>
             <FlashFromSearch {...sp} />
             <CheckinForm action={checkinAction.bind(null, id)} />
           </div>
@@ -89,7 +89,7 @@ export default async function CheckinPage({ params, searchParams }: { params: Pr
                 <div>
                   <span className={g.checkedInAt ? "inline-flex items-center gap-1 font-medium text-emerald-700" : "font-medium"}>{g.checkedInAt ? <CheckCircle2 className="h-4 w-4" aria-hidden /> : null}{g.name}</span>
                   <span className="ml-2 font-mono text-xs text-stone-400">{g.checkinCode}</span>
-                  <span className="ml-2 text-xs text-stone-500">
+                  <span className="ml-2 text-xs text-muted">
                     {g.suspendedAt ? "suspenso" : g.rsvpStatus === "ACCEPTED" ? `confirmado${g.companions ? ` +${g.companions}` : ""}` : g.rsvpStatus === "DECLINED" ? "não vinha" : "sem resposta"}
                     {g.tableNumber ? ` · mesa ${g.tableNumber}` : ""}
                   </span>

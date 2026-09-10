@@ -5,6 +5,7 @@ import { DashboardNav } from "./nav";
 import { Quotes } from "@/components/dashboard/Quotes";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { loadNotifications } from "./notifications/data";
+import { Avatar } from "@/components/ui";
 import { LogOut } from "lucide-react";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -24,10 +25,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Quotes />
         </div>
         <div className="hidden items-center gap-3 px-6 py-5 lg:flex">
-          <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-joy-sun font-display text-lg text-brand-800">{user.name.charAt(0).toUpperCase()}</div>
+          <Avatar name={user.name} />
           <div className="min-w-0 flex-1">
             <Link href="/dashboard/account" className="block truncate text-sm font-semibold hover:underline">{user.name}</Link>
-            <span className="block text-xs text-muted">A minha conta</span>
+            <span className="block text-xs text-muted">A sua conta</span>
           </div>
           <form action={logoutAction}>
             <button className="flex h-9 w-9 items-center justify-center rounded-full text-brand-700 hover:bg-brand-100" title="Terminar sessão" aria-label="Terminar sessão"><LogOut className="h-4 w-4" aria-hidden /></button>

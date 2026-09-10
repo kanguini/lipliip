@@ -3,14 +3,14 @@ import { FlashFromSearch, PageHeader } from "@/components/ui";
 import { changePasswordAction, updateProfileAction } from "./actions";
 import { SubmitButton } from "@/components/dashboard/SubmitButton";
 
-export const metadata = { title: "A minha conta" };
+export const metadata = { title: "A sua conta" };
 
 export default async function AccountPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
   const user = await requireUser();
   const sp = await searchParams;
   return (
     <>
-      <PageHeader title="A minha conta" subtitle={user.email} />
+      <PageHeader title="A sua conta" subtitle={user.email} />
       <FlashFromSearch {...sp} />
       <div className="grid gap-6 lg:grid-cols-2">
         <form action={updateProfileAction} className="card space-y-3">

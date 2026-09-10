@@ -113,7 +113,7 @@ export default async function HomePage() {
               <li key={t} className="card">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-joy-sun font-display text-lg text-brand-800">{i + 1}</span>
                 <p className="mt-3 font-semibold">{t}</p>
-                <p className="mt-1 text-sm text-stone-500">{d}</p>
+                <p className="mt-1 text-sm text-muted">{d}</p>
               </li>
             ))}
           </ol>
@@ -129,7 +129,7 @@ export default async function HomePage() {
               <div key={f.title} className="card">
                 <span className="icon-circle bg-brand-100 text-brand-700"><f.icon className="h-5 w-5" strokeWidth={1.5} aria-hidden /></span>
                 <p className="mt-3 font-semibold">{f.title}</p>
-                <p className="mt-1 text-sm text-stone-500">{f.text}</p>
+                <p className="mt-1 text-sm text-muted">{f.text}</p>
               </div>
             ))}
           </div>

@@ -109,7 +109,7 @@ export default async function SuppliersDirectoryPage({ searchParams }: { searchP
         {suppliers.length === 0 ? (
           <div className="card flex flex-col items-center py-14 text-center">
             <p className="font-display text-2xl">Ainda não temos fornecedores aqui</p>
-            <p className="mt-1 max-w-md text-sm text-stone-500">Experimente outra categoria ou província. Estamos a acrescentar fornecedores todas as semanas.</p>
+            <p className="mt-1 max-w-md text-sm text-muted">Experimente outra categoria ou província. Estamos a acrescentar fornecedores todas as semanas.</p>
             {hasFilters && <Link href="/fornecedores" className="btn-secondary mt-4">Ver todos</Link>}
           </div>
         ) : (
@@ -138,7 +138,7 @@ export default async function SuppliersDirectoryPage({ searchParams }: { searchP
                       <span className="text-[0.65rem] uppercase tracking-[0.12em] text-brand-500">{supplierCategoryLabel(s.category)}</span>
                       <p className="font-display mt-1 text-xl leading-snug text-ink group-hover:text-brand-700">{s.name}</p>
                       {location && <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted"><MapPin className="h-3.5 w-3.5 text-brand-500" strokeWidth={1.75} aria-hidden />{location}</p>}
-                      {s.description && <p className="mt-3 text-sm leading-relaxed text-stone-500">{supplierExcerpt(s.description)}</p>}
+                      {s.description && <p className="mt-3 text-sm leading-relaxed text-muted">{supplierExcerpt(s.description)}</p>}
                       <span className="mt-auto pt-4 text-sm font-semibold text-brand-700">Ver detalhes e pedir orçamento</span>
                     </div>
                   </Link>

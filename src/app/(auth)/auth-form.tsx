@@ -14,7 +14,7 @@ export function AuthForm({ mode, notice }: { mode: "login" | "register"; notice?
         <Link href="/" className="wordmark block text-center text-4xl" aria-label="Liplip">liplip<span>.</span></Link>
         <div className="card mt-6">
           <h1 className="text-xl font-semibold">{mode === "login" ? "Entrar" : "Criar conta"}</h1>
-          <p className="mt-1 text-sm text-stone-500">
+          <p className="mt-1 text-sm text-muted">
             {mode === "login" ? "Bem-vindo de volta." : "Comece a criar os seus convites em segundos."}
           </p>
           {notice && <p className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">{notice}</p>}
@@ -42,13 +42,13 @@ export function AuthForm({ mode, notice }: { mode: "login" | "register"; notice?
               />
             </div>
             {state.error && <p className="text-sm text-red-700" role="alert">{state.error}</p>}
-            {mode === "login" && <p className="text-right text-xs"><Link href="/forgot" className="text-stone-500 underline">Esqueceu-se da palavra-passe?</Link></p>}
+            {mode === "login" && <p className="text-right text-xs"><Link href="/forgot" className="text-muted underline">Esqueceu-se da palavra-passe?</Link></p>}
             <button className="btn-primary w-full" disabled={pending}>
               {pending ? "Aguarde…" : mode === "login" ? "Entrar" : "Criar conta"}
             </button>
           </form>
         </div>
-        <p className="mt-4 text-center text-sm text-stone-500">
+        <p className="mt-4 text-center text-sm text-muted">
           {mode === "login" ? (
             <>Ainda não tem conta? <Link href="/register" className="text-brand-700 underline">Criar conta</Link></>
           ) : (

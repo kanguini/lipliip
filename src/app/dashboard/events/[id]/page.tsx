@@ -5,7 +5,7 @@ import { formatEventDate, formatMoney, formatTime } from "@/lib/format";
 import { calendarDaysUntil } from "@/lib/timezone";
 import { isSmsConfigured } from "@/lib/sms";
 import { EVENT_TYPES, type EventType } from "@/lib/event-types";
-import { FlashFromSearch } from "@/components/ui";
+import { Alert, FlashFromSearch } from "@/components/ui";
 import { InvitationArt } from "@/components/templates/InvitationArt";
 import { resolveTemplateMeta } from "@/lib/templates-settings";
 import { planForEvent } from "@/lib/platform";
@@ -61,9 +61,11 @@ export default async function EventOverviewPage({ params, searchParams }: { para
     <>
       <FlashFromSearch {...sp} />
       {event.verificationRequired && !isSmsConfigured() && guests.length > 0 && (
-        <div className="mb-6 rounded-3xl bg-joy-sun/30 p-5 text-sm text-brand-900">
-          <p className="font-semibold">Envio de SMS ainda não configurado</p>
-          <p className="mt-1">Os códigos de validação ficam nos registos do servidor. Configure a Twilio ou desative a validação por SMS em <Link href={`/dashboard/events/${id}/settings`} className="underline">Definições</Link> enquanto testa.</p>
+        <div className="mb-6">
+          <Alert kind="warn">
+            <p className="font-semibold">Envio de SMS ainda não configurado</p>
+            <p className="mt-1">Os códigos de validação ficam nos registos do servidor. Configure a Twilio ou desative a validação por SMS em <Link href={`/dashboard/events/${id}/settings`} className="underline">Definições</Link> enquanto testa.</p>
+          </Alert>
         </div>
       )}
 

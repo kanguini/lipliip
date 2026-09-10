@@ -20,33 +20,33 @@ export default async function TablesPage({ params }: { params: Promise<{ id: str
     <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
       <div className="card">
         <h2 className="font-semibold">Sem mesa ({unassigned.length})</h2>
-        <p className="mt-1 text-xs text-stone-500">Escreva o número ou nome da mesa e carregue Enter. Convidados que disseram que não vão não aparecem aqui.</p>
+        <p className="mt-1 text-xs text-muted">Escreva o número ou nome da mesa e carregue Enter. Convidados que disseram que não vão não aparecem aqui.</p>
         <ul className="mt-3 divide-y divide-stone-100 text-sm">
           {unassigned.map((g) => (
             <li key={g.id} className="flex items-center justify-between gap-2 py-2">
-              <span>{g.name}{g.rsvpStatus === "ACCEPTED" && g.companions > 0 ? <span className="text-stone-500"> +{g.companions}</span> : null}{g.rsvpStatus === "PENDING" && <span className="ml-1 text-xs text-amber-700">(sem resposta)</span>}</span>
+              <span>{g.name}{g.rsvpStatus === "ACCEPTED" && g.companions > 0 ? <span className="text-muted"> +{g.companions}</span> : null}{g.rsvpStatus === "PENDING" && <span className="ml-1 text-xs text-amber-700">(sem resposta)</span>}</span>
               <form action={assignTableAction.bind(null, id)}>
                 <input type="hidden" name="guestId" value={g.id} />
                 <input name="tableNumber" className="input w-24 py-1 text-xs" placeholder="Mesa" list="table-names" />
               </form>
             </li>
           ))}
-          {unassigned.length === 0 && <li className="py-2 text-stone-500">Todos têm mesa.</li>}
+          {unassigned.length === 0 && <li className="py-2 text-muted">Todos têm mesa.</li>}
         </ul>
         <datalist id="table-names">{assigned.map(([k]) => <option key={k} value={k} />)}</datalist>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        {assigned.length === 0 && <p className="card text-sm text-stone-500">Ainda não há mesas atribuídas.</p>}
+        {assigned.length === 0 && <p className="card text-sm text-muted">Ainda não há mesas atribuídas.</p>}
         {assigned.map(([table, list]) => (
           <div key={table} className="card">
             <div className="flex items-baseline justify-between">
               <h3 className="font-semibold">Mesa {table}</h3>
-              <span className="text-xs text-stone-500">{seats(list)} lugares</span>
+              <span className="text-xs text-muted">{seats(list)} lugares</span>
             </div>
             <ul className="mt-2 space-y-1 text-sm">
               {list.map((g) => (
                 <li key={g.id} className="flex items-center justify-between gap-2">
-                  <span>{g.name}{g.rsvpStatus === "ACCEPTED" && g.companions > 0 ? <span className="text-stone-500"> +{g.companions}</span> : null}</span>
+                  <span>{g.name}{g.rsvpStatus === "ACCEPTED" && g.companions > 0 ? <span className="text-muted"> +{g.companions}</span> : null}</span>
                   <form action={assignTableAction.bind(null, id)}>
                     <input type="hidden" name="guestId" value={g.id} />
                     <input type="hidden" name="tableNumber" value="" />

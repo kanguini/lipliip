@@ -40,7 +40,7 @@ export default async function NotificationsPage() {
         }
       />
       {items.length === 0 ? (
-        <EmptyState title="Nada de novo por agora" description="Quando os convidados responderem, deixarem mensagens, fizerem pedidos ou partilharem fotografias, aparece aqui." action={<Link href="/dashboard" className="btn-primary">Os meus eventos</Link>} />
+        <EmptyState title="Nada de novo por agora" description="Quando os convidados responderem, deixarem mensagens, fizerem pedidos ou partilharem fotografias, aparece aqui." action={<Link href="/dashboard" className="btn-primary">Ver os eventos</Link>} />
       ) : (
         <ul className="space-y-2">
           {items.map((n) => {

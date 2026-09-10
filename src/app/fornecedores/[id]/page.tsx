@@ -56,7 +56,7 @@ export default async function SupplierDetailPage({ params, searchParams }: { par
                 <img src={mediaUrl(supplier.imageMediaId)} alt={supplier.name} className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
-                  <span className="icon-circle h-24 w-24 bg-brand-100 text-brand-700"><SupplierCategoryIcon category={supplier.category} className="h-10 w-10" strokeWidth={1.25} /></span>
+                  <span className="icon-circle h-24 w-24 bg-brand-100 text-brand-700"><SupplierCategoryIcon category={supplier.category} className="h-10 w-10" strokeWidth={1.75} /></span>
                 </div>
               )}
               {supplier.featured && (

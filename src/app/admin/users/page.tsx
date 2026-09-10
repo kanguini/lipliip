@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { isAdmin, requireAdmin } from "@/lib/admin";
 import { formatDateTimeShort } from "@/lib/format";
 import { setUserRoleAction, toggleSuspendUserAction } from "@/app/admin/actions";
-import { EmptyState, FlashFromSearch, PageHeader } from "@/components/ui";
+import { Badge, EmptyState, FlashFromSearch, PageHeader } from "@/components/ui";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 import { Search } from "lucide-react";
 
@@ -65,10 +65,10 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
                   <tr key={u.id} className="align-top">
                     <td className="px-5 py-3"><Link href={`/admin/users/${u.id}`} className="font-medium hover:underline">{u.name}</Link>{self && <span className="ml-1 text-xs text-brand-600">(você)</span>}</td>
                     <td className="px-3 py-3 text-muted">{u.email}</td>
-                    <td className="px-3 py-3">{admin ? <span className="badge bg-brand-100 text-brand-700">Admin{u.role !== "ADMIN" ? " (env)" : ""}</span> : <span className="badge bg-[#eeeaee] text-[#6d5e69]">Utilizador</span>}</td>
+                    <td className="px-3 py-3">{admin ? <Badge tone="brand">Admin{u.role !== "ADMIN" ? " (env)" : ""}</Badge> : <Badge tone="muted">Utilizador</Badge>}</td>
                     <td className="px-3 py-3 whitespace-nowrap text-xs text-muted">{formatDateTimeShort(u.createdAt)}</td>
                     <td className="px-3 py-3">{u._count.events}</td>
-                    <td className="px-3 py-3">{u.suspendedAt ? <span className="badge bg-[#f4e8eb] text-[#97596a]">Suspenso</span> : <span className="badge bg-[#e9f2eb] text-[#416c4a]">Ativo</span>}</td>
+                    <td className="px-3 py-3">{u.suspendedAt ? <Badge tone="bad">Suspenso</Badge> : <Badge tone="ok">Ativo</Badge>}</td>
                     <td className="px-5 py-3">
                       {!self && (
                         <div className="flex flex-wrap justify-end gap-1">

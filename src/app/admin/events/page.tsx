@@ -7,7 +7,7 @@ import { eventTypeLabel } from "@/lib/event-types";
 import { getTemplate } from "@/lib/templates";
 import { getCustomTemplates } from "@/lib/custom-templates";
 import { setEventActivationAction } from "@/app/admin/actions";
-import { EmptyState, FlashFromSearch, PageHeader } from "@/components/ui";
+import { Badge, EmptyState, FlashFromSearch, PageHeader } from "@/components/ui";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 import { Search } from "lucide-react";
 
@@ -95,7 +95,7 @@ export default async function AdminEventsPage({ searchParams }: { searchParams: 
                   <td className="px-3 py-3 whitespace-nowrap text-xs">{formatEventDate(e.date, false, e.timezone)} · {formatTime(e.date, e.timezone)}</td>
                   <td className="px-3 py-3"><Link href={`/admin/users/${e.owner.id}`} className="hover:underline">{e.owner.name}</Link><p className="text-xs text-muted">{e.owner.email}</p></td>
                   <td className="px-3 py-3">{e._count.guests}</td>
-                  <td className="px-3 py-3 whitespace-nowrap">{e.activatedAt ? <span className="badge bg-[#e9f2eb] text-[#416c4a]" title={formatDateTimeShort(e.activatedAt)}>Sim · {formatDateTimeShort(e.activatedAt)}</span> : <span className="badge bg-[#f8f0de] text-[#8b6b2d]">Não</span>}</td>
+                  <td className="px-3 py-3 whitespace-nowrap">{e.activatedAt ? <Badge tone="ok"><span title={formatDateTimeShort(e.activatedAt)}>Sim · {formatDateTimeShort(e.activatedAt)}</span></Badge> : <Badge tone="pending">Não</Badge>}</td>
                   <td className="px-5 py-3">
                     <div className="flex justify-end">
                       <form action={setEventActivationAction.bind(null, e.id, !e.activatedAt, returnTo)}>

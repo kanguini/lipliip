@@ -8,7 +8,7 @@ import { appUrl } from "@/lib/urls";
 import { eventTypeLabel } from "@/lib/event-types";
 import { ORDER_STATUS_LABEL, ORDER_STATUS_STYLE } from "@/lib/activation";
 import { generateResetLinkAction, setUserRoleAction, toggleSuspendUserAction } from "@/app/admin/actions";
-import { Alert, BackLink, FlashFromSearch, PageHeader, StatCard } from "@/components/ui";
+import { Alert, BackLink, Badge, FlashFromSearch, PageHeader, StatCard } from "@/components/ui";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 import { CopyButton } from "@/components/dashboard/CopyButton";
 import { SubmitButton } from "@/components/dashboard/SubmitButton";
@@ -105,7 +105,7 @@ export default async function AdminUserPage({ params, searchParams }: { params: 
                       <span className="ml-2 text-xs text-muted">{eventTypeLabel(e.type)} · {formatEventDate(e.date, false, e.timezone)} · {e._count.guests} convidados</span>
                     </span>
                     <span className="flex items-center gap-2">
-                      {e.activatedAt ? <span className="badge bg-[#e9f2eb] text-[#416c4a]">Ativado</span> : <span className="badge bg-[#f8f0de] text-[#8b6b2d]">Não ativado</span>}
+                      {e.activatedAt ? <Badge tone="ok">Ativado</Badge> : <Badge tone="pending">Não ativado</Badge>}
                       <Link href={`/admin/events?q=${encodeURIComponent(e.title)}`} className="btn-ghost btn-sm">Ver</Link>
                     </span>
                   </li>

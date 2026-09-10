@@ -91,7 +91,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
           <details className="card" open={false}>
             <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-brand-800"><span>Importar lista</span><span className="icon-circle h-8 w-8 bg-brand-100 text-brand-700"><Plus className="h-4 w-4" aria-hidden /></span></summary>
             <form action={importGuestsAction.bind(null, id)} className="mt-4 space-y-3">
-            <p className="text-xs text-stone-500">Cole uma linha por convidado: <code>Nome; Telefone; Acompanhantes; Grupo</code>. Pode copiar diretamente do Excel.</p>
+            <p className="text-xs text-muted">Cole uma linha por convidado: <code>Nome; Telefone; Acompanhantes; Grupo</code>. Pode copiar diretamente do Excel.</p>
             <textarea name="text" className="input font-mono text-xs" rows={6} placeholder={"Ana Silva; 912345678; 1; Família\nRui Costa; +244923456789; 0; Trabalho"} required />
             <SubmitButton className="btn-secondary w-full" pendingText="A importar…">Importar</SubmitButton>
           </form>
@@ -117,7 +117,7 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
           </div>
 
           {filtered.length === 0 ? (
-            <p className="mt-6 text-center text-sm text-stone-500">Nenhum convidado{q || sp.status ? " corresponde ao filtro" : " ainda"}.</p>
+            <p className="mt-6 text-center text-sm text-muted">Nenhum convidado{q || sp.status ? " corresponde ao filtro" : " ainda"}.</p>
           ) : (
             <ul className="mt-4 divide-y divide-stone-100">
               {filtered.map((g) => {
@@ -129,9 +129,9 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div>
                         <Link href={`/dashboard/events/${id}/guests/${g.id}`} className="font-medium hover:underline">{g.name}</Link>
-                        <span className="ml-2 text-xs text-stone-500">{formatPhone(g.phone)}</span>
+                        <span className="ml-2 text-xs text-muted">{formatPhone(g.phone)}</span>
                         {g.groupName && <span className="badge ml-2 bg-stone-100 text-stone-600">{g.groupName}</span>}
-                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-stone-500">
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted">
                           <RsvpBadge status={g.suspendedAt ? "SUSPENDED" : g.rsvpStatus} />
                           {g.rsvpStatus === "ACCEPTED" && g.maxCompanions > 0 && <span>+{g.companions} de {g.maxCompanions}</span>}
                           <span>{g.sentAt ? `enviado (${g.sentVia ?? "?"})` : "não enviado"}</span>
@@ -167,14 +167,14 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
               <ul className="mt-3 space-y-2 text-sm">
                 {pendingSent.map((g) => (
                   <li key={g.id} className="flex items-center justify-between gap-2">
-                    <span>{g.name}{g.firstOpenedAt ? <span className="text-xs text-stone-500"> · abriu {g.openCount}×</span> : <span className="text-xs text-stone-500"> · nunca abriu</span>}</span>
+                    <span>{g.name}{g.firstOpenedAt ? <span className="text-xs text-muted"> · abriu {g.openCount}×</span> : <span className="text-xs text-muted"> · nunca abriu</span>}</span>
                     <a href={`https://wa.me/${phoneForWhatsApp(g.phone)}?text=${encodeURIComponent(reminderText(g))}`} target="_blank" rel="noreferrer" className="btn-secondary btn-sm">Lembrar por WhatsApp</a>
                   </li>
                 ))}
               </ul>
             </details>
           )}
-          <p className="mt-4 text-xs text-stone-500">
+          <p className="mt-4 text-xs text-muted">
             {!plan.canShare && "Os convidados só conseguem abrir o convite depois de o evento ser ativado. "}Dica: o botão WhatsApp abre a conversa com a mensagem e o link pessoal já escritos. Depois de enviar, marque como enviado. O link só abre depois de o convidado validar o telemóvel.{!smsReady && " O envio direto por SMS fica disponível quando configurar um fornecedor de SMS."}
           </p>
         </div>

@@ -22,7 +22,7 @@ export function ResetForm({ token }: { token: string }) {
             <button className="btn-primary w-full" disabled={pending}>{pending ? "A guardar…" : "Guardar"}</button>
           </form>
         </div>
-        <p className="mt-4 text-center text-sm text-stone-500"><Link href="/forgot" className="text-brand-700 underline">Pedir novo link</Link></p>
+        <p className="mt-4 text-center text-sm text-muted"><Link href="/forgot" className="text-brand-700 underline">Pedir novo link</Link></p>
       </div>
     </main>
   );

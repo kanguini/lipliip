@@ -5,7 +5,7 @@ import { calendarDaysUntil } from "@/lib/timezone";
 import { addTaskAction, deleteTaskAction, generateChecklistAction, toggleTaskAction } from "@/app/dashboard/planner-actions";
 import Link from "next/link";
 import { planForEvent } from "@/lib/platform";
-import { Alert, FlashFromSearch, StatCard } from "@/components/ui";
+import { Alert, FilterPills, FlashFromSearch, StatCard } from "@/components/ui";
 import { Check, UserRound, X, Plus } from "lucide-react";
 import { SubmitButton } from "@/components/dashboard/SubmitButton";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
@@ -60,11 +60,7 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
         <div className="card">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="font-semibold">Tarefas</h2>
-            <div className="flex gap-1 text-xs">
-              {[["", "Por fazer"], ["done", "Feitas"], ["all", "Todas"]].map(([v, l]) => (
-                <a key={v} href={`?show=${v}`} className={`rounded-full px-3 py-1 ${(sp.show ?? "") === v ? "bg-brand-100 text-brand-700" : "text-muted hover:bg-brand-50"}`}>{l}</a>
-              ))}
-            </div>
+            <FilterPills param="show" active={sp.show ?? ""} options={[["", "Por fazer"], ["done", "Feitas"], ["all", "Todas"]]} />
           </div>
           {list.length === 0 ? (
             <p className="mt-6 text-center text-sm text-muted">{sp.show === "done" ? "Ainda não há tarefas concluídas." : "Nada por fazer."}</p>

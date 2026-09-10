@@ -67,7 +67,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
 
           <div className="card space-y-3">
             <h2 className="font-semibold">Resposta</h2>
-            <p className="text-sm"><RsvpBadge status={guest.suspendedAt ? "SUSPENDED" : guest.rsvpStatus} />{guest.respondedAt && <span className="ml-2 text-stone-500">em {formatDateTimeShort(guest.respondedAt, tz)}</span>}</p>
+            <p className="text-sm"><RsvpBadge status={guest.suspendedAt ? "SUSPENDED" : guest.rsvpStatus} />{guest.respondedAt && <span className="ml-2 text-muted">em {formatDateTimeShort(guest.respondedAt, tz)}</span>}</p>
             {guest.rsvpStatus === "ACCEPTED" && (
               <ul className="text-sm text-stone-700">
                 <li>Acompanhantes: {guest.companions}{guest.companionNames ? ` (${guest.companionNames})` : ""}</li>
@@ -97,7 +97,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
               <form action={toggleSuspendAction.bind(null, guest.id, null)}>{guest.suspendedAt ? <button className="btn-secondary btn-sm">Reativar convite</button> : <ConfirmButton className="btn-secondary btn-sm" message={`Suspender o convite de ${guest.name}? O acesso é cortado e as reservas de presentes são libertadas.`}>Suspender convite</ConfirmButton>}</form>
               <form action={regenerateTokenAction.bind(null, guest.id)}><ConfirmButton message="O link atual deixa de funcionar e terá de enviar o novo link ao convidado. Continuar?">Revogar e gerar novo link</ConfirmButton></form>
             </div>
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-muted">
               Código de entrada: <span className="font-mono font-semibold">{guest.checkinCode}</span> · Telemóvel validado: {guest.verifiedAt ? formatDateTimeShort(guest.verifiedAt, tz) : "não"} · Aberto {guest.openCount}×
             </p>
             {suspicious && (
@@ -108,7 +108,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
             <div>
               <p className="text-sm font-medium">Dispositivos autorizados ({guest.devices.length})</p>
               {guest.devices.length === 0 ? (
-                <p className="text-xs text-stone-500">Nenhum.</p>
+                <p className="text-xs text-muted">Nenhum.</p>
               ) : (
                 <ul className="mt-1 space-y-1 text-xs text-stone-600">
                   {guest.devices.map((d) => <li key={d.id}>{formatDateTimeShort(d.createdAt, tz)} · {d.userAgent?.slice(0, 80) ?? "?"}</li>)}
@@ -120,7 +120,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
           <div className="card">
             <h2 className="font-semibold">Histórico de acessos</h2>
             {guest.accessLogs.length === 0 ? (
-              <p className="mt-2 text-sm text-stone-500">Sem registos.</p>
+              <p className="mt-2 text-sm text-muted">Sem registos.</p>
             ) : (
               <ul className="mt-2 space-y-1 text-xs">
                 {guest.accessLogs.map((l) => (

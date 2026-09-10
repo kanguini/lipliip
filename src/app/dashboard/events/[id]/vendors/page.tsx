@@ -5,16 +5,16 @@ import { formatMoney } from "@/lib/format";
 import { BUDGET_CATEGORIES, VENDOR_STATUS } from "@/lib/checklists";
 import { addVendorAction, deleteVendorAction, updateVendorAction } from "@/app/dashboard/planner-actions";
 import { planForEvent } from "@/lib/platform";
-import { Alert, FlashFromSearch } from "@/components/ui";
+import { Alert, Badge, FlashFromSearch, type BadgeTone } from "@/components/ui";
 import { ArrowUpRight, Plus } from "lucide-react";
 import { SubmitButton } from "@/components/dashboard/SubmitButton";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 
-const STATUS_STYLE: Record<string, string> = {
-  CONTACTING: "bg-[#f8f0de] text-[#8b6b2d]",
-  PROPOSAL: "bg-[#e6eef8] text-[#2f4f7a]",
-  HIRED: "bg-[#e9f2eb] text-[#416c4a]",
-  REJECTED: "bg-[#eeeaee] text-[#6d5e69]",
+const STATUS_TONE: Record<string, BadgeTone> = {
+  CONTACTING: "pending",
+  PROPOSAL: "info",
+  HIRED: "ok",
+  REJECTED: "muted",
 };
 
 export default async function VendorsPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
@@ -64,7 +64,7 @@ export default async function VendorsPage({ params, searchParams }: { params: Pr
                   <li key={v.id} className="py-3">
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="font-medium">{v.name} <span className={`badge ml-1 ${STATUS_STYLE[v.status]}`}>{VENDOR_STATUS[v.status]}</span></p>
+                        <p className="font-medium">{v.name} <Badge tone={STATUS_TONE[v.status] ?? "muted"} className="ml-1">{VENDOR_STATUS[v.status]}</Badge></p>
                         <p className="mt-0.5 text-xs text-muted">
                           {[v.contactName, v.phone, v.email].filter(Boolean).join(" · ")}
                           {v.website && <> · <a href={v.website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 underline">site<ArrowUpRight className="h-3 w-3" aria-hidden /></a></>}

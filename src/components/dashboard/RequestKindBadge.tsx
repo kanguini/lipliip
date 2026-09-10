@@ -2,9 +2,10 @@ import { CupSoda, MessageSquare, Music, UtensilsCrossed } from "lucide-react";
 
 export const REQUEST_KIND_LABELS: Record<string, string> = { FOOD: "Comida", DRINK: "Bebida", MUSIC: "Música", OTHER: "Outro" };
 
+// Cores por tipo de pedido; amarelo e azul alinhados com os tons semânticos de `Badge`.
 const STYLES: Record<string, string> = {
-  FOOD: "bg-[#fff1d6] text-[#8b6b2d]",
-  DRINK: "bg-[#e3f1fb] text-[#2f5d80]",
+  FOOD: "bg-[#f8f0de] text-[#8b6b2d]",
+  DRINK: "bg-[#e6eef8] text-[#2f4f7a]",
   MUSIC: "bg-[#ece5fb] text-[#5b4a8e]",
   OTHER: "bg-brand-100 text-brand-700",
 };

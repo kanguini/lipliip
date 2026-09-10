@@ -27,7 +27,7 @@ export function ForgotForm({ emailConfigured }: { emailConfigured: boolean }) {
             </form>
           )}
         </div>
-        <p className="mt-4 text-center text-sm text-stone-500"><Link href="/login" className="text-brand-700 underline">Voltar ao login</Link></p>
+        <p className="mt-4 text-center text-sm text-muted"><Link href="/login" className="text-brand-700 underline">Voltar ao login</Link></p>
       </div>
     </main>
   );

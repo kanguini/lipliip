@@ -6,7 +6,7 @@ import { mediaUrl } from "@/lib/media";
 import { formatDateTimeShort } from "@/lib/format";
 import { ANGOLA_PROVINCES, SUPPLIER_CATEGORIES, parseSupplierFilters, supplierCategoryLabel, supplierFiltersQuery, supplierLocation } from "@/lib/suppliers";
 import { SupplierCategoryIcon } from "@/components/site/SupplierCategoryIcon";
-import { EmptyState, FlashFromSearch, PageHeader } from "@/components/ui";
+import { Badge, EmptyState, FlashFromSearch, PageHeader } from "@/components/ui";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 import { deleteSupplierAction, toggleSupplierAction } from "../suppliers-actions";
 import { ArrowUpRight, Eye, EyeOff, Pencil, Plus, Search, Star } from "lucide-react";
@@ -97,7 +97,7 @@ export default async function AdminSuppliersPage({ searchParams }: { searchParam
                 <p className="flex flex-wrap items-center gap-2 font-semibold">
                   <Link href={`/admin/suppliers/${s.id}`} className="hover:underline">{s.name}</Link>
                   {s.featured && <span className="badge bg-joy-sun text-brand-800"><Star className="mr-1 h-3 w-3" aria-hidden />Destaque</span>}
-                  {!s.active && <span className="badge bg-[#eeeaee] text-[#6d5e69]">Escondido</span>}
+                  {!s.active && <Badge tone="muted">Escondido</Badge>}
                 </p>
                 <p className="mt-0.5 text-xs text-muted">
                   {supplierCategoryLabel(s.category)}

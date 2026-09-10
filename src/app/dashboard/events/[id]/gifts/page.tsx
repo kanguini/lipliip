@@ -47,7 +47,7 @@ export default async function GiftsPage({ params, searchParams }: { params: Prom
             {totalCash > 0 && <span className="text-sm text-emerald-700">Contribuições: {formatMoney(totalCash, event.currency)}</span>}
           </div>
           {gifts.length === 0 ? (
-            <p className="mt-6 text-center text-sm text-stone-500">Ainda não adicionou presentes. Se preferir só contribuições por IBAN, Multicaixa Express ou MB WAY, preencha-as nas Definições.</p>
+            <p className="mt-6 text-center text-sm text-muted">Ainda não adicionou presentes. Se preferir só contribuições por IBAN, Multicaixa Express ou MB WAY, preencha-as nas Definições.</p>
           ) : (
             <ul className="mt-4 divide-y divide-stone-100">
               {gifts.map((g) => {
@@ -55,8 +55,8 @@ export default async function GiftsPage({ params, searchParams }: { params: Prom
                 return (
                   <li key={g.id} className="flex items-start justify-between gap-3 py-3">
                     <div className="text-sm">
-                      <p className="flex items-center gap-2 font-medium">{g.kind === "CASH" ? <HeartHandshake className="h-4 w-4 text-brand-600" aria-hidden /> : <Gift className="h-4 w-4 text-brand-600" aria-hidden />}{g.name}{g.price != null && <span className="ml-2 text-stone-500">{formatMoney(g.price, event.currency)}</span>}</p>
-                      {g.description && <p className="text-stone-500">{g.description}</p>}
+                      <p className="flex items-center gap-2 font-medium">{g.kind === "CASH" ? <HeartHandshake className="h-4 w-4 text-brand-600" aria-hidden /> : <Gift className="h-4 w-4 text-brand-600" aria-hidden />}{g.name}{g.price != null && <span className="ml-2 text-muted">{formatMoney(g.price, event.currency)}</span>}</p>
+                      {g.description && <p className="text-muted">{g.description}</p>}
                       {g.kind === "CASH" ? (
                         <p className="text-xs text-stone-600">
                           {g.reservations.length} contribuições

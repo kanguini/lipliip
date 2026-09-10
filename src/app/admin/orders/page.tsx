@@ -5,7 +5,7 @@ import { formatDateTimeShort, formatMoney } from "@/lib/format";
 import { mediaUrl } from "@/lib/media";
 import { ORDER_STATUS_LABEL } from "@/lib/activation";
 import { approveOrderAction, rejectOrderAction } from "@/app/admin/actions";
-import { EmptyState, FlashFromSearch, PageHeader } from "@/components/ui";
+import { Badge, EmptyState, FlashFromSearch, PageHeader } from "@/components/ui";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 import { FileText } from "lucide-react";
 
@@ -106,7 +106,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                         )}
                       </div>
                     )}
-                    {o.status === "APPROVED" && <span className="badge bg-[#e9f2eb] text-[#416c4a]">{ORDER_STATUS_LABEL.APPROVED}</span>}
+                    {o.status === "APPROVED" && <Badge tone="ok">{ORDER_STATUS_LABEL.APPROVED}</Badge>}
                   </td>
                 </tr>
               ))}

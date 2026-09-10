@@ -4,16 +4,16 @@ import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin";
 import { formatDateTimeShort } from "@/lib/format";
 import { supplierCategoryLabel, supplierWhatsappUrl } from "@/lib/suppliers";
-import { EmptyState, FlashFromSearch, PageHeader } from "@/components/ui";
+import { Badge, EmptyState, FlashFromSearch, PageHeader } from "@/components/ui";
 import { setServiceRequestStatusAction } from "../suppliers-actions";
 import { Check, MessageCircle, Phone, RotateCcw } from "lucide-react";
 
 export const metadata = { title: "Pedidos de serviços" };
 
 const STATUSES = [
-  { id: "NEW", label: "Novo", badge: "bg-[#f8f0de] text-[#8b6b2d]" },
-  { id: "CONTACTED", label: "Contactado", badge: "bg-[#e6eef8] text-[#2f4f7a]" },
-  { id: "CLOSED", label: "Fechado", badge: "bg-[#e9f2eb] text-[#416c4a]" },
+  { id: "NEW", label: "Novo", tone: "pending" },
+  { id: "CONTACTED", label: "Contactado", tone: "info" },
+  { id: "CLOSED", label: "Fechado", tone: "ok" },
 ] as const;
 
 export default async function ServiceRequestsPage({ searchParams }: { searchParams: Promise<{ status?: string; supplier?: string; ok?: string; error?: string }> }) {
@@ -72,7 +72,7 @@ export default async function ServiceRequestsPage({ searchParams }: { searchPara
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="flex flex-wrap items-center gap-2">
-                      <span className={`badge ${st.badge}`}>{st.label}</span>
+                      <Badge tone={st.tone}>{st.label}</Badge>
                       <span className="text-xs text-muted">{formatDateTimeShort(r.createdAt, "Africa/Luanda")}</span>
                     </p>
                     <p className="mt-2 font-semibold">

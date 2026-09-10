@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { requireEventAccess } from "@/lib/access";
 import { addMemberAction, leaveEventAction, removeMemberAction } from "@/app/dashboard/planner-actions";
-import { FlashFromSearch } from "@/components/ui";
+import { Badge, FlashFromSearch } from "@/components/ui";
 import { SubmitButton } from "@/components/dashboard/SubmitButton";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 
@@ -44,13 +44,13 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
           <ul className="mt-3 divide-y divide-brand-100 text-sm">
             <li className="flex items-center justify-between py-2">
               <span><strong>{owner?.name}</strong> <span className="text-xs text-muted">{owner?.email}</span></span>
-              <span className="badge bg-brand-100 text-brand-700">Dono</span>
+              <Badge tone="brand">Dono</Badge>
             </li>
             {members.map((m) => (
               <li key={m.id} className="flex items-center justify-between gap-2 py-2">
                 <span><strong>{m.user.name}</strong> <span className="text-xs text-muted">{m.user.email}</span>{m.userId === user.id && <span className="text-xs text-brand-700"> (você)</span>}</span>
                 <span className="flex items-center gap-2">
-                  <span className="badge bg-[#eeeaee] text-[#6d5e69]">{m.role === "STAFF" ? "Receção" : "Editor"}</span>
+                  <Badge tone="muted">{m.role === "STAFF" ? "Receção" : "Editor"}</Badge>
                   {role === "OWNER" && <form action={removeMemberAction.bind(null, id, m.id)}><ConfirmButton className="text-xs text-muted hover:text-red-700" message={`Retirar o acesso de ${m.user.name} a este evento?`}>remover</ConfirmButton></form>}
                 </span>
               </li>
