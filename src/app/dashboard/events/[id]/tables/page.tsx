@@ -50,7 +50,7 @@ export default async function TablesPage({ params }: { params: Promise<{ id: str
                   <form action={assignTableAction.bind(null, id)}>
                     <input type="hidden" name="guestId" value={g.id} />
                     <input type="hidden" name="tableNumber" value="" />
-                    <button className="text-[#a1939c] hover:text-red-700" title="Tirar da mesa" aria-label="Tirar da mesa"><X className="h-3.5 w-3.5" aria-hidden /></button>
+                    <button className="text-muted hover:text-red-700" title="Tirar da mesa" aria-label="Tirar da mesa"><X className="h-3.5 w-3.5" aria-hidden /></button>
                   </form>
                 </li>
               ))}

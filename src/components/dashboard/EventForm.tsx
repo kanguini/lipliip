@@ -18,32 +18,32 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
         <legend>O essencial</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="label">Título do evento</label>
-            <input name="title" className="input" required defaultValue={event?.title ?? ""} placeholder={`Ex: ${t.label} de ${t.hostPlaceholder}`} />
+            <label className="label" htmlFor="ev-title">Título do evento</label>
+            <input id="ev-title" name="title" className="input" required defaultValue={event?.title ?? ""} placeholder={`Ex: ${t.label} de ${t.hostPlaceholder}`} />
           </div>
           <div>
-            <label className="label">{t.hostLabel}</label>
-            <input name="hostNames" className="input" required minLength={1} maxLength={120} defaultValue={event?.hostNames ?? ""} placeholder={t.hostPlaceholder} />
+            <label className="label" htmlFor="ev-hostNames">{t.hostLabel}</label>
+            <input id="ev-hostNames" name="hostNames" className="input" required minLength={1} maxLength={120} defaultValue={event?.hostNames ?? ""} placeholder={t.hostPlaceholder} />
           </div>
           <div>
-            <label className="label">Data e hora de início</label>
-            <input name="date" type="datetime-local" className="input" required defaultValue={event ? dateToLocalInput(event.date, event.timezone) : ""} />
+            <label className="label" htmlFor="ev-date">Data e hora de início</label>
+            <input id="ev-date" name="date" type="datetime-local" className="input" required defaultValue={event ? dateToLocalInput(event.date, event.timezone) : ""} />
           </div>
           <div>
-            <label className="label">Hora de fim (opcional)</label>
-            <input name="endTime" className="input" defaultValue={event?.endTime ?? ""} placeholder="02:00" />
+            <label className="label" htmlFor="ev-endTime">Hora de fim (opcional)</label>
+            <input id="ev-endTime" name="endTime" type="time" className="input" defaultValue={event?.endTime ?? ""} placeholder="02:00" />
           </div>
           <div>
-            <label className="label">Fuso horário do evento</label>
-            <select name="timezone" className="input" defaultValue={event?.timezone ?? DEFAULT_TIMEZONE}>
+            <label className="label" htmlFor="ev-timezone">Fuso horário do evento</label>
+            <select id="ev-timezone" name="timezone" className="input" defaultValue={event?.timezone ?? DEFAULT_TIMEZONE}>
               {TIMEZONES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
             </select>
             <p className="hint">As horas do convite, a contagem decrescente e o calendário usam este fuso.</p>
           </div>
         </div>
         <div>
-          <label className="label">Mensagem de abertura</label>
-          <textarea name="message" className="input" rows={3} defaultValue={event?.message ?? ""} placeholder="Com muita alegria convidamos-te para celebrar connosco…" />
+          <label className="label" htmlFor="ev-message">Mensagem de abertura</label>
+          <textarea id="ev-message" name="message" className="input" rows={3} defaultValue={event?.message ?? ""} placeholder="Com muita alegria convidamos-te para celebrar connosco…" />
         </div>
       </fieldset>
 
@@ -101,12 +101,12 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
             <p className="hint">Números de outros países: escreva com o indicativo, ex.: +351 912 345 678</p>
           </div>
           <div>
-            <label className="label">Prazo para confirmar presença (opcional)</label>
-            <input name="rsvpDeadline" type="date" className="input" defaultValue={event?.rsvpDeadline ? dateToLocalDateInput(event.rsvpDeadline, event.timezone) : ""} />
+            <label className="label" htmlFor="ev-rsvpDeadline">Prazo para confirmar presença (opcional)</label>
+            <input id="ev-rsvpDeadline" name="rsvpDeadline" type="date" className="input" defaultValue={event?.rsvpDeadline ? dateToLocalDateInput(event.rsvpDeadline, event.timezone) : ""} />
           </div>
           <div>
-            <label className="label">Máximo de dispositivos por convidado</label>
-            <input name="maxDevicesPerGuest" type="number" min={1} max={10} className="input" defaultValue={event?.maxDevicesPerGuest ?? 2} />
+            <label className="label" htmlFor="ev-maxDevices">Máximo de dispositivos por convidado</label>
+            <input id="ev-maxDevices" name="maxDevicesPerGuest" type="number" min={1} max={10} className="input" defaultValue={event?.maxDevicesPerGuest ?? 2} />
             <p className="hint">Quantos telemóveis/computadores podem validar o mesmo convite.</p>
           </div>
         </div>
@@ -145,17 +145,17 @@ export function EventDetailsFields({ event, type }: { event?: Event; type: strin
             <p className="hint">Usada nos preços da lista de presentes. Se escolher &ldquo;Outra&rdquo;, escreva o código de 3 letras.</p>
           </div>
           <div>
-            <label className="label">IBAN</label>
-            <input name="contributionIban" className="input" defaultValue={event?.contributionIban ?? ""} />
+            <label className="label" htmlFor="ev-iban">IBAN</label>
+            <input id="ev-iban" name="contributionIban" className="input" defaultValue={event?.contributionIban ?? ""} />
           </div>
           <div>
-            <label className="label">Multicaixa Express / MB WAY (número de telemóvel)</label>
-            <input name="contributionMbway" className="input" defaultValue={event?.contributionMbway ?? ""} />
+            <label className="label" htmlFor="ev-mbway">Multicaixa Express / MB WAY (número de telemóvel)</label>
+            <input id="ev-mbway" name="contributionMbway" className="input" inputMode="tel" defaultValue={event?.contributionMbway ?? ""} />
           </div>
         </div>
         <div>
-          <label className="label">Nota para os convidados</label>
-          <input name="contributionNote" className="input" defaultValue={event?.contributionNote ?? ""} placeholder="Ex: Estamos a juntar para a lua de mel" />
+          <label className="label" htmlFor="ev-contributionNote">Nota para os convidados</label>
+          <input id="ev-contributionNote" name="contributionNote" className="input" defaultValue={event?.contributionNote ?? ""} placeholder="Ex: Estamos a juntar para a lua de mel" />
         </div>
       </fieldset>
     </div>

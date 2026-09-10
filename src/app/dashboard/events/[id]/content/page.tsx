@@ -26,13 +26,13 @@ export default async function ContentPage({ params, searchParams }: { params: Pr
             Deixar os convidados sugerir músicas na confirmação de presença
           </label>
           <div>
-            <label className="label">Música de fundo (link para MP3)</label>
-            <input name="musicUrl" type="url" pattern="https?://.*" title="Tem de começar por http:// ou https://" className="input" defaultValue={event.musicUrl ?? ""} placeholder="https://…/musica.mp3" />
+            <label className="label" htmlFor="ct-musicUrl">Música de fundo (link para MP3)</label>
+            <input id="ct-musicUrl" name="musicUrl" type="url" pattern="https?://.*" title="Tem de começar por http:// ou https://" className="input" defaultValue={event.musicUrl ?? ""} placeholder="https://…/musica.mp3" />
             <p className="hint">Aparece um botão flutuante para tocar/pausar. Use um ficheiro alojado (Dropbox com ?raw=1, Google Drive público, o seu site). Links do Spotify ou YouTube não funcionam como áudio.</p>
           </div>
           <div>
-            <label className="label">Hashtag do evento</label>
-            <input name="hashtag" className="input" defaultValue={event.hashtag ?? ""} placeholder="#AnaEJoao2027" />
+            <label className="label" htmlFor="ct-hashtag">Hashtag do evento</label>
+            <input id="ct-hashtag" name="hashtag" className="input" defaultValue={event.hashtag ?? ""} placeholder="#AnaEJoao2027" />
           </div>
         </fieldset>
 

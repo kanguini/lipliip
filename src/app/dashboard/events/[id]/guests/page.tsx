@@ -55,33 +55,33 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
             <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-brand-800"><span>Adicionar convidado</span><span className="icon-circle h-8 w-8 bg-brand-100 text-brand-700"><Plus className="h-4 w-4" aria-hidden /></span></summary>
             <form action={addGuestAction.bind(null, id)} className="mt-4 space-y-3">
             <div>
-              <label className="label">Nome</label>
-              <input name="name" className="input" required placeholder="Ana Silva" />
+              <label className="label" htmlFor="g-name">Nome</label>
+              <input id="g-name" name="name" className="input" required placeholder="Ana Silva" />
             </div>
             <div>
-              <label className="label">Telemóvel</label>
-              <input name="phone" className="input" required placeholder="912 345 678 ou +244 923 456 789" />
+              <label className="label" htmlFor="g-phone">Telemóvel</label>
+              <input id="g-phone" name="phone" className="input" inputMode="tel" autoComplete="tel" required placeholder="912 345 678 ou +244 923 456 789" />
               <p className="hint">É para este número que será enviado o código de validação.</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="label">Acompanhantes permitidos</label>
-                <input name="maxCompanions" type="number" min={0} max={20} className="input" defaultValue={0} />
+                <label className="label" htmlFor="g-maxCompanions">Acompanhantes permitidos</label>
+                <input id="g-maxCompanions" name="maxCompanions" type="number" min={0} max={20} className="input" defaultValue={0} />
               </div>
               <div>
-                <label className="label">Grupo</label>
-                <input name="groupName" className="input" placeholder="Família, Amigos…" list="groups" />
+                <label className="label" htmlFor="g-groupName">Grupo</label>
+                <input id="g-groupName" name="groupName" className="input" placeholder="Família, Amigos…" list="groups" />
                 <datalist id="groups">
                   {[...new Set(guests.map((g) => g.groupName).filter(Boolean))].map((g) => <option key={g!} value={g!} />)}
                 </datalist>
               </div>
               <div>
-                <label className="label">Mesa (opcional)</label>
-                <input name="tableNumber" className="input" placeholder="12" />
+                <label className="label" htmlFor="g-tableNumber">Mesa (opcional)</label>
+                <input id="g-tableNumber" name="tableNumber" className="input" placeholder="12" />
               </div>
               <div>
-                <label className="label">Email (opcional)</label>
-                <input name="email" type="email" className="input" />
+                <label className="label" htmlFor="g-email">Email (opcional)</label>
+                <input id="g-email" name="email" type="email" className="input" />
               </div>
             </div>
             <SubmitButton className="btn-primary w-full" pendingText="A adicionar…">Adicionar</SubmitButton>
@@ -103,9 +103,9 @@ export default async function GuestsPage({ params, searchParams }: { params: Pro
             <h2 className="font-semibold">{guests.length} convidados</h2>
             <div className="flex flex-wrap gap-2">
             <a href={`/dashboard/events/${id}/guests/export.csv`} className="btn-secondary btn-sm">⬇ Exportar Excel/CSV</a>
-            <form className="flex gap-2">
-              <input name="q" className="input w-40" placeholder="Pesquisar" aria-label="Pesquisar convidados" defaultValue={sp.q ?? ""} />
-              <select name="status" className="input w-36" defaultValue={sp.status ?? ""}>
+            <form className="flex flex-wrap gap-2">
+              <input name="q" className="input w-full min-w-0 sm:w-40" placeholder="Pesquisar" aria-label="Pesquisar convidados" defaultValue={sp.q ?? ""} />
+              <select name="status" className="input min-w-0 flex-1 sm:w-36 sm:flex-none" defaultValue={sp.status ?? ""}>
                 <option value="">Todos</option>
                 <option value="ACCEPTED">Confirmados</option>
                 <option value="DECLINED">Não vão</option>

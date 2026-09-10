@@ -95,7 +95,7 @@ export default async function CheckinPage({ params, searchParams }: { params: Pr
                   </span>
                 </div>
                 <form action={toggleCheckinAction.bind(null, g.id)}>
-                  <button className={g.checkedInAt ? "btn-ghost btn-sm" : "btn-secondary btn-sm"}>{g.checkedInAt ? "Anular" : "Entrou"}</button>
+                  <SubmitButton className={g.checkedInAt ? "btn-ghost btn-sm" : "btn-secondary btn-sm"} pendingText="…">{g.checkedInAt ? "Anular" : "Entrou"}</SubmitButton>
                 </form>
               </li>
             ))}

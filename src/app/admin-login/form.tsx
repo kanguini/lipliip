@@ -15,7 +15,7 @@ export function AdminLoginForm() {
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-joy-sun">
             <ShieldCheck className="h-6 w-6" strokeWidth={1.75} aria-hidden />
           </span>
-          <p className="wordmark mt-4 text-3xl leading-none text-white">liplip<span className="text-joy-coral">.</span></p>
+          <p className="wordmark mt-4 text-3xl leading-none !text-white">liplip<span className="!text-joy-coral">.</span></p>
           <p className="mt-1 text-[11px] uppercase tracking-[0.3em] text-white/60">Administração</p>
         </div>
 

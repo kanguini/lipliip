@@ -41,26 +41,26 @@ export default async function GuestDetailPage({ params, searchParams }: { params
 
   return (
     <>
-      <Link href={`/dashboard/events/${id}/guests`} className="mb-3 inline-flex items-center gap-1 text-sm text-[#8c7b87] hover:text-brand-700"><ChevronLeft className="h-4 w-4" aria-hidden />Convidados</Link>
+      <Link href={`/dashboard/events/${id}/guests`} className="mb-3 inline-flex items-center gap-1 text-sm text-muted hover:text-brand-700"><ChevronLeft className="h-4 w-4" aria-hidden />Convidados</Link>
       <FlashFromSearch {...sp} />
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-6">
           <form action={updateGuestAction.bind(null, guest.id)} className="card space-y-3">
             <h2 className="font-semibold">Dados do convidado</h2>
             <div>
-              <label className="label">Nome</label>
-              <input name="name" className="input" defaultValue={guest.name} required />
+              <label className="label" htmlFor="gd-name">Nome</label>
+              <input id="gd-name" name="name" className="input" defaultValue={guest.name} required />
             </div>
             <div>
-              <label className="label">Telemóvel</label>
-              <input name="phone" className="input" defaultValue={guest.phone} required />
+              <label className="label" htmlFor="gd-phone">Telemóvel</label>
+              <input id="gd-phone" name="phone" className="input" inputMode="tel" autoComplete="tel" defaultValue={guest.phone} required />
               <p className="hint">Se mudar o número, o convidado terá de validar de novo.</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="label">Acompanhantes permitidos</label><input name="maxCompanions" type="number" min={0} className="input" defaultValue={guest.maxCompanions} /></div>
-              <div><label className="label">Grupo</label><input name="groupName" className="input" defaultValue={guest.groupName ?? ""} /></div>
-              <div><label className="label">Mesa</label><input name="tableNumber" className="input" defaultValue={guest.tableNumber ?? ""} /></div>
-              <div><label className="label">Email</label><input name="email" type="email" className="input" defaultValue={guest.email ?? ""} /></div>
+              <div><label className="label" htmlFor="gd-maxCompanions">Acompanhantes permitidos</label><input id="gd-maxCompanions" name="maxCompanions" type="number" min={0} className="input" defaultValue={guest.maxCompanions} /></div>
+              <div><label className="label" htmlFor="gd-groupName">Grupo</label><input id="gd-groupName" name="groupName" className="input" defaultValue={guest.groupName ?? ""} /></div>
+              <div><label className="label" htmlFor="gd-tableNumber">Mesa</label><input id="gd-tableNumber" name="tableNumber" className="input" defaultValue={guest.tableNumber ?? ""} /></div>
+              <div><label className="label" htmlFor="gd-email">Email</label><input id="gd-email" name="email" type="email" className="input" defaultValue={guest.email ?? ""} /></div>
             </div>
             <SubmitButton>Guardar</SubmitButton>
           </form>
@@ -93,7 +93,7 @@ export default async function GuestDetailPage({ params, searchParams }: { params
             <p className="break-all rounded bg-stone-50 p-2 font-mono text-xs">{url}</p>
             <div className="flex flex-wrap gap-2">
               <CopyButton text={url} />
-              <form action={resetDevicesAction.bind(null, guest.id)}><button className="btn-secondary btn-sm">Remover dispositivos</button></form>
+              <form action={resetDevicesAction.bind(null, guest.id)}><ConfirmButton className="btn-secondary btn-sm" message={`Remover os dispositivos validados de ${guest.name}? Terá de validar o convite outra vez por SMS.`}>Remover dispositivos</ConfirmButton></form>
               <form action={toggleSuspendAction.bind(null, guest.id, null)}>{guest.suspendedAt ? <button className="btn-secondary btn-sm">Reativar convite</button> : <ConfirmButton className="btn-secondary btn-sm" message={`Suspender o convite de ${guest.name}? O acesso é cortado e as reservas de presentes são libertadas.`}>Suspender convite</ConfirmButton>}</form>
               <form action={regenerateTokenAction.bind(null, guest.id)}><ConfirmButton message="O link atual deixa de funcionar e terá de enviar o novo link ao convidado. Continuar?">Revogar e gerar novo link</ConfirmButton></form>
             </div>

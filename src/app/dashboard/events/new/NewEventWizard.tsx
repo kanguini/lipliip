@@ -98,21 +98,21 @@ export function NewEventWizard({ initialType, initialTemplate, templates: catalo
             <p className="-mt-3 text-sm text-muted">Programa, lista de presentes e o resto ficam para depois, quando quiser.</p>
             <div>
               <label className="label" htmlFor="hostNames">{kind.hostLabel}</label>
-              <input id="hostNames" name="hostNames" className="input" required minLength={1} maxLength={120} placeholder={kind.hostPlaceholder} autoFocus />
+              <input id="hostNames" name="hostNames" className="input" required minLength={1} maxLength={120} placeholder={kind.hostPlaceholder} defaultValue={draft.hostNames} autoFocus />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="label" htmlFor="date">Data e hora</label>
-                <input id="date" name="date" type="datetime-local" className="input" required />
+                <input id="date" name="date" type="datetime-local" className="input" required defaultValue={draft.date} />
               </div>
               <div>
                 <label className="label" htmlFor="venueName">Local</label>
-                <input id="venueName" name="venueName" className="input" required minLength={2} maxLength={120} placeholder="Quinta da Serra, Sintra" />
+                <input id="venueName" name="venueName" className="input" required minLength={2} maxLength={120} placeholder="Quinta da Serra, Sintra" defaultValue={draft.venueName} />
               </div>
             </div>
             <div>
               <label className="label" htmlFor="message">Mensagem de abertura <span className="font-normal text-muted">(opcional)</span></label>
-              <textarea id="message" name="message" className="input" rows={3} placeholder="Com muita alegria convidamos-te para celebrar connosco…" />
+              <textarea id="message" name="message" className="input" rows={3} placeholder="Com muita alegria convidamos-te para celebrar connosco…" defaultValue={draft.message} />
             </div>
             <div>
               <label className="label" htmlFor="country">País por omissão dos telefones</label>

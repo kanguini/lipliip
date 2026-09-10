@@ -23,20 +23,20 @@ export default async function GiftsPage({ params, searchParams }: { params: Prom
           <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-brand-800"><span>Adicionar presente</span><span className="icon-circle h-8 w-8 bg-brand-100 text-brand-700"><Plus className="h-4 w-4" aria-hidden /></span></summary>
           <form action={addGiftAction.bind(null, id)} className="mt-4 space-y-3">
           <div>
-            <label className="label">Tipo</label>
-            <select name="kind" className="input">
+            <label className="label" htmlFor="gi-kind">Tipo</label>
+            <select id="gi-kind" name="kind" className="input">
               <option value="PRODUCT">Produto (reservável)</option>
               <option value="CASH">Contribuição em dinheiro (ex: lua de mel)</option>
             </select>
           </div>
-          <div><label className="label">Nome</label><input name="name" className="input" required placeholder="Máquina de café" /></div>
-          <div><label className="label">Descrição</label><input name="description" className="input" placeholder="Modelo, cor, loja…" /></div>
+          <div><label className="label" htmlFor="gi-name">Nome</label><input id="gi-name" name="name" className="input" required placeholder="Máquina de café" /></div>
+          <div><label className="label" htmlFor="gi-description">Descrição</label><input id="gi-description" name="description" className="input" placeholder="Modelo, cor, loja…" /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="label">Preço ({event.currency})</label><input name="price" className="input" inputMode="decimal" placeholder="89,90" /></div>
-            <div><label className="label">Quantidade</label><input name="quantity" type="number" min={1} className="input" defaultValue={1} /></div>
+            <div><label className="label" htmlFor="gi-price">Preço ({event.currency})</label><input id="gi-price" name="price" className="input" inputMode="decimal" placeholder="89,90" /></div>
+            <div><label className="label" htmlFor="gi-quantity">Quantidade</label><input id="gi-quantity" name="quantity" type="number" min={1} className="input" defaultValue={1} /></div>
           </div>
-          <div><label className="label">Link da loja</label><input name="storeUrl" type="url" className="input" placeholder="https://…" /></div>
-          <div><label className="label">Imagem (URL)</label><input name="imageUrl" type="url" className="input" placeholder="https://…/foto.jpg" /></div>
+          <div><label className="label" htmlFor="gi-storeUrl">Link da loja</label><input id="gi-storeUrl" name="storeUrl" type="url" className="input" placeholder="https://…" /></div>
+          <div><label className="label" htmlFor="gi-imageUrl">Imagem (URL)</label><input id="gi-imageUrl" name="imageUrl" type="url" className="input" placeholder="https://…/foto.jpg" /></div>
           <SubmitButton className="btn-primary w-full" pendingText="A adicionar…">Adicionar</SubmitButton>
         </form>
         </details>

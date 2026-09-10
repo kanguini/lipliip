@@ -46,7 +46,7 @@ export default async function SupplierDetailPage({ params, searchParams }: { par
       <SiteHeader loggedIn={!!user} active="fornecedores" />
 
       <div className="mx-auto max-w-6xl px-6 pb-20 pt-8">
-        <Link href="/fornecedores" className="mb-5 inline-flex items-center gap-1 text-sm text-[#8c7b87] hover:text-brand-700"><ChevronLeft className="h-4 w-4" aria-hidden />Todos os fornecedores</Link>
+        <Link href="/fornecedores" className="mb-5 inline-flex items-center gap-1 text-sm text-muted hover:text-brand-700"><ChevronLeft className="h-4 w-4" aria-hidden />Todos os fornecedores</Link>
 
         <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
           <article>
@@ -72,7 +72,7 @@ export default async function SupplierDetailPage({ params, searchParams }: { par
                 {supplierCategoryLabel(supplier.category)}
               </Link>
               <h1 className="display-title mt-2 text-4xl sm:text-5xl">{supplier.name}<span className="plum">.</span></h1>
-              {location && <p className="mt-2 flex items-center gap-1.5 text-sm text-[#8c7b87]"><MapPin className="h-4 w-4 text-brand-500" strokeWidth={1.75} aria-hidden />{location}</p>}
+              {location && <p className="mt-2 flex items-center gap-1.5 text-sm text-muted"><MapPin className="h-4 w-4 text-brand-500" strokeWidth={1.75} aria-hidden />{location}</p>}
             </div>
 
             {supplier.description ? (

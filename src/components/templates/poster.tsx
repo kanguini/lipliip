@@ -9,6 +9,8 @@ export function PosterTemplate({ event, guestName, children, template }: Templat
   const t = template ?? getTemplate(event.templateId);
   return (
     <div className="mx-auto max-w-2xl px-5 py-8">
+      {/* Título de nível 1 para leitores de ecrã: o cartaz mostra os nomes como imagem/h3. */}
+      <h1 className="sr-only">{eventKicker(event)} · {event.hostNames}</h1>
       <Greeting guestName={guestName} className="mb-4 text-center" />
       <InvitationArt
         templateId={event.templateId}

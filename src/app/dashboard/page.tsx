@@ -47,12 +47,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 <div className="p-6">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[0.65rem] uppercase tracking-[0.1em] text-brand-500">{t?.label}</span>
-                    <span className="text-[0.65rem] text-[#a1939c]">{e._count.guests} convites</span>
+                    <span className="text-[0.65rem] text-muted">{e._count.guests} convites</span>
                   </div>
                   <p className="font-display mt-4 text-2xl leading-snug">{e.title}</p>
-                  <p className="mt-3 flex items-center gap-1.5 text-xs text-[#8d7986]"><CalendarDays className="h-3.5 w-3.5 text-brand-500" aria-hidden />{formatEventDate(e.date, true, e.timezone)} · {formatTime(e.date, e.timezone)}</p>
-                  <p className="mt-1 flex items-center gap-1.5 text-xs text-[#8d7986]"><MapPin className="h-3.5 w-3.5 text-brand-500" aria-hidden />{e.venueName}</p>
-                  <div className="mt-5 flex gap-6 border-t border-brand-100 pt-4 text-[0.6875rem] text-[#96828f]">
+                  <p className="mt-3 flex items-center gap-1.5 text-xs text-muted"><CalendarDays className="h-3.5 w-3.5 text-brand-500" aria-hidden />{formatEventDate(e.date, true, e.timezone)} · {formatTime(e.date, e.timezone)}</p>
+                  <p className="mt-1 flex items-center gap-1.5 text-xs text-muted"><MapPin className="h-3.5 w-3.5 text-brand-500" aria-hidden />{e.venueName}</p>
+                  <div className="mt-5 flex gap-6 border-t border-brand-100 pt-4 text-[0.6875rem] text-muted">
                     <span><strong className="font-display block text-xl text-[#654354]">{e.acceptedCount}</strong>confirmados</span>
                     <span><strong className="font-display block text-xl text-[#654354]">{e.people}</strong>presenças</span>
                   </div>

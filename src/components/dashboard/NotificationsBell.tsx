@@ -87,7 +87,7 @@ export function NotificationsBell({ unread, items }: { unread: number; items: No
                         <div className="min-w-0 flex-1">
                           <p className={`text-sm ${n.unread ? "font-semibold text-ink" : "font-medium text-ink/90"}`}>{n.title}</p>
                           {n.detail && <p className="mt-0.5 truncate text-xs text-muted">{n.detail}</p>}
-                          <p className="mt-0.5 text-[11px] text-[#a1939c]">{n.eventTitle} · {relativeTime(n.at)}</p>
+                          <p className="mt-0.5 text-[11px] text-muted">{n.eventTitle} · {relativeTime(n.at)}</p>
                         </div>
                         {n.unread && <span className="mt-1.5 h-2 w-2 flex-none rounded-full bg-joy-coral" aria-label="Não lida" />}
                       </Link>

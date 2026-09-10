@@ -40,19 +40,19 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
           <details className="card" open={tasks.length === 0}>
             <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-brand-800"><span>Nova tarefa</span><span className="icon-circle h-8 w-8 bg-brand-100 text-brand-700"><Plus className="h-4 w-4" aria-hidden /></span></summary>
             <form action={addTaskAction.bind(null, id)} className="mt-4 space-y-3">
-            <div><label className="label">Tarefa</label><input name="title" className="input" required placeholder="Ex.: Prova do vestido" /></div>
+            <div><label className="label" htmlFor="t-title">Tarefa</label><input id="t-title" name="title" className="input" required placeholder="Ex.: Prova do vestido" /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="label">Prazo</label><input name="dueAt" type="date" className="input" /></div>
-              <div><label className="label">Categoria</label><input name="category" className="input" list="task-cats" placeholder="Catering" /><datalist id="task-cats">{categories.map((c) => <option key={c} value={c} />)}</datalist></div>
+              <div><label className="label" htmlFor="t-dueAt">Prazo</label><input id="t-dueAt" name="dueAt" type="date" className="input" /></div>
+              <div><label className="label" htmlFor="t-category">Categoria</label><input id="t-category" name="category" className="input" list="task-cats" placeholder="Catering" /><datalist id="task-cats">{categories.map((c) => <option key={c} value={c} />)}</datalist></div>
             </div>
-            <div><label className="label">Quem trata</label><input name="assignee" className="input" placeholder="Ana, João, cerimonialista…" /></div>
+            <div><label className="label" htmlFor="t-assignee">Quem trata</label><input id="t-assignee" name="assignee" className="input" placeholder="Ana, João, cerimonialista…" /></div>
             <SubmitButton className="btn-primary w-full" pendingText="A adicionar…">Adicionar</SubmitButton>
           </form>
           </details>
           <form action={generateChecklistAction.bind(null, id)} className="card">
             <h2 className="font-semibold">Checklist sugerida</h2>
-            <p className="mt-1 text-xs text-[#8c7b87]">Acrescenta as tarefas típicas de um {event.type === "WEDDING" ? "casamento" : event.type === "ENGAGEMENT" ? "noivado" : event.type === "BIRTHDAY" ? "aniversário" : "evento"} que ainda não tenha, com prazos calculados a partir da data.</p>
-            <button className="btn-secondary mt-3 w-full">Completar checklist</button>
+            <p className="mt-1 text-xs text-muted">Acrescenta as tarefas típicas de um {event.type === "WEDDING" ? "casamento" : event.type === "ENGAGEMENT" ? "noivado" : event.type === "BIRTHDAY" ? "aniversário" : "evento"} que ainda não tenha, com prazos calculados a partir da data.</p>
+            <SubmitButton className="btn-secondary mt-3 w-full" pendingText="A completar…">Completar checklist</SubmitButton>
           </form>
           </>
           )}
@@ -62,12 +62,12 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
             <h2 className="font-semibold">Tarefas</h2>
             <div className="flex gap-1 text-xs">
               {[["", "Por fazer"], ["done", "Feitas"], ["all", "Todas"]].map(([v, l]) => (
-                <a key={v} href={`?show=${v}`} className={`rounded-full px-3 py-1 ${(sp.show ?? "") === v ? "bg-brand-100 text-brand-700" : "text-[#8c7b87] hover:bg-brand-50"}`}>{l}</a>
+                <a key={v} href={`?show=${v}`} className={`rounded-full px-3 py-1 ${(sp.show ?? "") === v ? "bg-brand-100 text-brand-700" : "text-muted hover:bg-brand-50"}`}>{l}</a>
               ))}
             </div>
           </div>
           {list.length === 0 ? (
-            <p className="mt-6 text-center text-sm text-[#8c7b87]">{sp.show === "done" ? "Ainda não há tarefas concluídas." : "Nada por fazer."}</p>
+            <p className="mt-6 text-center text-sm text-muted">{sp.show === "done" ? "Ainda não há tarefas concluídas." : "Nada por fazer."}</p>
           ) : (
             <ul className="mt-4 divide-y divide-brand-100">
               {list.map((t) => {
@@ -79,8 +79,8 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
                       <button className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded border ${t.completedAt ? "border-brand-600 bg-brand-600 text-white" : "border-brand-300 hover:border-brand-500"}`} aria-label={t.completedAt ? "Marcar por fazer" : "Marcar feita"}>{t.completedAt ? <Check className="h-3.5 w-3.5" aria-hidden /> : null}</button>
                     </form>
                     <div className="min-w-0 flex-1">
-                      <p className={`text-sm ${t.completedAt ? "text-[#a1939c] line-through" : "font-medium"}`}>{t.title}</p>
-                      <p className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-[#8c7b87]">
+                      <p className={`text-sm ${t.completedAt ? "text-muted line-through" : "font-medium"}`}>{t.title}</p>
+                      <p className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-muted">
                         {t.category && <span>{t.category}</span>}
                         {t.assignee && <span className="inline-flex items-center gap-1"><UserRound className="h-3 w-3" aria-hidden />{t.assignee}</span>}
                         {t.dueAt && (
@@ -90,9 +90,9 @@ export default async function TasksPage({ params, searchParams }: { params: Prom
                           </span>
                         )}
                       </p>
-                      {t.description && <p className="mt-1 text-xs text-[#8c7b87]">{t.description}</p>}
+                      {t.description && <p className="mt-1 text-xs text-muted">{t.description}</p>}
                     </div>
-                    <form action={deleteTaskAction.bind(null, id, t.id)}><ConfirmButton className="text-[#a1939c] hover:text-red-700" message={`Remover a tarefa "${t.title}"?`}><X className="h-4 w-4" aria-label="Remover tarefa" /></ConfirmButton></form>
+                    <form action={deleteTaskAction.bind(null, id, t.id)}><ConfirmButton className="text-muted hover:text-red-700" message={`Remover a tarefa "${t.title}"?`}><X className="h-4 w-4" aria-label="Remover tarefa" /></ConfirmButton></form>
                   </li>
                 );
               })}

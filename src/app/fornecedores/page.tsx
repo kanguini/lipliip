@@ -54,7 +54,7 @@ export default async function SuppliersDirectoryPage({ searchParams }: { searchP
           <h1 className="display-title mt-4 text-4xl leading-[1.05] sm:text-6xl">
             As pessoas que fazem a <em>festa</em> acontecer<span className="plum">.</span>
           </h1>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-[#8c7b87]">
+          <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">
             Salões, buffet, decoração, música, fotografia e tudo o que o seu evento precisa. Peça orçamentos diretamente a partir daqui.
           </p>
         </div>
@@ -137,7 +137,7 @@ export default async function SuppliersDirectoryPage({ searchParams }: { searchP
                     <div className="flex flex-1 flex-col p-5">
                       <span className="text-[0.65rem] uppercase tracking-[0.12em] text-brand-500">{supplierCategoryLabel(s.category)}</span>
                       <p className="font-display mt-1 text-xl leading-snug text-ink group-hover:text-brand-700">{s.name}</p>
-                      {location && <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[#8d7986]"><MapPin className="h-3.5 w-3.5 text-brand-500" strokeWidth={1.75} aria-hidden />{location}</p>}
+                      {location && <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted"><MapPin className="h-3.5 w-3.5 text-brand-500" strokeWidth={1.75} aria-hidden />{location}</p>}
                       {s.description && <p className="mt-3 text-sm leading-relaxed text-stone-500">{supplierExcerpt(s.description)}</p>}
                       <span className="mt-auto pt-4 text-sm font-semibold text-brand-700">Ver detalhes e pedir orçamento</span>
                     </div>

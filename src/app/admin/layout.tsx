@@ -13,8 +13,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="min-h-screen lg:grid lg:grid-cols-[16.5rem_1fr]">
       <aside className="bg-brand-900 text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
         <div className="flex items-center justify-between px-6 py-5 lg:block lg:px-7 lg:pb-6 lg:pt-8">
-          <Link href="/admin" className="wordmark block text-4xl leading-none text-white lg:text-[2.6rem]" aria-label="Liplip">liplip<span className="text-joy-coral">.</span></Link>
-          <p className="mt-1 hidden text-[11px] uppercase tracking-[0.3em] text-white/60 lg:block">Administração</p>
+          <div>
+            <Link href="/admin" className="wordmark block text-4xl leading-none !text-white lg:text-[2.6rem]" aria-label="Liplip">liplip<span className="!text-joy-coral">.</span></Link>
+            <p className="mt-1 hidden text-[11px] uppercase tracking-[0.3em] text-white/60 lg:block">Administração</p>
+          </div>
+          <form action={logoutAction} className="lg:hidden">
+            <button className="rounded-full px-3 py-1.5 text-sm font-medium text-white/85 hover:bg-white/10">Sair</button>
+          </form>
         </div>
         <AdminNav />
         <div className="hidden items-center gap-3 px-6 py-5 lg:mt-auto lg:flex">

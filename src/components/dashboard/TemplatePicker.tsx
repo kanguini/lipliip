@@ -27,7 +27,7 @@ export function TemplateCard({ t, type, names, selected }: { t: TemplateMeta & {
       )}
       <div className="p-3">
         <p className="text-sm font-semibold">{t.name}</p>
-        <p className="text-xs text-[#95818f]">{t.tag}{t.enabled === false ? " · indisponível" : ""}</p>
+        <p className="text-xs text-muted">{t.tag}{t.enabled === false ? " · indisponível" : ""}</p>
       </div>
     </div>
   );

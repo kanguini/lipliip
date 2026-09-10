@@ -81,7 +81,7 @@ export default async function HomePage() {
           <h1 className="display-title mt-4 text-5xl leading-[1.05] sm:text-7xl">
             As pessoas certas.<br />O seu <em>momento</em><span className="plum">.</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-[#8c7b87]">
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
             Convites digitais para casamentos, noivados e aniversários. Cada convidado recebe um link pessoal, ligado ao
             seu telemóvel, que não pode ser repassado. Confirmações de presença, lista de presentes e entrada por QR no mesmo lugar.
           </p>
@@ -91,7 +91,7 @@ export default async function HomePage() {
             </Link>
             <a href="#templates" className="btn-secondary px-6 py-3 text-base">Ver a colecção</a>
           </div>
-          <p className="mt-6 text-xs text-[#9e8d96]">Grátis para começar · sem cartão · convidados ilimitados enquanto testa</p>
+          <p className="mt-6 text-xs text-muted">Grátis para começar · sem cartão · convidados ilimitados enquanto testa</p>
         </div>
         <div className="relative grid grid-cols-2 gap-4">
           <InvitationArt templateId="rubi" kicker="Vamos casar" names="Sofia & Miguel" dateLabel="12 de dezembro de 2026" placeLabel="Quinta da Serra · 16:00" caption="Uma vida inteira começa aqui." className="rotate-[-3deg] shadow-2xl" />
@@ -142,7 +142,7 @@ export default async function HomePage() {
             <div>
               <p className="eyebrow">Escolha como começa</p>
               <h2 className="display-title mt-3 text-4xl">Um convite à altura da sua <em>história</em><span className="plum">.</span></h2>
-              <p className="mt-3 max-w-xl text-[#8c7b87]">Seis cartazes da colecção 2026 e cinco clássicos. Personalize nomes, cores, foto e mensagem.</p>
+              <p className="mt-3 max-w-xl text-muted">Seis cartazes da colecção 2026 e cinco clássicos. Personalize nomes, cores, foto e mensagem.</p>
             </div>
             <span className="hidden h-24 w-24 flex-col items-center justify-center rounded-full bg-joy-sun text-center font-display text-[0.6rem] uppercase leading-tight tracking-[0.14em] text-brand-800 sm:flex">
               Colecção<br /><strong className="text-2xl font-semibold tracking-[0.05em]">2026</strong>
@@ -165,7 +165,7 @@ export default async function HomePage() {
                   <div className="mt-4 flex items-center justify-between gap-3">
                     <div>
                       <p className="font-medium">{t.name}</p>
-                      <p className="text-xs text-[#95818f]">{t.tag}</p>
+                      <p className="text-xs text-muted">{t.tag}</p>
                     </div>
                     <span className="flex h-8 w-8 items-center justify-center rounded-full border border-brand-200 text-brand-700 transition group-hover:bg-brand-100"><ArrowUpRight className="h-4 w-4" aria-hidden /></span>
                   </div>
@@ -181,7 +181,7 @@ export default async function HomePage() {
                 </div>
                 <div className="p-2">
                   <p className="text-xs font-medium">{t.name}</p>
-                  <p className="text-[10px] text-[#95818f]">{t.tag}</p>
+                  <p className="text-[10px] text-muted">{t.tag}</p>
                 </div>
               </Link>
             ))}

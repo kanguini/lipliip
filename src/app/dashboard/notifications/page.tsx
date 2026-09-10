@@ -52,7 +52,7 @@ export default async function NotificationsPage() {
                   <div className="min-w-0 flex-1">
                     <p className={`text-sm ${n.unread ? "font-semibold text-ink" : "font-medium text-ink/90"}`}>{n.title}</p>
                     {n.detail && <p className="mt-0.5 text-sm text-muted">{n.detail}</p>}
-                    <p className="mt-1 text-xs text-[#a1939c]">{n.eventTitle} · {relativeTime(n.at, now)}</p>
+                    <p className="mt-1 text-xs text-muted">{n.eventTitle} · {relativeTime(n.at, now)}</p>
                   </div>
                   {n.unread && <span className="mt-2 h-2.5 w-2.5 flex-none rounded-full bg-joy-coral" aria-label="Não lida" />}
                 </Link>

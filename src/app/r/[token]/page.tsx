@@ -134,9 +134,9 @@ export default async function ReceptionPage({ params, searchParams }: { params: 
           </div>
         </div>
         <div className="card">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="font-semibold">Lista de convidados</h2>
-            <form><input name="q" className="input w-44" placeholder="Nome ou código" aria-label="Pesquisar convidado" defaultValue={sp.q ?? ""} /></form>
+            <form className="min-w-0 flex-1 sm:flex-none"><input name="q" className="input w-full min-w-0 sm:w-44" placeholder="Nome ou código" aria-label="Pesquisar convidado" defaultValue={sp.q ?? ""} /></form>
           </div>
           {list.length === 0 && <p className="mt-3 text-sm text-muted">Nenhum convidado corresponde à pesquisa.</p>}
           <ul className="mt-3 divide-y divide-stone-100 text-sm">
@@ -151,7 +151,7 @@ export default async function ReceptionPage({ params, searchParams }: { params: 
                   </span>
                 </div>
                 <form action={receptionToggleCheckinAction.bind(null, token, g.id, sp.q ?? null)}>
-                  <button className={g.checkedInAt ? "btn-ghost btn-sm" : "btn-secondary btn-sm"}>{g.checkedInAt ? "Anular" : "Entrou"}</button>
+                  <SubmitButton className={g.checkedInAt ? "btn-ghost btn-sm" : "btn-secondary btn-sm"} pendingText="…">{g.checkedInAt ? "Anular" : "Entrou"}</SubmitButton>
                 </form>
               </li>
             ))}

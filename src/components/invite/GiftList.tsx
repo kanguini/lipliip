@@ -113,12 +113,12 @@ export function GiftList({
                       )}
                       <input name="note" className="invite-input" placeholder="Nota (opcional)" />
                       <div className="flex gap-2">
-                        <button className="invite-btn btn-sm" disabled={pending}>{g.kind === "CASH" ? "Contribuir" : "Reservar"}</button>
-                        <button type="button" className="invite-btn-outline btn-sm" onClick={() => setOpenId(null)}>Cancelar</button>
+                        <button className="invite-btn flex-1" disabled={pending}>{g.kind === "CASH" ? "Contribuir" : "Reservar"}</button>
+                        <button type="button" className="invite-btn-outline" onClick={() => setOpenId(null)}>Cancelar</button>
                       </div>
                     </form>
                   ) : (
-                    <button className="invite-btn-outline btn-sm" onClick={() => setOpenId(g.id)} disabled={pending}>
+                    <button className="invite-btn-outline w-full sm:w-auto" onClick={() => setOpenId(g.id)} disabled={pending}>
                       {g.kind === "CASH" ? "Quero contribuir" : "Reservar este presente"}
                     </button>
                   )}
