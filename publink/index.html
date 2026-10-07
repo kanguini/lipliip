@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Publink: produção de mobiliário escolar e de escritório, carpintaria e serralharia.">
+<meta name="description" content="Publink: mobiliário escolar e de escritório, carpintaria, serralharia e aluguer de estruturas metálicas e digitais (mupis, ecrãs LED, TVs, totens).">
 <title>Publink</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -94,7 +94,7 @@ section.block{padding-block:clamp(3.5rem,8vw,6rem)}
 .sec-head p{color:var(--muted);max-width:36rem}
 
 /* Services */
-.services{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+.services{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem}
 .svc{background:var(--surface);border:1px solid var(--line);padding:1.6rem;display:flex;flex-direction:column;gap:1rem;min-width:0}
 .svc-ico{width:56px;height:56px;color:var(--board)}
 .svc h3{font-size:1.5rem;font-weight:800;font-stretch:108%}
@@ -122,6 +122,13 @@ section.block{padding-block:clamp(3.5rem,8vw,6rem)}
 .spec dt{color:var(--muted)}
 .spec dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.8rem}
 .note{margin-top:1.8rem;font-size:.9rem;color:var(--muted)}
+.rent-terms{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:2rem;border:1px solid var(--line);background:var(--surface)}
+.rent-terms div{padding:1.1rem 1.2rem;border-right:1px solid var(--line);min-width:0}
+.rent-terms div:last-child{border-right:0}
+.rent-terms strong{display:block;font-family:var(--display);font-weight:800;font-stretch:108%;font-size:1.05rem;margin-bottom:.2rem}
+.rent-terms span{font-size:.88rem;color:var(--muted)}
+.item-fig .screen{fill:var(--board)}
+.item-fig .glow{stroke:var(--ply)}
 
 /* Process */
 .steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;counter-reset:s}
@@ -160,7 +167,9 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
   .hero .wrap,.quote .wrap,.sec-head{grid-template-columns:1fr}
   .services{grid-template-columns:1fr}
   .steps{grid-template-columns:1fr 1fr;row-gap:1.8rem}
-  .facts .wrap{grid-template-columns:1fr 1fr}
+  .facts .wrap,.rent-terms{grid-template-columns:1fr 1fr}
+  .rent-terms div:nth-child(2){border-right:0}
+  .rent-terms div:nth-child(-n+2){border-bottom:1px solid var(--line)}
   .fact:nth-child(2){border-right:0}
   .fact:nth-child(3){padding-inline-start:0}
   .fact:nth-child(-n+2){border-bottom:1px solid var(--line)}
@@ -168,7 +177,9 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 @media (max-width:560px){
   nav.menu{width:100%;justify-content:space-between}
   form.order{grid-template-columns:1fr}
-  .steps{grid-template-columns:1fr}
+  .steps,.rent-terms{grid-template-columns:1fr}
+  .rent-terms div{border-right:0;border-bottom:1px solid var(--line)}
+  .rent-terms div:last-child{border-bottom:0}
 }
 </style>
 </head>
@@ -188,6 +199,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
     <nav class="menu" aria-label="Principal">
       <a href="#servicos">Serviços</a>
       <a href="#catalogo">Catálogo</a>
+      <a href="#aluguer">Aluguer</a>
       <a href="#processo">Como trabalhamos</a>
       <a href="#orcamento">Orçamento</a>
     </nav>
@@ -198,9 +210,9 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
   <section class="hero">
     <div class="wrap">
       <div>
-        <p class="label">Mobiliário · Carpintaria · Serralharia</p>
+        <p class="label">Mobiliário · Carpintaria · Serralharia · Aluguer</p>
         <h1>Carteiras que aguentam <em>o ano lectivo inteiro.</em></h1>
-        <p class="hero-lead">A Publink fabrica mobiliário escolar e de escritório na sua própria oficina, com carpintaria e serralharia sob o mesmo tecto. Do tampo em madeira à estrutura em tubo de aço, controlamos cada peça.</p>
+        <p class="hero-lead">A Publink fabrica mobiliário escolar e de escritório na sua própria oficina, com carpintaria e serralharia sob o mesmo tecto. Do tampo em madeira à estrutura em tubo de aço, controlamos cada peça. Também alugamos estruturas metálicas e equipamento digital para eventos e publicidade.</p>
         <div class="hero-cta">
           <a class="btn btn-ply" href="#orcamento">Pedir orçamento</a>
           <a class="btn" href="#catalogo">Ver catálogo</a>
@@ -250,7 +262,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
       <div class="sec-head">
         <div>
           <p class="label">O que fazemos</p>
-          <h2>Três ofícios, uma só oficina</h2>
+          <h2>Quatro serviços, uma só oficina</h2>
         </div>
         <p>Como a madeira e o metal são trabalhados no mesmo espaço, cada peça sai com as junções certas e os prazos não dependem de terceiros.</p>
       </div>
@@ -286,6 +298,17 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
             <li>Grades de janela e de segurança</li>
             <li>Estruturas para mobiliário</li>
             <li>Escadas, corrimãos e coberturas</li>
+          </ul>
+        </article>
+        <article class="svc">
+          <svg class="svc-ico" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="12" y="4" width="32" height="38"/><path d="M18 10h20v26H18z"/><path d="M22 42v8M34 42v8M14 50h28"/></svg>
+          <h3>Aluguer de estruturas metálicas e digitais</h3>
+          <p>Para eventos, feiras, campanhas e lançamentos. Entregamos, montamos e recolhemos no fim.</p>
+          <ul>
+            <li>Mupis e outdoors</li>
+            <li>Ecrãs LED, interior e exterior</li>
+            <li>TVs com suporte de chão ou parede</li>
+            <li>Totens digitais e estruturas metálicas</li>
           </ul>
         </article>
       </div>
@@ -353,6 +376,51 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
     </div>
   </section>
 
+  <section class="block" id="aluguer">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="label">Aluguer</p>
+          <h2>Estruturas e ecrãs para o seu evento</h2>
+        </div>
+        <p>Alugamos por dia, por semana ou por mês. O preço inclui transporte, montagem e desmontagem. Nos equipamentos digitais, um técnico acompanha a instalação.</p>
+      </div>
+      <div class="grid-items">
+        <article class="item">
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="52" y="4" width="56" height="86"/><rect x="58" y="10" width="44" height="74" fill="var(--ply)"/><path d="M62 90v14M98 90v14M50 104h60"/></svg></div>
+          <div class="item-body"><span class="item-ref">ALUGUER · MP-01</span><h3>Mupi</h3>
+            <dl class="spec"><dt>Cartaz</dt><dd>1185 × 1750 mm</dd><dt>Faces</dt><dd>1 ou 2, iluminado</dd><dt>Também</dt><dd>Mupi digital 55"</dd></dl></div>
+        </article>
+        <article class="item">
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect class="screen" x="14" y="10" width="132" height="72"/><path d="M47 10v72M80 10v72M113 10v72M14 34h132M14 58h132" stroke="var(--board-ink)" stroke-width="1" opacity=".5"/><path d="M30 82v22M130 82v22M22 104h116"/></svg></div>
+          <div class="item-body"><span class="item-ref">ALUGUER · LED-39</span><h3>Ecrã LED modular</h3>
+            <dl class="spec"><dt>Módulo</dt><dd>500 × 500 mm</dd><dt>Pixel</dt><dd>P2.9 interior · P3.9 exterior</dd><dt>Tamanho</dt><dd>À medida do palco</dd></dl></div>
+        </article>
+        <article class="item">
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect class="screen" x="22" y="10" width="116" height="66"/><path d="M80 76v24M56 104h48"/></svg></div>
+          <div class="item-body"><span class="item-ref">ALUGUER · TV-65</span><h3>TV com suporte</h3>
+            <dl class="spec"><dt>Tamanhos</dt><dd>43" · 55" · 65" · 75"</dd><dt>Suporte</dt><dd>Pé de chão ou parede</dd><dt>Entrada</dt><dd>HDMI · USB</dd></dl></div>
+        </article>
+        <article class="item">
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M60 4h40v94H60z"/><rect class="screen" x="65" y="10" width="30" height="62"/><path d="M54 98h52v8H54z"/><circle cx="80" cy="85" r="4" class="glow"/></svg></div>
+          <div class="item-body"><span class="item-ref">ALUGUER · TT-55</span><h3>Totem digital</h3>
+            <dl class="spec"><dt>Ecrã</dt><dd>55" vertical, táctil</dd><dt>Altura</dt><dd>1900 mm</dd><dt>Conteúdo</dt><dd>Vídeo, imagens, menus</dd></dl></div>
+        </article>
+        <article class="item">
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14 104V14h132v90M14 14h132v12H14z"/><path d="M14 26l12-12M26 26l12-12M38 26l12-12M50 26l12-12M62 26l12-12M74 26l12-12M86 26l12-12M98 26l12-12M110 26l12-12M122 26l12-12M134 26l12-12" stroke-width="1.4"/><path d="M8 104h24M128 104h24"/><rect x="30" y="34" width="100" height="40" fill="var(--ply)" opacity=".8"/></svg></div>
+          <div class="item-body"><span class="item-ref">ALUGUER · ES-29</span><h3>Estrutura metálica</h3>
+            <dl class="spec"><dt>Tipo</dt><dd>Pórticos, palcos, stands</dd><dt>Treliça</dt><dd>290 × 290 mm</dd><dt>Uso</dt><dd>Lonas, ecrãs, luzes</dd></dl></div>
+        </article>
+      </div>
+      <div class="rent-terms">
+        <div><strong>Por dia, semana ou mês</strong><span>Escolha o período do aluguer</span></div>
+        <div><strong>Montagem incluída</strong><span>Transporte, montagem e recolha</span></div>
+        <div><strong>Técnico no local</strong><span>Para ecrãs LED e totens</span></div>
+        <div><strong>Conteúdo pronto</strong><span>Carregamos os seus vídeos e imagens</span></div>
+      </div>
+    </div>
+  </section>
+
   <section class="block" id="processo">
     <div class="wrap">
       <div class="sec-head">
@@ -397,6 +465,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
             <option>Mobiliário de escritório</option>
             <option>Carpintaria</option>
             <option>Serralharia</option>
+            <option>Aluguer de estruturas metálicas</option>
+            <option>Aluguer de equipamento digital (mupis, LED, TVs, totens)</option>
           </select></div>
         <div class="field"><label for="f-qty">Quantidade aproximada</label><input id="f-qty" name="qty" inputmode="numeric" value="120 carteiras duplas"></div>
         <div class="field full"><label for="f-msg">Descrição</label><textarea id="f-msg" name="msg">Precisamos de equipar 4 salas de aula antes do início do ano lectivo. Carteiras com grade para livros e cadeiras a condizer.</textarea></div>
@@ -421,7 +491,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 
 <footer>
   <div class="wrap">
-    <span>© <span id="year">2026</span> Publink · Mobiliário escolar e de escritório, carpintaria e serralharia</span>
+    <span>© <span id="year">2026</span> Publink · Mobiliário escolar e de escritório, carpintaria, serralharia e aluguer de estruturas</span>
     <a href="#inicio">Voltar ao topo</a>
   </div>
 </footer>
