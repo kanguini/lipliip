@@ -72,6 +72,16 @@ nav.menu a:hover{color:var(--fg)}
 .hero-cta{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:2.2rem}
 .hero-draw{min-width:0;margin:0}
 .hero-draw svg{width:100%;height:auto;display:block}
+.hero-media{position:relative}
+.hero-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05)}
+.hero-draw.loaded .hero-media{aspect-ratio:4/3.4;max-width:100%}
+.hero-draw.loaded .hero-media svg{visibility:hidden}
+.hero-draw.loaded .hero-media::after{content:"";position:absolute;left:0;bottom:0;width:30%;height:6px;background:var(--red)}
+.hero-draw.loaded figcaption{display:none}
+.svc-photo{display:block;width:100%;max-width:100%;aspect-ratio:16/9;object-fit:cover;filter:grayscale(1);transition:filter .3s ease}
+.svc:hover .svc-photo{filter:none}
+.svc-photo + .svc-ico{display:none}
+@media (prefers-reduced-motion:reduce){.svc-photo{transition:none}}
 .hero-draw figcaption{font-size:.78rem;color:var(--muted);margin-top:.8rem;font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:no-preference){
   .dim{stroke-dasharray:400;stroke-dashoffset:0;animation:draw 1.6s ease-out both}
@@ -212,6 +222,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
         </div>
       </div>
       <figure class="hero-draw">
+        <div class="hero-media">
+          <img src="https://images.pexels.com/photos/36650154/pexels-photo-36650154.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1400" alt="Sala de aula com carteiras de madeira e quadro" onload="this.closest('figure').classList.add('loaded')" onerror="this.remove()">
         <svg viewBox="0 0 420 330" role="img" aria-label="Desenho técnico de uma carteira escolar com cotas de 1200, 500 e 760 milímetros">
           <g fill="none" stroke="var(--fg)" stroke-width="2.2" stroke-linejoin="round">
             <!-- tampo -->
@@ -236,6 +248,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
             <text x="16" y="198" transform="rotate(-90 16 198)" text-anchor="middle">760 mm</text>
           </g>
         </svg>
+        </div>
         <figcaption>REF. CE-12 · Carteira dupla · tampo MDF 18 mm, estrutura tubo 30×30 mm</figcaption>
       </figure>
     </div>
@@ -261,6 +274,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
       </div>
       <div class="services">
         <article class="svc">
+          <img class="svc-photo" src="https://images.pexels.com/photos/6180740/pexels-photo-6180740.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Sala de reunião com mesa branca e cadeiras vermelhas" loading="lazy" onerror="this.remove()">
           <svg class="svc-ico" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 20h44M10 20v26M46 20v26M10 34h36"/><path d="M18 8h20v12H18z"/></svg>
           <h3>Mobiliário escolar e de escritório</h3>
           <p>Carteiras, cadeiras, quadros, secretárias e armários, fabricados em série para equipar salas inteiras.</p>
@@ -272,6 +286,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
           </ul>
         </article>
         <article class="svc">
+          <img class="svc-photo" src="https://images.pexels.com/photos/6790977/pexels-photo-6790977.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Carpinteiro a trabalhar uma peça de madeira" loading="lazy" onerror="this.remove()">
           <svg class="svc-ico" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="8" y="6" width="40" height="44"/><path d="M8 28h40M28 6v44"/><circle cx="23" cy="17" r="1.5" fill="currentColor"/><circle cx="33" cy="17" r="1.5" fill="currentColor"/></svg>
           <h3>Carpintaria</h3>
           <p>Trabalho em madeira maciça, MDF e contraplacado, para obra nova, remodelação ou mobiliário à medida.</p>
@@ -283,6 +298,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
           </ul>
         </article>
         <article class="svc">
+          <img class="svc-photo" src="https://images.pexels.com/photos/5846247/pexels-photo-5846247.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Serralheiro a soldar uma peça de metal" loading="lazy" onerror="this.remove()">
           <svg class="svc-ico" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 48h44M10 48V12h36v36"/><path d="M19 12v36M28 12v36M37 12v36"/><path d="M10 24h36"/></svg>
           <h3>Serralharia</h3>
           <p>Estruturas em ferro e aço, cortadas, soldadas e pintadas na nossa oficina.</p>
@@ -294,6 +310,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
           </ul>
         </article>
         <article class="svc">
+          <img class="svc-photo" src="https://images.pexels.com/photos/12887602/pexels-photo-12887602.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Ecrã digital de publicidade à entrada de uma loja" loading="lazy" onerror="this.remove()">
           <svg class="svc-ico" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="12" y="4" width="32" height="38"/><path d="M18 10h20v26H18z"/><path d="M22 42v8M34 42v8M14 50h28"/></svg>
           <h3>Aluguer de estruturas metálicas e digitais</h3>
           <p>Para eventos, feiras, campanhas e lançamentos. Entregamos, montamos e recolhemos no fim.</p>
@@ -484,7 +501,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 
 <footer>
   <div class="wrap">
-    <span>© <span id="year">2026</span> Publink · Mobiliário escolar e de escritório, carpintaria, serralharia e aluguer de estruturas</span>
+    <span>© <span id="year">2026</span> Publink · Mobiliário escolar e de escritório, carpintaria, serralharia e aluguer de estruturas · Fotografias ilustrativas: <a href="https://www.pexels.com" target="_blank" rel="noopener">Pexels</a></span>
     <a href="#inicio">Voltar ao topo</a>
   </div>
 </footer>
