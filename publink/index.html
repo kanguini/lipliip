@@ -3,183 +3,176 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d7141e">
 <meta name="description" content="Publink: mobiliário escolar e de escritório, carpintaria, serralharia e aluguer de estruturas metálicas e digitais (mupis, ecrãs LED, TVs, totens).">
 <title>Publink</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@75..150,500..900&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap">
 <style>
-/* Layout: ficha técnica de oficina — desenhos com cotas em mm, secções separadas por réguas, verde de quadro escolar + contraplacado */
+/* Layout: minimalista — branco, preto e um só vermelho; muito espaço, linhas finas, tipografia pesada nos títulos */
 :root{
-  --bg:#f3f4f0;          /* papel técnico, leve tom verde */
-  --surface:#ffffff;
-  --ink:#17201b;
-  --muted:#5b665f;
-  --line:#d3d8d1;
-  --board:#1f4a3a;       /* verde de quadro escolar */
-  --board-ink:#eef3ee;
-  --ply:#c98a2e;         /* contraplacado / bétula */
-  --ply-soft:#f4e6cf;
-  --steel:#6c7a83;
-  --display:"Anybody","Arial Narrow",system-ui,sans-serif;
-  --body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
-  --wrap:72rem;
+  --bg:#ffffff;
+  --fg:#0b0b0b;
+  --muted:#6b6b6b;
+  --line:#e6e6e6;
+  --soft:#f6f6f6;
+  --red:#d7141e;
+  --on-red:#ffffff;
+  --inv-bg:#0b0b0b;
+  --inv-fg:#ffffff;
+  --inv-muted:#a3a3a3;
+  --inv-line:#2a2a2a;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --body:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --wrap:70rem;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#111613; --surface:#18201b; --ink:#e7ece7; --muted:#9aa69e; --line:#2b352f;
-    --board:#173a2d; --board-ink:#e7efe8; --ply:#e0a24a; --ply-soft:#3a2d18; --steel:#93a3ac;
+    --bg:#0b0b0b; --fg:#f5f5f5; --muted:#9a9a9a; --line:#262626; --soft:#151515;
+    --red:#ee2b33; --inv-bg:#151515; --inv-fg:#ffffff; --inv-muted:#a3a3a3; --inv-line:#2f2f2f;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#111613; --surface:#18201b; --ink:#e7ece7; --muted:#9aa69e; --line:#2b352f;
-  --board:#173a2d; --board-ink:#e7efe8; --ply:#e0a24a; --ply-soft:#3a2d18; --steel:#93a3ac;
+  --bg:#0b0b0b; --fg:#f5f5f5; --muted:#9a9a9a; --line:#262626; --soft:#151515;
+  --red:#ee2b33; --inv-bg:#151515; --inv-fg:#ffffff; --inv-muted:#a3a3a3; --inv-line:#2f2f2f;
   color-scheme:dark;
 }
 
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1rem;line-height:1.6;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:1rem;line-height:1.6;margin:0}
 .wrap{max-width:var(--wrap);margin-inline:auto;padding-inline:clamp(16px,4vw,40px)}
-h1,h2,h3{font-family:var(--display);line-height:1.02;text-wrap:balance;margin:0}
+h1,h2,h3{font-family:var(--display);line-height:1.02;text-wrap:balance;margin:0;letter-spacing:-.02em}
 p{margin:0}
 a{color:inherit}
-:focus-visible{outline:3px solid var(--ply);outline-offset:3px;border-radius:2px}
-.label{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.btn{display:inline-flex;align-items:center;gap:.5rem;font:600 .95rem/1 var(--body);padding:.9rem 1.3rem;border-radius:3px;border:2px solid currentColor;text-decoration:none;cursor:pointer;background:transparent;color:inherit;transition:transform .15s ease,background .15s ease}
-.btn:hover{transform:translateY(-2px)}
-.btn-ply{background:var(--ply);border-color:var(--ply);color:#1a1206}
+:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+.label{font-size:.75rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.btn{display:inline-flex;align-items:center;gap:.5rem;font:600 .95rem/1 var(--body);padding:.95rem 1.4rem;border:1.5px solid currentColor;text-decoration:none;cursor:pointer;background:transparent;color:inherit;transition:background .15s ease,color .15s ease}
+.btn:hover{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn-red{background:var(--red);border-color:var(--red);color:var(--on-red)}
+.btn-red:hover{background:var(--fg);border-color:var(--fg);color:var(--bg)}
 
 /* Header */
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
-.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-block:.85rem;flex-wrap:wrap}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-block:1rem;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:.6rem;text-decoration:none}
-.brand-mark{width:34px;height:34px;flex:none}
-.brand-name{font-family:var(--display);font-weight:850;font-stretch:125%;font-size:1.35rem;letter-spacing:.01em}
-nav.menu{display:flex;gap:clamp(.8rem,2.5vw,1.8rem);flex-wrap:wrap}
-nav.menu a{text-decoration:none;font-weight:500;font-size:.93rem;color:var(--muted)}
-nav.menu a:hover{color:var(--ink)}
+.brand-mark{width:28px;height:28px;flex:none}
+.brand-name{font-family:var(--display);font-weight:800;font-size:1.2rem;letter-spacing:.06em}
+nav.menu{display:flex;gap:clamp(.9rem,2.5vw,2rem);flex-wrap:wrap}
+nav.menu a{text-decoration:none;font-size:.9rem;color:var(--muted)}
+nav.menu a:hover{color:var(--fg)}
 
 /* Hero */
-.hero{background:var(--board);color:var(--board-ink);overflow:hidden}
-.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(1.5rem,4vw,3.5rem);align-items:center;padding-block:clamp(3rem,7vw,5.5rem)}
-.hero .label{color:color-mix(in srgb,var(--board-ink) 70%,transparent)}
-.hero h1{font-size:clamp(2.6rem,6.5vw,5rem);font-weight:850;font-stretch:118%;margin-block:.9rem 1.2rem}
-.hero h1 em{font-style:normal;color:var(--ply)}
-.hero-lead{max-width:34rem;font-size:1.1rem;opacity:.9}
-.hero-cta{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:2rem}
-.hero-draw{min-width:0}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(2rem,5vw,4rem);align-items:center;padding-block:clamp(3.5rem,9vw,7rem)}
+.hero h1{font-size:clamp(2.6rem,6.8vw,5.4rem);font-weight:800;margin-block:1rem 1.4rem}
+.hero h1 em{font-style:normal;color:var(--red)}
+.hero-lead{max-width:33rem;font-size:1.08rem;color:var(--muted)}
+.hero-cta{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:2.2rem}
+.hero-draw{min-width:0;margin:0}
 .hero-draw svg{width:100%;height:auto;display:block}
-.hero-draw figcaption{font-family:var(--mono);font-size:.75rem;opacity:.7;margin-top:.6rem}
+.hero-draw figcaption{font-size:.78rem;color:var(--muted);margin-top:.8rem;font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:no-preference){
   .dim{stroke-dasharray:400;stroke-dashoffset:0;animation:draw 1.6s ease-out both}
   @keyframes draw{from{stroke-dashoffset:400}}
 }
 
-/* Strip of facts */
-.facts{border-bottom:1px solid var(--line)}
-.facts .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
-.fact{padding-block:1.4rem;padding-inline:0 1rem;border-right:1px solid var(--line)}
-.fact:last-child{border-right:0}
-.fact:not(:first-child){padding-inline-start:1.2rem}
-.fact strong{display:block;font-family:var(--display);font-weight:800;font-stretch:110%;font-size:1.15rem}
+/* Facts */
+.facts{border-block:1px solid var(--line)}
+.facts .wrap{display:grid;grid-template-columns:repeat(4,1fr)}
+.fact{padding-block:1.5rem;padding-inline:0 1rem}
+.fact strong{display:block;font-weight:700;font-size:1rem}
 .fact span{font-size:.88rem;color:var(--muted)}
 
 /* Sections */
-section.block{padding-block:clamp(3.5rem,8vw,6rem)}
-.sec-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:2rem;align-items:end;margin-bottom:2.5rem}
-.sec-head h2{font-size:clamp(2rem,4.5vw,3.2rem);font-weight:800;font-stretch:112%;margin-top:.5rem}
-.sec-head p{color:var(--muted);max-width:36rem}
+section.block{padding-block:clamp(4rem,9vw,7rem)}
+.sec-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2rem;align-items:end;margin-bottom:3rem}
+.sec-head h2{font-size:clamp(2rem,4.4vw,3.2rem);font-weight:800;margin-top:.7rem}
+.sec-head p{color:var(--muted);max-width:34rem}
 
 /* Services */
-.services{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem}
-.svc{background:var(--surface);border:1px solid var(--line);padding:1.6rem;display:flex;flex-direction:column;gap:1rem;min-width:0}
-.svc-ico{width:56px;height:56px;color:var(--board)}
-.svc h3{font-size:1.5rem;font-weight:800;font-stretch:108%}
+.services{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border-top:1px solid var(--line)}
+.svc{padding:2rem 2rem 2.2rem 0;display:flex;flex-direction:column;gap:1rem;min-width:0;border-bottom:1px solid var(--line)}
+.svc:nth-child(even){padding-inline:2rem 0;border-left:1px solid var(--line)}
+.svc-ico{width:44px;height:44px;color:var(--red)}
+.svc h3{font-size:1.45rem;font-weight:700}
 .svc p{color:var(--muted)}
-.svc ul{margin:0;padding:0;list-style:none;display:grid;gap:.4rem;border-top:1px dashed var(--line);padding-top:1rem;margin-top:auto}
-.svc li{display:flex;gap:.6rem;font-size:.93rem}
-.svc li::before{content:"";width:8px;height:8px;margin-top:.55em;flex:none;background:var(--ply)}
-:root[data-theme="dark"] .svc-ico{color:var(--ply)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .svc-ico{color:var(--ply)}}
+.svc ul{margin:0;padding:0;list-style:none;display:grid;gap:.35rem;margin-top:auto}
+.svc li{display:flex;gap:.7rem;font-size:.93rem}
+.svc li::before{content:"";width:10px;height:1.5px;margin-top:.8em;flex:none;background:var(--red)}
 
 /* Catalogue */
-.catalog{background:var(--surface);border-block:1px solid var(--line)}
-.tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.8rem}
-.tab{font:600 .9rem var(--body);padding:.6rem 1.1rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:99px;cursor:pointer}
-.tab[aria-selected="true"]{background:var(--board);border-color:var(--board);color:var(--board-ink)}
-.grid-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(15.5rem,1fr));gap:1.25rem}
-.item{border:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;min-width:0}
-.item-fig{aspect-ratio:4/3;max-width:100%;display:grid;place-items:center;border-bottom:1px solid var(--line);color:var(--ink);padding:1rem;
-  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:20px 20px;background-position:-1px -1px}
-.item-fig svg{width:82%;height:auto;max-height:100%}
-.item-body{padding:1.1rem 1.2rem 1.3rem;display:grid;gap:.55rem}
-.item-ref{font-family:var(--mono);font-size:.72rem;color:var(--ply);letter-spacing:.06em}
-.item h3{font-size:1.2rem;font-weight:750;font-stretch:105%}
-.spec{display:grid;grid-template-columns:auto 1fr;gap:.2rem .8rem;font-size:.85rem;margin:0}
+.catalog{background:var(--soft)}
+.tabs{display:flex;gap:1.6rem;flex-wrap:wrap;margin-bottom:2rem;border-bottom:1px solid var(--line)}
+.tab{font:500 .92rem var(--body);padding:.7rem 0;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;background:none;color:var(--muted);cursor:pointer}
+.tab:hover{color:var(--fg)}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--red)}
+.grid-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:1.5rem}
+.item{background:var(--bg);display:flex;flex-direction:column;min-width:0}
+.item-fig{aspect-ratio:4/3;max-width:100%;display:grid;place-items:center;color:var(--fg);padding:1.5rem;border-bottom:1px solid var(--line)}
+.item-fig svg{width:78%;height:auto;max-height:100%}
+.item-body{padding:1.2rem 1.3rem 1.4rem;display:grid;gap:.6rem}
+.item-ref{font-size:.7rem;font-weight:600;color:var(--red);letter-spacing:.12em}
+.item h3{font-size:1.15rem;font-weight:700}
+.spec{display:grid;grid-template-columns:auto 1fr;gap:.25rem .9rem;font-size:.85rem;margin:0}
 .spec dt{color:var(--muted)}
-.spec dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.8rem}
-.note{margin-top:1.8rem;font-size:.9rem;color:var(--muted)}
-.rent-terms{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:2rem;border:1px solid var(--line);background:var(--surface)}
-.rent-terms div{padding:1.1rem 1.2rem;border-right:1px solid var(--line);min-width:0}
-.rent-terms div:last-child{border-right:0}
-.rent-terms strong{display:block;font-family:var(--display);font-weight:800;font-stretch:108%;font-size:1.05rem;margin-bottom:.2rem}
+.spec dd{margin:0;font-variant-numeric:tabular-nums}
+.note{margin-top:2rem;font-size:.9rem;color:var(--muted)}
+#aluguer .item{background:var(--soft)}
+.rent-terms{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--line)}
+.rent-terms div{min-width:0}
+.rent-terms strong{display:block;font-weight:700;margin-bottom:.2rem}
 .rent-terms span{font-size:.88rem;color:var(--muted)}
-.item-fig .screen{fill:var(--board)}
-.item-fig .glow{stroke:var(--ply)}
+.item-fig .screen{fill:var(--fg)}
+.item-fig .glow{stroke:var(--red)}
 
 /* Process */
-.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;counter-reset:s}
-.steps li{counter-increment:s;padding:1.4rem 1.2rem 0 0;border-top:3px solid var(--board);position:relative;min-width:0}
-.steps li::before{content:counter(s,decimal-leading-zero);font-family:var(--mono);font-size:.8rem;color:var(--ply);display:block;margin-bottom:.5rem}
-.steps h3{font-size:1.15rem;font-weight:750;margin-bottom:.4rem}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:1.5rem;counter-reset:s}
+.steps li{counter-increment:s;padding-top:1.2rem;border-top:1.5px solid var(--fg);min-width:0}
+.steps li::before{content:counter(s,decimal-leading-zero);font-weight:700;font-size:.85rem;color:var(--red);display:block;margin-bottom:.6rem;font-variant-numeric:tabular-nums}
+.steps h3{font-size:1.1rem;font-weight:700;margin-bottom:.4rem}
 .steps p{font-size:.92rem;color:var(--muted)}
 
 /* Quote */
-.quote{background:var(--board);color:var(--board-ink)}
-.quote .wrap{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(2rem,5vw,4rem)}
-.quote h2{font-size:clamp(2rem,4.5vw,3.2rem);font-weight:850;font-stretch:115%;margin-block:.6rem 1rem}
-.quote .label{color:color-mix(in srgb,var(--board-ink) 70%,transparent)}
-.quote-info{display:grid;gap:1.6rem;align-content:start}
-.contact-list{display:grid;gap:1rem;margin:0}
-.contact-list dt{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;opacity:.7}
+.quote{background:var(--inv-bg);color:var(--inv-fg)}
+.quote .wrap{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(2rem,5vw,4.5rem)}
+.quote h2{font-size:clamp(2rem,4.4vw,3.2rem);font-weight:800;margin-block:.7rem 1rem}
+.quote-info{display:grid;gap:2rem;align-content:start}
+.quote-info > div > p{color:var(--inv-muted)}
+.contact-list{display:grid;gap:1.1rem;margin:0}
+.contact-list > div{padding-bottom:1.1rem;border-bottom:1px solid var(--inv-line)}
+.contact-list dt{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--inv-muted)}
 .contact-list dd{margin:0;font-weight:600;font-size:1.05rem;user-select:all}
-form.order{background:var(--surface);color:var(--ink);padding:clamp(1.25rem,3vw,2rem);display:grid;grid-template-columns:1fr 1fr;gap:1rem;min-width:0}
+form.order{background:var(--bg);color:var(--fg);padding:clamp(1.25rem,3vw,2.2rem);display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;min-width:0}
 .field{display:grid;gap:.35rem;min-width:0}
 .field.full{grid-column:1/-1}
-.field label{font-size:.85rem;font-weight:600}
-.field input,.field select,.field textarea{font:inherit;font-size:.95rem;padding:.7rem .8rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:3px;width:100%}
-.field textarea{min-height:7rem;resize:vertical}
-.form-foot{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between}
-.form-foot small{color:var(--muted);max-width:28rem}
-.summary{grid-column:1/-1;border:1px dashed var(--ply);background:var(--ply-soft);padding:1rem;display:grid;gap:.8rem}
-.summary pre{margin:0;white-space:pre-wrap;font-family:var(--mono);font-size:.82rem;user-select:all}
+.field label{font-size:.82rem;font-weight:600}
+.field input,.field select,.field textarea{font:inherit;font-size:.95rem;padding:.7rem 0;border:0;border-bottom:1.5px solid var(--line);background:transparent;color:var(--fg);border-radius:0;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-bottom-color:var(--red)}
+.field textarea{min-height:6.5rem;resize:vertical}
+.form-foot{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;margin-top:.5rem}
+.form-foot small{color:var(--muted);max-width:26rem}
+.summary{grid-column:1/-1;border-left:3px solid var(--red);background:var(--soft);padding:1rem 1.2rem;display:grid;gap:.8rem}
+.summary pre{margin:0;white-space:pre-wrap;font-family:var(--body);font-size:.88rem;user-select:all}
 .summary-actions{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
 .summary .btn{padding:.6rem 1rem;font-size:.85rem}
 .status{font-size:.85rem;color:var(--muted)}
 
-footer{padding-block:2rem;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+footer{padding-block:2rem;font-size:.85rem;color:var(--muted)}
 footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 
 @media (max-width:900px){
   .hero .wrap,.quote .wrap,.sec-head{grid-template-columns:1fr}
   .services{grid-template-columns:1fr}
-  .steps{grid-template-columns:1fr 1fr;row-gap:1.8rem}
+  .svc,.svc:nth-child(even){padding-inline:0;border-left:0}
+  .steps{grid-template-columns:1fr 1fr;row-gap:2rem}
   .facts .wrap,.rent-terms{grid-template-columns:1fr 1fr}
-  .rent-terms div:nth-child(2){border-right:0}
-  .rent-terms div:nth-child(-n+2){border-bottom:1px solid var(--line)}
-  .fact:nth-child(2){border-right:0}
-  .fact:nth-child(3){padding-inline-start:0}
-  .fact:nth-child(-n+2){border-bottom:1px solid var(--line)}
 }
 @media (max-width:560px){
   nav.menu{width:100%;justify-content:space-between}
   form.order{grid-template-columns:1fr}
   .steps,.rent-terms{grid-template-columns:1fr}
-  .rent-terms div{border-right:0;border-bottom:1px solid var(--line)}
-  .rent-terms div:last-child{border-bottom:0}
 }
 </style>
 </head>
@@ -188,11 +181,11 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#inicio" aria-label="Publink, início">
-      <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true">
-        <rect x="1" y="1" width="32" height="32" fill="var(--board)"/>
-        <rect x="7" y="9" width="20" height="4" fill="var(--ply)"/>
-        <rect x="9" y="13" width="3" height="13" fill="var(--board-ink)"/>
-        <rect x="22" y="13" width="3" height="13" fill="var(--board-ink)"/>
+      <svg class="brand-mark" viewBox="0 0 28 28" aria-hidden="true">
+        <rect width="28" height="28" fill="var(--red)"/>
+        <rect x="6" y="8" width="16" height="3" fill="var(--on-red)"/>
+        <rect x="8" y="11" width="2.5" height="10" fill="var(--on-red)"/>
+        <rect x="17.5" y="11" width="2.5" height="10" fill="var(--on-red)"/>
       </svg>
       <span class="brand-name">PUBLINK</span>
     </a>
@@ -211,18 +204,18 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
     <div class="wrap">
       <div>
         <p class="label">Mobiliário · Carpintaria · Serralharia · Aluguer</p>
-        <h1>Carteiras que aguentam <em>o ano lectivo inteiro.</em></h1>
+        <h1>Carteiras que aguentam o ano lectivo inteiro<em>.</em></h1>
         <p class="hero-lead">A Publink fabrica mobiliário escolar e de escritório na sua própria oficina, com carpintaria e serralharia sob o mesmo tecto. Do tampo em madeira à estrutura em tubo de aço, controlamos cada peça. Também alugamos estruturas metálicas e equipamento digital para eventos e publicidade.</p>
         <div class="hero-cta">
-          <a class="btn btn-ply" href="#orcamento">Pedir orçamento</a>
+          <a class="btn btn-red" href="#orcamento">Pedir orçamento</a>
           <a class="btn" href="#catalogo">Ver catálogo</a>
         </div>
       </div>
-      <figure class="hero-draw" style="margin:0">
+      <figure class="hero-draw">
         <svg viewBox="0 0 420 330" role="img" aria-label="Desenho técnico de uma carteira escolar com cotas de 1200, 500 e 760 milímetros">
-          <g fill="none" stroke="var(--board-ink)" stroke-width="2.2" stroke-linejoin="round">
+          <g fill="none" stroke="var(--fg)" stroke-width="2.2" stroke-linejoin="round">
             <!-- tampo -->
-            <path d="M70 110 L300 110 L360 75 L130 75 Z" fill="var(--ply)" stroke="var(--board-ink)"/>
+            <path d="M70 110 L300 110 L360 75 L130 75 Z" fill="var(--red)" stroke="var(--fg)"/>
             <path d="M70 110 L70 122 L300 122 L300 110"/>
             <path d="M300 122 L360 87 L360 75"/>
             <!-- grade de livros -->
@@ -232,12 +225,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
             <path d="M84 230 L286 230" stroke-width="3"/>
             <path d="M74 270 L94 270 M276 270 L296 270 M336 236 L356 236" stroke-width="4"/>
           </g>
-          <g class="dim" fill="none" stroke="var(--ply)" stroke-width="1.3">
+          <g class="dim" fill="none" stroke="var(--red)" stroke-width="1.3">
             <path d="M70 296 L300 296 M70 288 L70 304 M300 288 L300 304"/>
             <path d="M318 132 L378 97 M314 126 L322 138 M374 91 L382 103"/>
             <path d="M28 110 L28 270 M20 110 L36 110 M20 270 L36 270"/>
           </g>
-          <g font-family="JetBrains Mono, monospace" font-size="13" fill="var(--board-ink)">
+          <g font-family="Archivo, Arial, sans-serif" font-size="13" fill="var(--fg)">
             <text x="160" y="318">1200 mm</text>
             <text x="362" y="128">500</text>
             <text x="16" y="198" transform="rotate(-90 16 198)" text-anchor="middle">760 mm</text>
@@ -332,22 +325,22 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
       </div>
       <div class="grid-items" id="items">
         <article class="item" data-cat="escolar">
-          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 30h120l10-10H30z" fill="var(--ply)"/><path d="M28 30v70M132 30v70M146 20v66M28 80h104"/></svg></div>
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 30h120l10-10H30z" fill="var(--red)"/><path d="M28 30v70M132 30v70M146 20v66M28 80h104"/></svg></div>
           <div class="item-body"><span class="item-ref">REF. CE-12</span><h3>Carteira dupla</h3>
             <dl class="spec"><dt>Medidas</dt><dd>1200 × 500 × 760 mm</dd><dt>Tampo</dt><dd>MDF 18 mm, orla PVC</dd><dt>Estrutura</dt><dd>Tubo 30×30 mm</dd></dl></div>
         </article>
         <article class="item" data-cat="escolar">
-          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M50 60h60l6-6H56z" fill="var(--ply)"/><path d="M58 16h44v28H58z" fill="var(--ply)"/><path d="M56 60v42M104 60v42M62 44v16M98 44v16M114 54v40"/></svg></div>
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M50 60h60l6-6H56z" fill="var(--red)"/><path d="M58 16h44v28H58z" fill="var(--red)"/><path d="M56 60v42M104 60v42M62 44v16M98 44v16M114 54v40"/></svg></div>
           <div class="item-body"><span class="item-ref">REF. CD-04</span><h3>Cadeira escolar</h3>
             <dl class="spec"><dt>Assento</dt><dd>400 × 380 mm</dd><dt>Altura</dt><dd>460 mm (ajustável)</dd><dt>Estrutura</dt><dd>Tubo Ø22 mm</dd></dl></div>
         </article>
         <article class="item" data-cat="escolar">
-          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="14" y="14" width="132" height="70" fill="var(--board)"/><path d="M14 90h132M40 84v18M120 84v18"/><path d="M30 34h50M30 48h70" stroke="var(--board-ink)" stroke-width="2"/></svg></div>
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="14" y="14" width="132" height="70" fill="var(--fg)"/><path d="M14 90h132M40 84v18M120 84v18"/><path d="M30 34h50M30 48h70" stroke="var(--bg)" stroke-width="2"/></svg></div>
           <div class="item-body"><span class="item-ref">REF. QD-24</span><h3>Quadro de parede</h3>
             <dl class="spec"><dt>Medidas</dt><dd>2400 × 1200 mm</dd><dt>Superfície</dt><dd>Giz ou branco</dd><dt>Moldura</dt><dd>Alumínio</dd></dl></div>
         </article>
         <article class="item" data-cat="escritorio">
-          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M10 34h140" stroke-width="6" stroke="var(--ply)"/><path d="M16 37v62M144 37v62"/><rect x="96" y="37" width="44" height="50"/><path d="M96 54h44M96 70h44"/></svg></div>
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M10 34h140" stroke-width="6" stroke="var(--red)"/><path d="M16 37v62M144 37v62"/><rect x="96" y="37" width="44" height="50"/><path d="M96 54h44M96 70h44"/></svg></div>
           <div class="item-body"><span class="item-ref">REF. SE-16</span><h3>Secretária com bloco</h3>
             <dl class="spec"><dt>Medidas</dt><dd>1600 × 800 × 750 mm</dd><dt>Gavetas</dt><dd>3, com fechadura</dd><dt>Tampo</dt><dd>Melamina 25 mm</dd></dl></div>
         </article>
@@ -357,7 +350,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
             <dl class="spec"><dt>Medidas</dt><dd>900 × 450 × 2000 mm</dd><dt>Prateleiras</dt><dd>4, reguláveis</dd><dt>Portas</dt><dd>2, com fechadura</dd></dl></div>
         </article>
         <article class="item" data-cat="escritorio">
-          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><ellipse cx="80" cy="40" rx="68" ry="18" fill="var(--ply)"/><path d="M80 58v40M56 100h48"/></svg></div>
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><ellipse cx="80" cy="40" rx="68" ry="18" fill="var(--red)"/><path d="M80 58v40M56 100h48"/></svg></div>
           <div class="item-body"><span class="item-ref">REF. MR-24</span><h3>Mesa de reunião</h3>
             <dl class="spec"><dt>Medidas</dt><dd>2400 × 1200 × 750 mm</dd><dt>Lugares</dt><dd>8 a 10</dd><dt>Base</dt><dd>Aço pintado</dd></dl></div>
         </article>
@@ -367,7 +360,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
             <dl class="spec"><dt>Largura</dt><dd>Até 6000 mm</dd><dt>Material</dt><dd>Tubo e chapa de aço</dd><dt>Acabamento</dt><dd>Primário + esmalte</dd></dl></div>
         </article>
         <article class="item" data-cat="obra">
-          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="52" y="4" width="56" height="102"/><rect x="60" y="12" width="40" height="38" fill="var(--ply)"/><rect x="60" y="58" width="40" height="40" fill="var(--ply)"/><circle cx="98" cy="56" r="2.5" fill="currentColor"/></svg></div>
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="52" y="4" width="56" height="102"/><rect x="60" y="12" width="40" height="38" fill="var(--red)"/><rect x="60" y="58" width="40" height="40" fill="var(--red)"/><circle cx="98" cy="56" r="2.5" fill="currentColor"/></svg></div>
           <div class="item-body"><span class="item-ref">CARPINTARIA</span><h3>Porta interior</h3>
             <dl class="spec"><dt>Medidas</dt><dd>800 × 2100 mm</dd><dt>Material</dt><dd>Maciça ou almofadada</dd><dt>Inclui</dt><dd>Aro e ferragens</dd></dl></div>
         </article>
@@ -387,12 +380,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
       </div>
       <div class="grid-items">
         <article class="item">
-          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="52" y="4" width="56" height="86"/><rect x="58" y="10" width="44" height="74" fill="var(--ply)"/><path d="M62 90v14M98 90v14M50 104h60"/></svg></div>
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="52" y="4" width="56" height="86"/><rect x="58" y="10" width="44" height="74" fill="var(--red)"/><path d="M62 90v14M98 90v14M50 104h60"/></svg></div>
           <div class="item-body"><span class="item-ref">ALUGUER · MP-01</span><h3>Mupi</h3>
             <dl class="spec"><dt>Cartaz</dt><dd>1185 × 1750 mm</dd><dt>Faces</dt><dd>1 ou 2, iluminado</dd><dt>Também</dt><dd>Mupi digital 55"</dd></dl></div>
         </article>
         <article class="item">
-          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect class="screen" x="14" y="10" width="132" height="72"/><path d="M47 10v72M80 10v72M113 10v72M14 34h132M14 58h132" stroke="var(--board-ink)" stroke-width="1" opacity=".5"/><path d="M30 82v22M130 82v22M22 104h116"/></svg></div>
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect class="screen" x="14" y="10" width="132" height="72"/><path d="M47 10v72M80 10v72M113 10v72M14 34h132M14 58h132" stroke="var(--bg)" stroke-width="1" opacity=".5"/><path d="M30 82v22M130 82v22M22 104h116"/></svg></div>
           <div class="item-body"><span class="item-ref">ALUGUER · LED-39</span><h3>Ecrã LED modular</h3>
             <dl class="spec"><dt>Módulo</dt><dd>500 × 500 mm</dd><dt>Pixel</dt><dd>P2.9 interior · P3.9 exterior</dd><dt>Tamanho</dt><dd>À medida do palco</dd></dl></div>
         </article>
@@ -407,7 +400,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
             <dl class="spec"><dt>Ecrã</dt><dd>55" vertical, táctil</dd><dt>Altura</dt><dd>1900 mm</dd><dt>Conteúdo</dt><dd>Vídeo, imagens, menus</dd></dl></div>
         </article>
         <article class="item">
-          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14 104V14h132v90M14 14h132v12H14z"/><path d="M14 26l12-12M26 26l12-12M38 26l12-12M50 26l12-12M62 26l12-12M74 26l12-12M86 26l12-12M98 26l12-12M110 26l12-12M122 26l12-12M134 26l12-12" stroke-width="1.4"/><path d="M8 104h24M128 104h24"/><rect x="30" y="34" width="100" height="40" fill="var(--ply)" opacity=".8"/></svg></div>
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14 104V14h132v90M14 14h132v12H14z"/><path d="M14 26l12-12M26 26l12-12M38 26l12-12M50 26l12-12M62 26l12-12M74 26l12-12M86 26l12-12M98 26l12-12M110 26l12-12M122 26l12-12M134 26l12-12" stroke-width="1.4"/><path d="M8 104h24M128 104h24"/><rect x="30" y="34" width="100" height="40" fill="var(--red)" opacity=".8"/></svg></div>
           <div class="item-body"><span class="item-ref">ALUGUER · ES-29</span><h3>Estrutura metálica</h3>
             <dl class="spec"><dt>Tipo</dt><dd>Pórticos, palcos, stands</dd><dt>Treliça</dt><dd>290 × 290 mm</dd><dt>Uso</dt><dd>Lonas, ecrãs, luzes</dd></dl></div>
         </article>
@@ -472,7 +465,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
         <div class="field full"><label for="f-msg">Descrição</label><textarea id="f-msg" name="msg">Precisamos de equipar 4 salas de aula antes do início do ano lectivo. Carteiras com grade para livros e cadeiras a condizer.</textarea></div>
         <div class="form-foot">
           <small>O formulário está preenchido com um exemplo. Substitua pelos seus dados.</small>
-          <button class="btn btn-ply" type="submit">Preparar pedido</button>
+          <button class="btn btn-red" type="submit">Preparar pedido</button>
         </div>
         <div class="summary" id="summary" hidden>
           <span class="label">O seu pedido</span>
