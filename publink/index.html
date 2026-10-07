@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Publink: produção de mobiliário escolar e de escritório, carpintaria e serralharia.">
+<title>Publink</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@75..150,500..900&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: ficha técnica de oficina — desenhos com cotas em mm, secções separadas por réguas, verde de quadro escolar + contraplacado */
+:root{
+  --bg:#f3f4f0;          /* papel técnico, leve tom verde */
+  --surface:#ffffff;
+  --ink:#17201b;
+  --muted:#5b665f;
+  --line:#d3d8d1;
+  --board:#1f4a3a;       /* verde de quadro escolar */
+  --board-ink:#eef3ee;
+  --ply:#c98a2e;         /* contraplacado / bétula */
+  --ply-soft:#f4e6cf;
+  --steel:#6c7a83;
+  --display:"Anybody","Arial Narrow",system-ui,sans-serif;
+  --body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --wrap:72rem;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111613; --surface:#18201b; --ink:#e7ece7; --muted:#9aa69e; --line:#2b352f;
+    --board:#173a2d; --board-ink:#e7efe8; --ply:#e0a24a; --ply-soft:#3a2d18; --steel:#93a3ac;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111613; --surface:#18201b; --ink:#e7ece7; --muted:#9aa69e; --line:#2b352f;
+  --board:#173a2d; --board-ink:#e7efe8; --ply:#e0a24a; --ply-soft:#3a2d18; --steel:#93a3ac;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1rem;line-height:1.6;margin:0}
+.wrap{max-width:var(--wrap);margin-inline:auto;padding-inline:clamp(16px,4vw,40px)}
+h1,h2,h3{font-family:var(--display);line-height:1.02;text-wrap:balance;margin:0}
+p{margin:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--ply);outline-offset:3px;border-radius:2px}
+.label{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:.5rem;font:600 .95rem/1 var(--body);padding:.9rem 1.3rem;border-radius:3px;border:2px solid currentColor;text-decoration:none;cursor:pointer;background:transparent;color:inherit;transition:transform .15s ease,background .15s ease}
+.btn:hover{transform:translateY(-2px)}
+.btn-ply{background:var(--ply);border-color:var(--ply);color:#1a1206}
+
+/* Header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-block:.85rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.6rem;text-decoration:none}
+.brand-mark{width:34px;height:34px;flex:none}
+.brand-name{font-family:var(--display);font-weight:850;font-stretch:125%;font-size:1.35rem;letter-spacing:.01em}
+nav.menu{display:flex;gap:clamp(.8rem,2.5vw,1.8rem);flex-wrap:wrap}
+nav.menu a{text-decoration:none;font-weight:500;font-size:.93rem;color:var(--muted)}
+nav.menu a:hover{color:var(--ink)}
+
+/* Hero */
+.hero{background:var(--board);color:var(--board-ink);overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(1.5rem,4vw,3.5rem);align-items:center;padding-block:clamp(3rem,7vw,5.5rem)}
+.hero .label{color:color-mix(in srgb,var(--board-ink) 70%,transparent)}
+.hero h1{font-size:clamp(2.6rem,6.5vw,5rem);font-weight:850;font-stretch:118%;margin-block:.9rem 1.2rem}
+.hero h1 em{font-style:normal;color:var(--ply)}
+.hero-lead{max-width:34rem;font-size:1.1rem;opacity:.9}
+.hero-cta{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:2rem}
+.hero-draw{min-width:0}
+.hero-draw svg{width:100%;height:auto;display:block}
+.hero-draw figcaption{font-family:var(--mono);font-size:.75rem;opacity:.7;margin-top:.6rem}
+@media (prefers-reduced-motion:no-preference){
+  .dim{stroke-dasharray:400;stroke-dashoffset:0;animation:draw 1.6s ease-out both}
+  @keyframes draw{from{stroke-dashoffset:400}}
+}
+
+/* Strip of facts */
+.facts{border-bottom:1px solid var(--line)}
+.facts .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.fact{padding-block:1.4rem;padding-inline:0 1rem;border-right:1px solid var(--line)}
+.fact:last-child{border-right:0}
+.fact:not(:first-child){padding-inline-start:1.2rem}
+.fact strong{display:block;font-family:var(--display);font-weight:800;font-stretch:110%;font-size:1.15rem}
+.fact span{font-size:.88rem;color:var(--muted)}
+
+/* Sections */
+section.block{padding-block:clamp(3.5rem,8vw,6rem)}
+.sec-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:2rem;align-items:end;margin-bottom:2.5rem}
+.sec-head h2{font-size:clamp(2rem,4.5vw,3.2rem);font-weight:800;font-stretch:112%;margin-top:.5rem}
+.sec-head p{color:var(--muted);max-width:36rem}
+
+/* Services */
+.services{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+.svc{background:var(--surface);border:1px solid var(--line);padding:1.6rem;display:flex;flex-direction:column;gap:1rem;min-width:0}
+.svc-ico{width:56px;height:56px;color:var(--board)}
+.svc h3{font-size:1.5rem;font-weight:800;font-stretch:108%}
+.svc p{color:var(--muted)}
+.svc ul{margin:0;padding:0;list-style:none;display:grid;gap:.4rem;border-top:1px dashed var(--line);padding-top:1rem;margin-top:auto}
+.svc li{display:flex;gap:.6rem;font-size:.93rem}
+.svc li::before{content:"";width:8px;height:8px;margin-top:.55em;flex:none;background:var(--ply)}
+:root[data-theme="dark"] .svc-ico{color:var(--ply)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .svc-ico{color:var(--ply)}}
+
+/* Catalogue */
+.catalog{background:var(--surface);border-block:1px solid var(--line)}
+.tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.8rem}
+.tab{font:600 .9rem var(--body);padding:.6rem 1.1rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:99px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--board);border-color:var(--board);color:var(--board-ink)}
+.grid-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(15.5rem,1fr));gap:1.25rem}
+.item{border:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;min-width:0}
+.item-fig{aspect-ratio:4/3;max-width:100%;display:grid;place-items:center;border-bottom:1px solid var(--line);color:var(--ink);padding:1rem;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:20px 20px;background-position:-1px -1px}
+.item-fig svg{width:82%;height:auto;max-height:100%}
+.item-body{padding:1.1rem 1.2rem 1.3rem;display:grid;gap:.55rem}
+.item-ref{font-family:var(--mono);font-size:.72rem;color:var(--ply);letter-spacing:.06em}
+.item h3{font-size:1.2rem;font-weight:750;font-stretch:105%}
+.spec{display:grid;grid-template-columns:auto 1fr;gap:.2rem .8rem;font-size:.85rem;margin:0}
+.spec dt{color:var(--muted)}
+.spec dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.8rem}
+.note{margin-top:1.8rem;font-size:.9rem;color:var(--muted)}
+
+/* Process */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;counter-reset:s}
+.steps li{counter-increment:s;padding:1.4rem 1.2rem 0 0;border-top:3px solid var(--board);position:relative;min-width:0}
+.steps li::before{content:counter(s,decimal-leading-zero);font-family:var(--mono);font-size:.8rem;color:var(--ply);display:block;margin-bottom:.5rem}
+.steps h3{font-size:1.15rem;font-weight:750;margin-bottom:.4rem}
+.steps p{font-size:.92rem;color:var(--muted)}
+
+/* Quote */
+.quote{background:var(--board);color:var(--board-ink)}
+.quote .wrap{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(2rem,5vw,4rem)}
+.quote h2{font-size:clamp(2rem,4.5vw,3.2rem);font-weight:850;font-stretch:115%;margin-block:.6rem 1rem}
+.quote .label{color:color-mix(in srgb,var(--board-ink) 70%,transparent)}
+.quote-info{display:grid;gap:1.6rem;align-content:start}
+.contact-list{display:grid;gap:1rem;margin:0}
+.contact-list dt{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;opacity:.7}
+.contact-list dd{margin:0;font-weight:600;font-size:1.05rem;user-select:all}
+form.order{background:var(--surface);color:var(--ink);padding:clamp(1.25rem,3vw,2rem);display:grid;grid-template-columns:1fr 1fr;gap:1rem;min-width:0}
+.field{display:grid;gap:.35rem;min-width:0}
+.field.full{grid-column:1/-1}
+.field label{font-size:.85rem;font-weight:600}
+.field input,.field select,.field textarea{font:inherit;font-size:.95rem;padding:.7rem .8rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:3px;width:100%}
+.field textarea{min-height:7rem;resize:vertical}
+.form-foot{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between}
+.form-foot small{color:var(--muted);max-width:28rem}
+.summary{grid-column:1/-1;border:1px dashed var(--ply);background:var(--ply-soft);padding:1rem;display:grid;gap:.8rem}
+.summary pre{margin:0;white-space:pre-wrap;font-family:var(--mono);font-size:.82rem;user-select:all}
+.summary-actions{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.summary .btn{padding:.6rem 1rem;font-size:.85rem}
+.status{font-size:.85rem;color:var(--muted)}
+
+footer{padding-block:2rem;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+
+@media (max-width:900px){
+  .hero .wrap,.quote .wrap,.sec-head{grid-template-columns:1fr}
+  .services{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr 1fr;row-gap:1.8rem}
+  .facts .wrap{grid-template-columns:1fr 1fr}
+  .fact:nth-child(2){border-right:0}
+  .fact:nth-child(3){padding-inline-start:0}
+  .fact:nth-child(-n+2){border-bottom:1px solid var(--line)}
+}
+@media (max-width:560px){
+  nav.menu{width:100%;justify-content:space-between}
+  form.order{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio" aria-label="Publink, início">
+      <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true">
+        <rect x="1" y="1" width="32" height="32" fill="var(--board)"/>
+        <rect x="7" y="9" width="20" height="4" fill="var(--ply)"/>
+        <rect x="9" y="13" width="3" height="13" fill="var(--board-ink)"/>
+        <rect x="22" y="13" width="3" height="13" fill="var(--board-ink)"/>
+      </svg>
+      <span class="brand-name">PUBLINK</span>
+    </a>
+    <nav class="menu" aria-label="Principal">
+      <a href="#servicos">Serviços</a>
+      <a href="#catalogo">Catálogo</a>
+      <a href="#processo">Como trabalhamos</a>
+      <a href="#orcamento">Orçamento</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <p class="label">Mobiliário · Carpintaria · Serralharia</p>
+        <h1>Carteiras que aguentam <em>o ano lectivo inteiro.</em></h1>
+        <p class="hero-lead">A Publink fabrica mobiliário escolar e de escritório na sua própria oficina, com carpintaria e serralharia sob o mesmo tecto. Do tampo em madeira à estrutura em tubo de aço, controlamos cada peça.</p>
+        <div class="hero-cta">
+          <a class="btn btn-ply" href="#orcamento">Pedir orçamento</a>
+          <a class="btn" href="#catalogo">Ver catálogo</a>
+        </div>
+      </div>
+      <figure class="hero-draw" style="margin:0">
+        <svg viewBox="0 0 420 330" role="img" aria-label="Desenho técnico de uma carteira escolar com cotas de 1200, 500 e 760 milímetros">
+          <g fill="none" stroke="var(--board-ink)" stroke-width="2.2" stroke-linejoin="round">
+            <!-- tampo -->
+            <path d="M70 110 L300 110 L360 75 L130 75 Z" fill="var(--ply)" stroke="var(--board-ink)"/>
+            <path d="M70 110 L70 122 L300 122 L300 110"/>
+            <path d="M300 122 L360 87 L360 75"/>
+            <!-- grade de livros -->
+            <path d="M88 140 L290 140 L340 111" stroke-dasharray="5 5" opacity=".7"/>
+            <!-- pernas em tubo -->
+            <path d="M84 122 L84 270 M286 122 L286 270 M346 95 L346 236 M144 87 L144 235" stroke-width="5" stroke-linecap="square"/>
+            <path d="M84 230 L286 230" stroke-width="3"/>
+            <path d="M74 270 L94 270 M276 270 L296 270 M336 236 L356 236" stroke-width="4"/>
+          </g>
+          <g class="dim" fill="none" stroke="var(--ply)" stroke-width="1.3">
+            <path d="M70 296 L300 296 M70 288 L70 304 M300 288 L300 304"/>
+            <path d="M318 132 L378 97 M314 126 L322 138 M374 91 L382 103"/>
+            <path d="M28 110 L28 270 M20 110 L36 110 M20 270 L36 270"/>
+          </g>
+          <g font-family="JetBrains Mono, monospace" font-size="13" fill="var(--board-ink)">
+            <text x="160" y="318">1200 mm</text>
+            <text x="362" y="128">500</text>
+            <text x="16" y="198" transform="rotate(-90 16 198)" text-anchor="middle">760 mm</text>
+          </g>
+        </svg>
+        <figcaption>REF. CE-12 · Carteira dupla · tampo MDF 18 mm, estrutura tubo 30×30 mm</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <div class="facts">
+    <div class="wrap">
+      <div class="fact"><strong>Fabrico próprio</strong><span>Oficina de madeira e metal</span></div>
+      <div class="fact"><strong>Por medida</strong><span>Adaptamos às suas salas</span></div>
+      <div class="fact"><strong>Grandes encomendas</strong><span>Escolas, empresas e Estado</span></div>
+      <div class="fact"><strong>Entrega e montagem</strong><span>Equipa própria no local</span></div>
+    </div>
+  </div>
+
+  <section class="block" id="servicos">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="label">O que fazemos</p>
+          <h2>Três ofícios, uma só oficina</h2>
+        </div>
+        <p>Como a madeira e o metal são trabalhados no mesmo espaço, cada peça sai com as junções certas e os prazos não dependem de terceiros.</p>
+      </div>
+      <div class="services">
+        <article class="svc">
+          <svg class="svc-ico" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 20h44M10 20v26M46 20v26M10 34h36"/><path d="M18 8h20v12H18z"/></svg>
+          <h3>Mobiliário escolar e de escritório</h3>
+          <p>Carteiras, cadeiras, quadros, secretárias e armários, fabricados em série para equipar salas inteiras.</p>
+          <ul>
+            <li>Carteiras simples e duplas</li>
+            <li>Cadeiras escolares e de escritório</li>
+            <li>Secretárias, mesas de reunião e armários</li>
+            <li>Quadros brancos e de giz</li>
+          </ul>
+        </article>
+        <article class="svc">
+          <svg class="svc-ico" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="8" y="6" width="40" height="44"/><path d="M8 28h40M28 6v44"/><circle cx="23" cy="17" r="1.5" fill="currentColor"/><circle cx="33" cy="17" r="1.5" fill="currentColor"/></svg>
+          <h3>Carpintaria</h3>
+          <p>Trabalho em madeira maciça, MDF e contraplacado, para obra nova, remodelação ou mobiliário à medida.</p>
+          <ul>
+            <li>Portas, aros e rodapés</li>
+            <li>Roupeiros e cozinhas</li>
+            <li>Balcões de atendimento</li>
+            <li>Estantes e bibliotecas</li>
+          </ul>
+        </article>
+        <article class="svc">
+          <svg class="svc-ico" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 48h44M10 48V12h36v36"/><path d="M19 12v36M28 12v36M37 12v36"/><path d="M10 24h36"/></svg>
+          <h3>Serralharia</h3>
+          <p>Estruturas em ferro e aço, cortadas, soldadas e pintadas na nossa oficina.</p>
+          <ul>
+            <li>Portões e gradeamentos</li>
+            <li>Grades de janela e de segurança</li>
+            <li>Estruturas para mobiliário</li>
+            <li>Escadas, corrimãos e coberturas</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block catalog" id="catalogo">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="label">Catálogo</p>
+          <h2>Modelos de linha</h2>
+        </div>
+        <p>Medidas de referência dos modelos mais pedidos. Todos podem ser ajustados em altura, cor e acabamento.</p>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Filtrar catálogo">
+        <button class="tab" role="tab" id="tab-all" aria-selected="true" data-filter="all">Todos</button>
+        <button class="tab" role="tab" id="tab-escolar" aria-selected="false" data-filter="escolar">Escolar</button>
+        <button class="tab" role="tab" id="tab-escritorio" aria-selected="false" data-filter="escritorio">Escritório</button>
+        <button class="tab" role="tab" id="tab-obra" aria-selected="false" data-filter="obra">Carpintaria e serralharia</button>
+      </div>
+      <div class="grid-items" id="items">
+        <article class="item" data-cat="escolar">
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 30h120l10-10H30z" fill="var(--ply)"/><path d="M28 30v70M132 30v70M146 20v66M28 80h104"/></svg></div>
+          <div class="item-body"><span class="item-ref">REF. CE-12</span><h3>Carteira dupla</h3>
+            <dl class="spec"><dt>Medidas</dt><dd>1200 × 500 × 760 mm</dd><dt>Tampo</dt><dd>MDF 18 mm, orla PVC</dd><dt>Estrutura</dt><dd>Tubo 30×30 mm</dd></dl></div>
+        </article>
+        <article class="item" data-cat="escolar">
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M50 60h60l6-6H56z" fill="var(--ply)"/><path d="M58 16h44v28H58z" fill="var(--ply)"/><path d="M56 60v42M104 60v42M62 44v16M98 44v16M114 54v40"/></svg></div>
+          <div class="item-body"><span class="item-ref">REF. CD-04</span><h3>Cadeira escolar</h3>
+            <dl class="spec"><dt>Assento</dt><dd>400 × 380 mm</dd><dt>Altura</dt><dd>460 mm (ajustável)</dd><dt>Estrutura</dt><dd>Tubo Ø22 mm</dd></dl></div>
+        </article>
+        <article class="item" data-cat="escolar">
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="14" y="14" width="132" height="70" fill="var(--board)"/><path d="M14 90h132M40 84v18M120 84v18"/><path d="M30 34h50M30 48h70" stroke="var(--board-ink)" stroke-width="2"/></svg></div>
+          <div class="item-body"><span class="item-ref">REF. QD-24</span><h3>Quadro de parede</h3>
+            <dl class="spec"><dt>Medidas</dt><dd>2400 × 1200 mm</dd><dt>Superfície</dt><dd>Giz ou branco</dd><dt>Moldura</dt><dd>Alumínio</dd></dl></div>
+        </article>
+        <article class="item" data-cat="escritorio">
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M10 34h140" stroke-width="6" stroke="var(--ply)"/><path d="M16 37v62M144 37v62"/><rect x="96" y="37" width="44" height="50"/><path d="M96 54h44M96 70h44"/></svg></div>
+          <div class="item-body"><span class="item-ref">REF. SE-16</span><h3>Secretária com bloco</h3>
+            <dl class="spec"><dt>Medidas</dt><dd>1600 × 800 × 750 mm</dd><dt>Gavetas</dt><dd>3, com fechadura</dd><dt>Tampo</dt><dd>Melamina 25 mm</dd></dl></div>
+        </article>
+        <article class="item" data-cat="escritorio">
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="44" y="6" width="72" height="98"/><path d="M80 6v98M44 38h72M44 70h72"/><circle cx="74" cy="56" r="2" fill="currentColor"/><circle cx="86" cy="56" r="2" fill="currentColor"/></svg></div>
+          <div class="item-body"><span class="item-ref">REF. AR-20</span><h3>Armário de arquivo</h3>
+            <dl class="spec"><dt>Medidas</dt><dd>900 × 450 × 2000 mm</dd><dt>Prateleiras</dt><dd>4, reguláveis</dd><dt>Portas</dt><dd>2, com fechadura</dd></dl></div>
+        </article>
+        <article class="item" data-cat="escritorio">
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><ellipse cx="80" cy="40" rx="68" ry="18" fill="var(--ply)"/><path d="M80 58v40M56 100h48"/></svg></div>
+          <div class="item-body"><span class="item-ref">REF. MR-24</span><h3>Mesa de reunião</h3>
+            <dl class="spec"><dt>Medidas</dt><dd>2400 × 1200 × 750 mm</dd><dt>Lugares</dt><dd>8 a 10</dd><dt>Base</dt><dd>Aço pintado</dd></dl></div>
+        </article>
+        <article class="item" data-cat="obra">
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M8 104h144M16 104V20h128v84"/><path d="M80 20v84M36 20v84M58 20v84M102 20v84M124 20v84"/><path d="M16 46h128M16 82h128"/></svg></div>
+          <div class="item-body"><span class="item-ref">SERRALHARIA</span><h3>Portão de correr</h3>
+            <dl class="spec"><dt>Largura</dt><dd>Até 6000 mm</dd><dt>Material</dt><dd>Tubo e chapa de aço</dd><dt>Acabamento</dt><dd>Primário + esmalte</dd></dl></div>
+        </article>
+        <article class="item" data-cat="obra">
+          <div class="item-fig"><svg viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="52" y="4" width="56" height="102"/><rect x="60" y="12" width="40" height="38" fill="var(--ply)"/><rect x="60" y="58" width="40" height="40" fill="var(--ply)"/><circle cx="98" cy="56" r="2.5" fill="currentColor"/></svg></div>
+          <div class="item-body"><span class="item-ref">CARPINTARIA</span><h3>Porta interior</h3>
+            <dl class="spec"><dt>Medidas</dt><dd>800 × 2100 mm</dd><dt>Material</dt><dd>Maciça ou almofadada</dd><dt>Inclui</dt><dd>Aro e ferragens</dd></dl></div>
+        </article>
+      </div>
+      <p class="note">Precisa de outra medida ou de um modelo que não está aqui? Envie-nos a planta ou uma fotografia e fazemos o desenho.</p>
+    </div>
+  </section>
+
+  <section class="block" id="processo">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="label">Como trabalhamos</p>
+          <h2>Do pedido à sala montada</h2>
+        </div>
+        <p>Cada encomenda passa pelas mesmas cinco etapas, para que saiba sempre em que ponto está.</p>
+      </div>
+      <ol class="steps">
+        <li><h3>Pedido</h3><p>Diz-nos o que precisa, quantas unidades e para quando.</p></li>
+        <li><h3>Medição</h3><p>Visitamos o espaço e confirmamos medidas e quantidades.</p></li>
+        <li><h3>Orçamento</h3><p>Recebe preço, materiais e prazo de entrega por escrito.</p></li>
+        <li><h3>Produção</h3><p>Madeira e metal são trabalhados e pintados na nossa oficina.</p></li>
+        <li><h3>Entrega e montagem</h3><p>A nossa equipa entrega, monta e deixa o espaço pronto a usar.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block quote" id="orcamento">
+    <div class="wrap">
+      <div class="quote-info">
+        <div>
+          <p class="label">Orçamento</p>
+          <h2>Diga-nos o que precisa</h2>
+          <p>Preencha o pedido e envie-o por e-mail ou WhatsApp. Respondemos com preço e prazo.</p>
+        </div>
+        <dl class="contact-list">
+          <div><dt>Telefone / WhatsApp</dt><dd>+000 000 000 000</dd></div>
+          <div><dt>E-mail</dt><dd>geral@publink.com</dd></div>
+          <div><dt>Oficina</dt><dd>Morada da oficina</dd></div>
+          <div><dt>Horário</dt><dd>Seg a Sex, 8h00 às 17h00 · Sáb, 8h00 às 13h00</dd></div>
+        </dl>
+      </div>
+
+      <form class="order" id="order" novalidate>
+        <div class="field"><label for="f-name">Nome</label><input id="f-name" name="name" required autocomplete="name" value="Escola Primária n.º 214"></div>
+        <div class="field"><label for="f-phone">Telefone</label><input id="f-phone" name="phone" required autocomplete="tel" inputmode="tel" value="923 456 789"></div>
+        <div class="field"><label for="f-type">Serviço</label>
+          <select id="f-type" name="type">
+            <option>Mobiliário escolar</option>
+            <option>Mobiliário de escritório</option>
+            <option>Carpintaria</option>
+            <option>Serralharia</option>
+          </select></div>
+        <div class="field"><label for="f-qty">Quantidade aproximada</label><input id="f-qty" name="qty" inputmode="numeric" value="120 carteiras duplas"></div>
+        <div class="field full"><label for="f-msg">Descrição</label><textarea id="f-msg" name="msg">Precisamos de equipar 4 salas de aula antes do início do ano lectivo. Carteiras com grade para livros e cadeiras a condizer.</textarea></div>
+        <div class="form-foot">
+          <small>O formulário está preenchido com um exemplo. Substitua pelos seus dados.</small>
+          <button class="btn btn-ply" type="submit">Preparar pedido</button>
+        </div>
+        <div class="summary" id="summary" hidden>
+          <span class="label">O seu pedido</span>
+          <pre id="summary-text"></pre>
+          <div class="summary-actions">
+            <button class="btn" type="button" id="copy">Copiar texto</button>
+            <a class="btn" id="mail" href="#">Abrir e-mail</a>
+            <a class="btn" id="wa" href="#" target="_blank" rel="noopener">Abrir WhatsApp</a>
+            <span class="status" id="status" aria-live="polite"></span>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="year">2026</span> Publink · Mobiliário escolar e de escritório, carpintaria e serralharia</span>
+    <a href="#inicio">Voltar ao topo</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var EMAIL = "geral@publink.com";
+  var WHATSAPP = "000000000000"; // número com indicativo, só dígitos
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  // Filtro do catálogo
+  var tabs = document.querySelectorAll(".tab");
+  var items = document.querySelectorAll(".item");
+  tabs.forEach(function(t){
+    t.addEventListener("click", function(){
+      tabs.forEach(function(x){ x.setAttribute("aria-selected", x === t ? "true" : "false"); });
+      var f = t.dataset.filter;
+      items.forEach(function(i){ i.hidden = !(f === "all" || i.dataset.cat === f); });
+    });
+  });
+
+  // Pedido de orçamento
+  var form = document.getElementById("order");
+  var box = document.getElementById("summary");
+  var out = document.getElementById("summary-text");
+  var status = document.getElementById("status");
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var d = new FormData(form);
+    var missing = [];
+    if(!String(d.get("name")).trim()) missing.push("nome");
+    if(!String(d.get("phone")).trim()) missing.push("telefone");
+    if(missing.length){
+      box.hidden = false;
+      out.textContent = "Falta preencher: " + missing.join(" e ") + ".";
+      return;
+    }
+    var text = "Pedido de orçamento — Publink\n\n" +
+      "Nome: " + d.get("name") + "\n" +
+      "Telefone: " + d.get("phone") + "\n" +
+      "Serviço: " + d.get("type") + "\n" +
+      "Quantidade: " + (d.get("qty") || "—") + "\n\n" +
+      d.get("msg");
+    out.textContent = text;
+    document.getElementById("mail").href = "mailto:" + EMAIL + "?subject=" + encodeURIComponent("Pedido de orçamento") + "&body=" + encodeURIComponent(text);
+    document.getElementById("wa").href = "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(text);
+    status.textContent = "";
+    box.hidden = false;
+  });
+  document.getElementById("copy").addEventListener("click", function(){
+    var text = out.textContent;
+    function fallback(){
+      var r = document.createRange(); r.selectNodeContents(out);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      status.textContent = "Texto seleccionado. Use Ctrl+C para copiar.";
+    }
+    try{
+      navigator.clipboard.writeText(text).then(function(){ status.textContent = "Copiado."; }, fallback);
+    }catch(err){ fallback(); }
+  });
+})();
+</script>
+</body>
+</html>
